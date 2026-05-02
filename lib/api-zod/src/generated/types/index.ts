@@ -14,3 +14,4 @@ export * from "./analysisStats";
 export * from "./analysisStatsRiskDistribution";
 export * from "./analyzeTextBody";
 export * from "./healthStatus";
+export * from "./manipulationBreakdown";

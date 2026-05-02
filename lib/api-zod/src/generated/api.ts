@@ -16,7 +16,7 @@ export const HealthCheckResponse = zod.object({
 });
 
 /**
- * Analyze input text for credibility, risk level, suspicious phrases, and explanation
+ * Analyze input text for credibility, risk level, suspicious phrases, and manipulation technique breakdown
  * @summary Analyze text for misinformation
  */
 export const AnalyzeTextBody = zod.object({
@@ -34,6 +34,18 @@ export const AnalyzeTextResponse = zod.object({
   suspiciousPhrases: zod
     .array(zod.string())
     .describe("List of suspicious phrases found in the text"),
+  manipulationBreakdown: zod
+    .object({
+      fear: zod.number().describe("Fear tactics score (0-100)"),
+      urgency: zod.number().describe("Urgency language score (0-100)"),
+      emotionalTriggers: zod
+        .number()
+        .describe("Emotional trigger score (0-100)"),
+      fakeAuthority: zod
+        .number()
+        .describe("Fake authority signals score (0-100)"),
+    })
+    .describe("Scores (0-100) for each detected manipulation technique"),
   id: zod.string().describe("Record ID for history tracking"),
 });
 
@@ -48,6 +60,18 @@ export const GetAnalysisHistoryResponseItem = zod.object({
   riskLevel: zod.enum(["Low", "Medium", "High"]),
   explanation: zod.string(),
   suspiciousPhrases: zod.array(zod.string()),
+  manipulationBreakdown: zod
+    .object({
+      fear: zod.number().describe("Fear tactics score (0-100)"),
+      urgency: zod.number().describe("Urgency language score (0-100)"),
+      emotionalTriggers: zod
+        .number()
+        .describe("Emotional trigger score (0-100)"),
+      fakeAuthority: zod
+        .number()
+        .describe("Fake authority signals score (0-100)"),
+    })
+    .describe("Scores (0-100) for each detected manipulation technique"),
   analyzedAt: zod.coerce.date(),
 });
 export const GetAnalysisHistoryResponse = zod.array(

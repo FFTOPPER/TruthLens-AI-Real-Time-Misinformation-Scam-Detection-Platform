@@ -9,6 +9,7 @@ export const analysesTable = pgTable("analyses", {
   riskLevel: text("risk_level").notNull(),
   explanation: text("explanation").notNull(),
   suspiciousPhrases: text("suspicious_phrases").notNull(),
+  manipulationBreakdown: text("manipulation_breakdown").notNull().default("{}"),
   analyzedAt: timestamp("analyzed_at").defaultNow().notNull(),
 });
 

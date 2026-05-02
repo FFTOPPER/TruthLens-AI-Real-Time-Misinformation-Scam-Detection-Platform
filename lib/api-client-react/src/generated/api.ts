@@ -110,7 +110,7 @@ export function useHealthCheck<
 }
 
 /**
- * Analyze input text for credibility, risk level, suspicious phrases, and explanation
+ * Analyze input text for credibility, risk level, suspicious phrases, and manipulation technique breakdown
  * @summary Analyze text for misinformation
  */
 export const getAnalyzeTextUrl = () => {

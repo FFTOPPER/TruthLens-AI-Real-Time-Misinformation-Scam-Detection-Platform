@@ -14,6 +14,20 @@ export interface AnalyzeTextBody {
   text: string;
 }
 
+/**
+ * Scores (0-100) for each detected manipulation technique
+ */
+export interface ManipulationBreakdown {
+  /** Fear tactics score (0-100) */
+  fear: number;
+  /** Urgency language score (0-100) */
+  urgency: number;
+  /** Emotional trigger score (0-100) */
+  emotionalTriggers: number;
+  /** Fake authority signals score (0-100) */
+  fakeAuthority: number;
+}
+
 export type AnalysisResultRiskLevel =
   (typeof AnalysisResultRiskLevel)[keyof typeof AnalysisResultRiskLevel];
 
@@ -31,6 +45,7 @@ export interface AnalysisResult {
   explanation: string;
   /** List of suspicious phrases found in the text */
   suspiciousPhrases: string[];
+  manipulationBreakdown: ManipulationBreakdown;
   /** Record ID for history tracking */
   id: string;
 }
@@ -52,6 +67,7 @@ export interface AnalysisRecord {
   riskLevel: AnalysisRecordRiskLevel;
   explanation: string;
   suspiciousPhrases: string[];
+  manipulationBreakdown: ManipulationBreakdown;
   analyzedAt: string;
 }
 

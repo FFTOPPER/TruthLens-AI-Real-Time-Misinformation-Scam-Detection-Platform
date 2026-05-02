@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { AnalysisRecordRiskLevel } from "./analysisRecordRiskLevel";
+import type { ManipulationBreakdown } from "./manipulationBreakdown";
 
 export interface AnalysisRecord {
   id: string;
@@ -15,5 +16,6 @@ export interface AnalysisRecord {
   riskLevel: AnalysisRecordRiskLevel;
   explanation: string;
   suspiciousPhrases: string[];
+  manipulationBreakdown: ManipulationBreakdown;
   analyzedAt: Date;
 }

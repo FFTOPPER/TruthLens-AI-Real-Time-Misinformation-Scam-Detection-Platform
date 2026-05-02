@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAnalyzeText, getGetAnalysisHistoryQueryKey, getGetAnalysisStatsQueryKey } from "@workspace/api-client-react";
-import { AlertTriangle, ShieldCheck, ScanLine, Zap, Eye } from "lucide-react";
+import { AlertTriangle, ShieldCheck, ScanLine, Zap, Eye, BrainCircuit } from "lucide-react";
 import { Gauge } from "@/components/Gauge";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
@@ -31,7 +31,6 @@ function ScanningDots() {
           <ScanLine className="w-6 h-6" style={{ color: "#00e5ff" }} />
         </motion.div>
       </div>
-
       <div className="flex flex-col items-center gap-3">
         <div className="flex items-center gap-2">
           <span
@@ -63,6 +62,89 @@ function ScanningDots() {
   );
 }
 
+interface ManipulationBarProps {
+  label: string;
+  sublabel: string;
+  value: number;
+  color: string;
+  glow: string;
+  delay: number;
+  icon: string;
+}
+
+function ManipulationBar({ label, sublabel, value, color, glow, delay, icon }: ManipulationBarProps) {
+  const intensity = value >= 70 ? "HIGH" : value >= 40 ? "MED" : "LOW";
+  const intensityColor = value >= 70 ? "#ef4444" : value >= 40 ? "#f59e0b" : "rgba(255,255,255,0.3)";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -12 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay, duration: 0.35 }}
+      className="space-y-1.5"
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-base leading-none">{icon}</span>
+          <div>
+            <span
+              className="text-[11px] font-semibold tracking-[0.12em]"
+              style={{ fontFamily: "'Rajdhani', sans-serif", color: "rgba(255,255,255,0.75)" }}
+            >
+              {label}
+            </span>
+            <p
+              className="text-[9px] tracking-wider leading-tight"
+              style={{ fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.25)" }}
+            >
+              {sublabel}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <span
+            className="text-[9px] tracking-[0.15em] px-1.5 py-0.5 rounded"
+            style={{ fontFamily: "'Orbitron', monospace", color: intensityColor, background: `${intensityColor}18`, border: `1px solid ${intensityColor}30` }}
+          >
+            {intensity}
+          </span>
+          <span
+            className="text-sm font-bold tabular-nums w-8 text-right"
+            style={{ fontFamily: "'Orbitron', monospace", color, textShadow: `0 0 8px ${glow}` }}
+          >
+            {Math.round(value)}
+          </span>
+        </div>
+      </div>
+      {/* Track */}
+      <div
+        className="relative h-2 rounded-full overflow-hidden"
+        style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.04)" }}
+      >
+        {/* Animated fill */}
+        <motion.div
+          className="absolute top-0 left-0 h-full rounded-full"
+          initial={{ width: 0 }}
+          animate={{ width: `${value}%` }}
+          transition={{ duration: 1.2, delay: delay + 0.2, ease: [0.34, 1.56, 0.64, 1] }}
+          style={{
+            background: `linear-gradient(90deg, ${color}80, ${color})`,
+            boxShadow: `0 0 8px ${glow}, 0 0 16px ${glow}`,
+          }}
+        />
+        {/* Shimmer */}
+        <motion.div
+          className="absolute top-0 h-full w-8 rounded-full pointer-events-none"
+          initial={{ left: "-10%" }}
+          animate={{ left: "110%" }}
+          transition={{ duration: 1.5, delay: delay + 0.4, ease: "easeOut" }}
+          style={{ background: `linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)` }}
+        />
+      </div>
+    </motion.div>
+  );
+}
+
 export default function Home() {
   const [text, setText] = useState("");
   const { toast } = useToast();
@@ -73,17 +155,10 @@ export default function Home() {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getGetAnalysisHistoryQueryKey() });
         queryClient.invalidateQueries({ queryKey: getGetAnalysisStatsQueryKey() });
-        toast({
-          title: "Analysis Complete",
-          description: "Intelligence report generated.",
-        });
+        toast({ title: "Analysis Complete", description: "Intelligence report generated." });
       },
       onError: () => {
-        toast({
-          title: "Analysis Failed",
-          description: "System error during processing.",
-          variant: "destructive",
-        });
+        toast({ title: "Analysis Failed", description: "System error during processing.", variant: "destructive" });
       }
     }
   });
@@ -99,6 +174,47 @@ export default function Home() {
   const result = analyzeMutation.data;
   const isPending = analyzeMutation.isPending;
 
+  const manipBars: ManipulationBarProps[] = result
+    ? [
+        {
+          label: "Fear Tactics",
+          sublabel: "Threats · danger · doom language",
+          value: result.manipulationBreakdown.fear,
+          color: "#ef4444",
+          glow: "rgba(239,68,68,0.6)",
+          delay: 0.55,
+          icon: "⚠",
+        },
+        {
+          label: "Urgency Language",
+          sublabel: "Act now · deadlines · scarcity · FOMO",
+          value: result.manipulationBreakdown.urgency,
+          color: "#f97316",
+          glow: "rgba(249,115,22,0.6)",
+          delay: 0.65,
+          icon: "⏱",
+        },
+        {
+          label: "Emotional Triggers",
+          sublabel: "Outrage · sympathy · tribalism",
+          value: result.manipulationBreakdown.emotionalTriggers,
+          color: "#a855f7",
+          glow: "rgba(168,85,247,0.6)",
+          delay: 0.75,
+          icon: "◈",
+        },
+        {
+          label: "Fake Authority",
+          sublabel: "Unverified experts · false credentials",
+          value: result.manipulationBreakdown.fakeAuthority,
+          color: "#f59e0b",
+          glow: "rgba(245,158,11,0.6)",
+          delay: 0.85,
+          icon: "⬡",
+        },
+      ]
+    : [];
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -108,11 +224,7 @@ export default function Home() {
     >
       {/* Header */}
       <div className="relative">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-        >
+        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
           <div className="flex items-center gap-3 mb-2">
             <div
               className="w-8 h-8 rounded flex items-center justify-center flex-shrink-0"
@@ -153,7 +265,6 @@ export default function Home() {
           }}
         >
           <span />
-          {/* Header */}
           <div
             className="px-6 py-4 flex items-center gap-2"
             style={{ borderBottom: "1px solid rgba(0, 229, 255, 0.08)", background: "rgba(0, 229, 255, 0.03)" }}
@@ -192,7 +303,6 @@ export default function Home() {
                 onChange={e => setText(e.target.value)}
                 data-testid="input-text-analysis"
               />
-              {/* Char count */}
               <span
                 className="absolute bottom-3 right-3 text-[10px]"
                 style={{ fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.2)" }}
@@ -201,7 +311,6 @@ export default function Home() {
               </span>
             </div>
 
-            {/* Animated Submit Button */}
             <div className="mt-5 flex justify-end">
               <motion.button
                 onClick={handleSubmit}
@@ -223,7 +332,6 @@ export default function Home() {
                 whileTap={!isPending && text.trim() ? { scale: 0.97 } : {}}
                 data-testid="button-submit-analysis"
               >
-                {/* Animated shimmer */}
                 {!isPending && text.trim() && (
                   <motion.div
                     className="absolute inset-0 pointer-events-none"
@@ -255,7 +363,6 @@ export default function Home() {
             minHeight: "420px",
           }}
         >
-          {/* Header */}
           <div
             className="px-6 py-4 flex items-center gap-2"
             style={{ borderBottom: "1px solid rgba(168, 85, 247, 0.08)", background: "rgba(168, 85, 247, 0.03)" }}
@@ -289,12 +396,12 @@ export default function Home() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.5 }}
-                  className="space-y-6"
+                  className="space-y-5"
                 >
                   {/* Gauge */}
                   <div
                     className="flex items-center justify-center py-4 rounded-xl"
-                    style={{ background: "rgba(0, 0, 0, 0.3)", border: "1px solid rgba(255,255,255,0.04)" }}
+                    style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.04)" }}
                   >
                     <Gauge score={result.credibilityScore} />
                   </div>
@@ -322,12 +429,39 @@ export default function Home() {
                     </p>
                   </motion.div>
 
+                  {/* Manipulation breakdown */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.45 }}
+                    className="rounded-xl overflow-hidden"
+                    style={{ border: "1px solid rgba(168, 85, 247, 0.15)", background: "rgba(168, 85, 247, 0.03)" }}
+                  >
+                    <div
+                      className="px-4 py-3 flex items-center gap-2"
+                      style={{ borderBottom: "1px solid rgba(168, 85, 247, 0.1)", background: "rgba(168, 85, 247, 0.04)" }}
+                    >
+                      <BrainCircuit className="w-3.5 h-3.5" style={{ color: "#a855f7" }} />
+                      <span
+                        className="text-[10px] tracking-[0.2em] font-semibold"
+                        style={{ fontFamily: "'Space Mono', monospace", color: "#a855f7" }}
+                      >
+                        MANIPULATION TECHNIQUE BREAKDOWN
+                      </span>
+                    </div>
+                    <div className="px-4 py-4 space-y-4">
+                      {manipBars.map(bar => (
+                        <ManipulationBar key={bar.label} {...bar} />
+                      ))}
+                    </div>
+                  </motion.div>
+
                   {/* Suspicious phrases */}
                   {result.suspiciousPhrases.length > 0 && (
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.45 }}
+                      transition={{ delay: 0.95 }}
                     >
                       <div className="flex items-center gap-2 mb-3">
                         <AlertTriangle className="w-3 h-3" style={{ color: "#ef4444" }} />
@@ -344,12 +478,9 @@ export default function Home() {
                             key={i}
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.5 + i * 0.1 }}
+                            transition={{ delay: 1 + i * 0.08 }}
                             className="flex items-start gap-2 px-3 py-2 rounded-lg"
-                            style={{
-                              background: "rgba(239, 68, 68, 0.06)",
-                              border: "1px solid rgba(239, 68, 68, 0.2)",
-                            }}
+                            style={{ background: "rgba(239, 68, 68, 0.06)", border: "1px solid rgba(239, 68, 68, 0.2)" }}
                           >
                             <span
                               className="text-[10px] mt-0.5 flex-shrink-0 font-bold"

@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { AnalysisResultRiskLevel } from "./analysisResultRiskLevel";
+import type { ManipulationBreakdown } from "./manipulationBreakdown";
 
 export interface AnalysisResult {
   /** Score from 0 to 100 (100 = fully credible) */
@@ -15,6 +16,7 @@ export interface AnalysisResult {
   explanation: string;
   /** List of suspicious phrases found in the text */
   suspiciousPhrases: string[];
+  manipulationBreakdown: ManipulationBreakdown;
   /** Record ID for history tracking */
   id: string;
 }
