@@ -3,6 +3,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useAnalyzeText, getGetAnalysisHistoryQueryKey, getGetAnalysisStatsQueryKey } from "@workspace/api-client-react";
 import { AlertTriangle, ShieldCheck, ScanLine, Zap, Eye, BrainCircuit } from "lucide-react";
 import { Gauge } from "@/components/Gauge";
+import { TrustOrb } from "@/components/TrustOrb";
+import { VoiceControls } from "@/components/VoiceControls";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -116,12 +118,10 @@ function ManipulationBar({ label, sublabel, value, color, glow, delay, icon }: M
           </span>
         </div>
       </div>
-      {/* Track */}
       <div
         className="relative h-2 rounded-full overflow-hidden"
         style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.04)" }}
       >
-        {/* Animated fill */}
         <motion.div
           className="absolute top-0 left-0 h-full rounded-full"
           initial={{ width: 0 }}
@@ -132,13 +132,12 @@ function ManipulationBar({ label, sublabel, value, color, glow, delay, icon }: M
             boxShadow: `0 0 8px ${glow}, 0 0 16px ${glow}`,
           }}
         />
-        {/* Shimmer */}
         <motion.div
           className="absolute top-0 h-full w-8 rounded-full pointer-events-none"
           initial={{ left: "-10%" }}
           animate={{ left: "110%" }}
           transition={{ duration: 1.5, delay: delay + 0.4, ease: "easeOut" }}
-          style={{ background: `linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)` }}
+          style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)" }}
         />
       </div>
     </motion.div>
@@ -176,44 +175,14 @@ export default function Home() {
 
   const manipBars: ManipulationBarProps[] = result
     ? [
-        {
-          label: "Fear Tactics",
-          sublabel: "Threats · danger · doom language",
-          value: result.manipulationBreakdown.fear,
-          color: "#ef4444",
-          glow: "rgba(239,68,68,0.6)",
-          delay: 0.55,
-          icon: "⚠",
-        },
-        {
-          label: "Urgency Language",
-          sublabel: "Act now · deadlines · scarcity · FOMO",
-          value: result.manipulationBreakdown.urgency,
-          color: "#f97316",
-          glow: "rgba(249,115,22,0.6)",
-          delay: 0.65,
-          icon: "⏱",
-        },
-        {
-          label: "Emotional Triggers",
-          sublabel: "Outrage · sympathy · tribalism",
-          value: result.manipulationBreakdown.emotionalTriggers,
-          color: "#a855f7",
-          glow: "rgba(168,85,247,0.6)",
-          delay: 0.75,
-          icon: "◈",
-        },
-        {
-          label: "Fake Authority",
-          sublabel: "Unverified experts · false credentials",
-          value: result.manipulationBreakdown.fakeAuthority,
-          color: "#f59e0b",
-          glow: "rgba(245,158,11,0.6)",
-          delay: 0.85,
-          icon: "⬡",
-        },
+        { label: "Fear Tactics", sublabel: "Threats · danger · doom language", value: result.manipulationBreakdown.fear, color: "#ef4444", glow: "rgba(239,68,68,0.6)", delay: 0.55, icon: "⚠" },
+        { label: "Urgency Language", sublabel: "Act now · deadlines · scarcity · FOMO", value: result.manipulationBreakdown.urgency, color: "#f97316", glow: "rgba(249,115,22,0.6)", delay: 0.65, icon: "⏱" },
+        { label: "Emotional Triggers", sublabel: "Outrage · sympathy · tribalism", value: result.manipulationBreakdown.emotionalTriggers, color: "#a855f7", glow: "rgba(168,85,247,0.6)", delay: 0.75, icon: "◈" },
+        { label: "Fake Authority", sublabel: "Unverified experts · false credentials", value: result.manipulationBreakdown.fakeAuthority, color: "#f59e0b", glow: "rgba(245,158,11,0.6)", delay: 0.85, icon: "⬡" },
       ]
     : [];
+
+  const riskLevel = result?.riskLevel as "Low" | "Medium" | "High" | null ?? null;
 
   return (
     <motion.div
@@ -251,105 +220,139 @@ export default function Home() {
 
       {/* Main grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Input card */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.4, delay: 0.1 }}
-          className="rounded-xl relative overflow-hidden corner-brackets"
-          style={{
-            background: "rgba(255, 255, 255, 0.02)",
-            backdropFilter: "blur(20px)",
-            border: "1px solid rgba(0, 229, 255, 0.12)",
-            boxShadow: "0 0 40px rgba(0, 229, 255, 0.04), inset 0 0 40px rgba(0, 229, 255, 0.02)",
-          }}
-        >
-          <span />
-          <div
-            className="px-6 py-4 flex items-center gap-2"
-            style={{ borderBottom: "1px solid rgba(0, 229, 255, 0.08)", background: "rgba(0, 229, 255, 0.03)" }}
+        {/* Left: Input + Trust Orb */}
+        <div className="flex flex-col gap-6">
+          {/* Input card */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="rounded-xl relative overflow-hidden corner-brackets"
+            style={{
+              background: "rgba(255, 255, 255, 0.02)",
+              backdropFilter: "blur(20px)",
+              border: "1px solid rgba(0, 229, 255, 0.12)",
+              boxShadow: "0 0 40px rgba(0, 229, 255, 0.04), inset 0 0 40px rgba(0, 229, 255, 0.02)",
+            }}
           >
-            <ScanLine className="w-3.5 h-3.5" style={{ color: "#00e5ff" }} />
-            <span
-              className="text-[11px] tracking-[0.25em] font-semibold"
-              style={{ fontFamily: "'Space Mono', monospace", color: "#00e5ff" }}
+            <span />
+            <div
+              className="px-6 py-4 flex items-center gap-2"
+              style={{ borderBottom: "1px solid rgba(0, 229, 255, 0.08)", background: "rgba(0, 229, 255, 0.03)" }}
             >
-              INPUT STREAM
-            </span>
-          </div>
-
-          <div className="p-6">
-            <div className="relative">
-              <textarea
-                placeholder="Paste transmission data here — news article, message, URL content..."
-                className="w-full min-h-[280px] resize-none rounded-lg px-4 py-3 text-sm font-mono outline-none transition-all duration-300"
-                style={{
-                  background: "rgba(0, 0, 0, 0.4)",
-                  border: "1px solid rgba(255, 255, 255, 0.06)",
-                  color: "rgba(255, 255, 255, 0.8)",
-                  fontFamily: "'Space Mono', monospace",
-                  fontSize: "12px",
-                  lineHeight: "1.7",
-                }}
-                onFocus={e => {
-                  e.currentTarget.style.border = "1px solid rgba(0, 229, 255, 0.3)";
-                  e.currentTarget.style.boxShadow = "0 0 20px rgba(0, 229, 255, 0.08)";
-                }}
-                onBlur={e => {
-                  e.currentTarget.style.border = "1px solid rgba(255, 255, 255, 0.06)";
-                  e.currentTarget.style.boxShadow = "none";
-                }}
-                value={text}
-                onChange={e => setText(e.target.value)}
-                data-testid="input-text-analysis"
-              />
+              <ScanLine className="w-3.5 h-3.5" style={{ color: "#00e5ff" }} />
               <span
-                className="absolute bottom-3 right-3 text-[10px]"
-                style={{ fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.2)" }}
+                className="text-[11px] tracking-[0.25em] font-semibold"
+                style={{ fontFamily: "'Space Mono', monospace", color: "#00e5ff" }}
               >
-                {text.length} chars
+                INPUT STREAM
               </span>
             </div>
 
-            <div className="mt-5 flex justify-end">
-              <motion.button
-                onClick={handleSubmit}
-                disabled={isPending || !text.trim()}
-                className="relative overflow-hidden px-8 py-3 rounded-lg text-xs tracking-[0.25em] font-bold disabled:opacity-40 disabled:cursor-not-allowed"
-                style={{
-                  fontFamily: "'Orbitron', monospace",
-                  background: isPending
-                    ? "rgba(0, 229, 255, 0.1)"
-                    : "linear-gradient(135deg, rgba(0, 229, 255, 0.15), rgba(168, 85, 247, 0.15))",
-                  border: "1px solid rgba(0, 229, 255, 0.4)",
-                  color: "#00e5ff",
-                  boxShadow: isPending ? "none" : "0 0 20px rgba(0, 229, 255, 0.2), inset 0 0 20px rgba(0, 229, 255, 0.05)",
-                }}
-                whileHover={!isPending && text.trim() ? {
-                  scale: 1.02,
-                  boxShadow: "0 0 40px rgba(0, 229, 255, 0.4), 0 0 80px rgba(0, 229, 255, 0.15), inset 0 0 20px rgba(0, 229, 255, 0.1)",
-                } : {}}
-                whileTap={!isPending && text.trim() ? { scale: 0.97 } : {}}
-                data-testid="button-submit-analysis"
-              >
-                {!isPending && text.trim() && (
-                  <motion.div
-                    className="absolute inset-0 pointer-events-none"
-                    style={{ background: "linear-gradient(90deg, transparent, rgba(0, 229, 255, 0.15), transparent)" }}
-                    animate={{ x: ["-100%", "100%"] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                  />
-                )}
-                <div className="relative flex items-center gap-2">
-                  <Zap className="w-3.5 h-3.5" />
-                  {isPending ? "PROCESSING..." : "INITIATE SCAN"}
-                </div>
-              </motion.button>
-            </div>
-          </div>
-        </motion.div>
+            <div className="p-6">
+              <div className="relative">
+                <textarea
+                  placeholder="Paste transmission data here — news article, message, URL content..."
+                  className="w-full min-h-[200px] resize-none rounded-lg px-4 py-3 text-sm font-mono outline-none transition-all duration-300"
+                  style={{
+                    background: "rgba(0, 0, 0, 0.4)",
+                    border: "1px solid rgba(255, 255, 255, 0.06)",
+                    color: "rgba(255, 255, 255, 0.8)",
+                    fontFamily: "'Space Mono', monospace",
+                    fontSize: "12px",
+                    lineHeight: "1.7",
+                  }}
+                  onFocus={e => {
+                    e.currentTarget.style.border = "1px solid rgba(0, 229, 255, 0.3)";
+                    e.currentTarget.style.boxShadow = "0 0 20px rgba(0, 229, 255, 0.08)";
+                  }}
+                  onBlur={e => {
+                    e.currentTarget.style.border = "1px solid rgba(255, 255, 255, 0.06)";
+                    e.currentTarget.style.boxShadow = "none";
+                  }}
+                  value={text}
+                  onChange={e => setText(e.target.value)}
+                  data-testid="input-text-analysis"
+                />
+                <span
+                  className="absolute bottom-3 right-3 text-[10px]"
+                  style={{ fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.2)" }}
+                >
+                  {text.length} chars
+                </span>
+              </div>
 
-        {/* Result card */}
+              <div className="mt-5 flex justify-end">
+                <motion.button
+                  onClick={handleSubmit}
+                  disabled={isPending || !text.trim()}
+                  className="relative overflow-hidden px-8 py-3 rounded-lg text-xs tracking-[0.25em] font-bold disabled:opacity-40 disabled:cursor-not-allowed"
+                  style={{
+                    fontFamily: "'Orbitron', monospace",
+                    background: isPending
+                      ? "rgba(0, 229, 255, 0.1)"
+                      : "linear-gradient(135deg, rgba(0, 229, 255, 0.15), rgba(168, 85, 247, 0.15))",
+                    border: "1px solid rgba(0, 229, 255, 0.4)",
+                    color: "#00e5ff",
+                    boxShadow: isPending ? "none" : "0 0 20px rgba(0, 229, 255, 0.2), inset 0 0 20px rgba(0, 229, 255, 0.05)",
+                  }}
+                  whileHover={!isPending && text.trim() ? {
+                    scale: 1.02,
+                    boxShadow: "0 0 40px rgba(0, 229, 255, 0.4), 0 0 80px rgba(0, 229, 255, 0.15), inset 0 0 20px rgba(0, 229, 255, 0.1)",
+                  } : {}}
+                  whileTap={!isPending && text.trim() ? { scale: 0.97 } : {}}
+                  data-testid="button-submit-analysis"
+                >
+                  {!isPending && text.trim() && (
+                    <motion.div
+                      className="absolute inset-0 pointer-events-none"
+                      style={{ background: "linear-gradient(90deg, transparent, rgba(0, 229, 255, 0.15), transparent)" }}
+                      animate={{ x: ["-100%", "100%"] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                    />
+                  )}
+                  <div className="relative flex items-center gap-2">
+                    <Zap className="w-3.5 h-3.5" />
+                    {isPending ? "PROCESSING..." : "INITIATE SCAN"}
+                  </div>
+                </motion.button>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Trust Orb */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="rounded-xl overflow-hidden"
+            style={{
+              background: "rgba(255,255,255,0.015)",
+              backdropFilter: "blur(20px)",
+              border: "1px solid rgba(255,255,255,0.06)",
+            }}
+          >
+            <div
+              className="px-6 py-3 flex items-center gap-2"
+              style={{ borderBottom: "1px solid rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.02)" }}
+            >
+              <span
+                className="text-[10px] tracking-[0.25em] font-semibold"
+                style={{ fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.3)" }}
+              >
+                ◈ TRUST ORB — THREAT VISUALIZER
+              </span>
+            </div>
+            <div className="py-6 flex items-center justify-center">
+              <TrustOrb
+                risk={isPending ? null : riskLevel}
+                score={isPending ? null : (result?.credibilityScore ?? null)}
+              />
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Right: Intelligence Report */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -405,6 +408,9 @@ export default function Home() {
                   >
                     <Gauge score={result.credibilityScore} />
                   </div>
+
+                  {/* Voice controls */}
+                  <VoiceControls result={result} />
 
                   {/* Explanation */}
                   <motion.div
