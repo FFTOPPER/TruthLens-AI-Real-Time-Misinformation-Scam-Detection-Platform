@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: analysis
+    description: Text analysis operations
 paths:
   /healthz:
     get:
@@ -24,6 +26,57 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /analysis/analyze:
+    post:
+      operationId: analyzeText
+      tags: [analysis]
+      summary: Analyze text for misinformation
+      description: Analyze input text for credibility, risk level, suspicious phrases, and explanation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnalyzeTextBody"
+      responses:
+        "200":
+          description: Analysis result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalysisResult"
+
+  /analysis/history:
+    get:
+      operationId: getAnalysisHistory
+      tags: [analysis]
+      summary: Get recent analysis history
+      description: Returns the last 20 analyses performed
+      responses:
+        "200":
+          description: List of past analyses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AnalysisRecord"
+
+  /analysis/stats:
+    get:
+      operationId: getAnalysisStats
+      tags: [analysis]
+      summary: Get analysis statistics
+      description: Returns aggregate stats - total analyses, risk distribution, avg credibility
+      responses:
+        "200":
+          description: Stats object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalysisStats"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +87,91 @@ components:
       required:
         - status
 
+    AnalyzeTextBody:
+      type: object
+      properties:
+        text:
+          type: string
+          description: The text or content to analyze
+      required:
+        - text
+
+    AnalysisResult:
+      type: object
+      properties:
+        credibilityScore:
+          type: number
+          description: Score from 0 to 100 (100 = fully credible)
+        riskLevel:
+          type: string
+          enum: [Low, Medium, High]
+        explanation:
+          type: string
+          description: Human-readable explanation of the analysis
+        suspiciousPhrases:
+          type: array
+          items:
+            type: string
+          description: List of suspicious phrases found in the text
+        id:
+          type: string
+          description: Record ID for history tracking
+      required:
+        - credibilityScore
+        - riskLevel
+        - explanation
+        - suspiciousPhrases
+        - id
+
+    AnalysisRecord:
+      type: object
+      properties:
+        id:
+          type: string
+        textSnippet:
+          type: string
+          description: First 200 chars of analyzed text
+        credibilityScore:
+          type: number
+        riskLevel:
+          type: string
+          enum: [Low, Medium, High]
+        explanation:
+          type: string
+        suspiciousPhrases:
+          type: array
+          items:
+            type: string
+        analyzedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - textSnippet
+        - credibilityScore
+        - riskLevel
+        - explanation
+        - suspiciousPhrases
+        - analyzedAt
+
+    AnalysisStats:
+      type: object
+      properties:
+        totalAnalyses:
+          type: integer
+        avgCredibilityScore:
+          type: number
+        riskDistribution:
+          type: object
+          properties:
+            Low:
+              type: integer
+            Medium:
+              type: integer
+            High:
+              type: integer
+          required: [Low, Medium, High]
+      required:
+        - totalAnalyses
+        - avgCredibilityScore
+        - riskDistribution

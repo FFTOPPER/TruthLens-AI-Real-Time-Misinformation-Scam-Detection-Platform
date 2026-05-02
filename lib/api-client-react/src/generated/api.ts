@@ -5,18 +5,27 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
+  MutationFunction,
   QueryFunction,
   QueryKey,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import type { HealthStatus } from "./api.schemas";
+import type {
+  AnalysisRecord,
+  AnalysisResult,
+  AnalysisStats,
+  AnalyzeTextBody,
+  HealthStatus,
+} from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
-import type { ErrorType } from "../custom-fetch";
+import type { ErrorType, BodyType } from "../custom-fetch";
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
@@ -92,6 +101,245 @@ export function useHealthCheck<
   request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getHealthCheckQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Analyze input text for credibility, risk level, suspicious phrases, and explanation
+ * @summary Analyze text for misinformation
+ */
+export const getAnalyzeTextUrl = () => {
+  return `/api/analysis/analyze`;
+};
+
+export const analyzeText = async (
+  analyzeTextBody: AnalyzeTextBody,
+  options?: RequestInit,
+): Promise<AnalysisResult> => {
+  return customFetch<AnalysisResult>(getAnalyzeTextUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(analyzeTextBody),
+  });
+};
+
+export const getAnalyzeTextMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof analyzeText>>,
+    TError,
+    { data: BodyType<AnalyzeTextBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof analyzeText>>,
+  TError,
+  { data: BodyType<AnalyzeTextBody> },
+  TContext
+> => {
+  const mutationKey = ["analyzeText"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof analyzeText>>,
+    { data: BodyType<AnalyzeTextBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return analyzeText(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AnalyzeTextMutationResult = NonNullable<
+  Awaited<ReturnType<typeof analyzeText>>
+>;
+export type AnalyzeTextMutationBody = BodyType<AnalyzeTextBody>;
+export type AnalyzeTextMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Analyze text for misinformation
+ */
+export const useAnalyzeText = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof analyzeText>>,
+    TError,
+    { data: BodyType<AnalyzeTextBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof analyzeText>>,
+  TError,
+  { data: BodyType<AnalyzeTextBody> },
+  TContext
+> => {
+  return useMutation(getAnalyzeTextMutationOptions(options));
+};
+
+/**
+ * Returns the last 20 analyses performed
+ * @summary Get recent analysis history
+ */
+export const getGetAnalysisHistoryUrl = () => {
+  return `/api/analysis/history`;
+};
+
+export const getAnalysisHistory = async (
+  options?: RequestInit,
+): Promise<AnalysisRecord[]> => {
+  return customFetch<AnalysisRecord[]>(getGetAnalysisHistoryUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetAnalysisHistoryQueryKey = () => {
+  return [`/api/analysis/history`] as const;
+};
+
+export const getGetAnalysisHistoryQueryOptions = <
+  TData = Awaited<ReturnType<typeof getAnalysisHistory>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getAnalysisHistory>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetAnalysisHistoryQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getAnalysisHistory>>
+  > = ({ signal }) => getAnalysisHistory({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getAnalysisHistory>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetAnalysisHistoryQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getAnalysisHistory>>
+>;
+export type GetAnalysisHistoryQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get recent analysis history
+ */
+
+export function useGetAnalysisHistory<
+  TData = Awaited<ReturnType<typeof getAnalysisHistory>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getAnalysisHistory>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetAnalysisHistoryQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Returns aggregate stats - total analyses, risk distribution, avg credibility
+ * @summary Get analysis statistics
+ */
+export const getGetAnalysisStatsUrl = () => {
+  return `/api/analysis/stats`;
+};
+
+export const getAnalysisStats = async (
+  options?: RequestInit,
+): Promise<AnalysisStats> => {
+  return customFetch<AnalysisStats>(getGetAnalysisStatsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetAnalysisStatsQueryKey = () => {
+  return [`/api/analysis/stats`] as const;
+};
+
+export const getGetAnalysisStatsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getAnalysisStats>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getAnalysisStats>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetAnalysisStatsQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getAnalysisStats>>
+  > = ({ signal }) => getAnalysisStats({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getAnalysisStats>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetAnalysisStatsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getAnalysisStats>>
+>;
+export type GetAnalysisStatsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get analysis statistics
+ */
+
+export function useGetAnalysisStats<
+  TData = Awaited<ReturnType<typeof getAnalysisStats>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getAnalysisStats>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetAnalysisStatsQueryOptions(options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

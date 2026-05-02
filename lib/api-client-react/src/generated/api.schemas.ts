@@ -8,3 +8,61 @@
 export interface HealthStatus {
   status: string;
 }
+
+export interface AnalyzeTextBody {
+  /** The text or content to analyze */
+  text: string;
+}
+
+export type AnalysisResultRiskLevel =
+  (typeof AnalysisResultRiskLevel)[keyof typeof AnalysisResultRiskLevel];
+
+export const AnalysisResultRiskLevel = {
+  Low: "Low",
+  Medium: "Medium",
+  High: "High",
+} as const;
+
+export interface AnalysisResult {
+  /** Score from 0 to 100 (100 = fully credible) */
+  credibilityScore: number;
+  riskLevel: AnalysisResultRiskLevel;
+  /** Human-readable explanation of the analysis */
+  explanation: string;
+  /** List of suspicious phrases found in the text */
+  suspiciousPhrases: string[];
+  /** Record ID for history tracking */
+  id: string;
+}
+
+export type AnalysisRecordRiskLevel =
+  (typeof AnalysisRecordRiskLevel)[keyof typeof AnalysisRecordRiskLevel];
+
+export const AnalysisRecordRiskLevel = {
+  Low: "Low",
+  Medium: "Medium",
+  High: "High",
+} as const;
+
+export interface AnalysisRecord {
+  id: string;
+  /** First 200 chars of analyzed text */
+  textSnippet: string;
+  credibilityScore: number;
+  riskLevel: AnalysisRecordRiskLevel;
+  explanation: string;
+  suspiciousPhrases: string[];
+  analyzedAt: string;
+}
+
+export type AnalysisStatsRiskDistribution = {
+  Low: number;
+  Medium: number;
+  High: number;
+};
+
+export interface AnalysisStats {
+  totalAnalyses: number;
+  avgCredibilityScore: number;
+  riskDistribution: AnalysisStatsRiskDistribution;
+}

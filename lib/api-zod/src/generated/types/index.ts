@@ -6,4 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from "./analysisRecord";
+export * from "./analysisRecordRiskLevel";
+export * from "./analysisResult";
+export * from "./analysisResultRiskLevel";
+export * from "./analysisStats";
+export * from "./analysisStatsRiskDistribution";
+export * from "./analyzeTextBody";
 export * from "./healthStatus";

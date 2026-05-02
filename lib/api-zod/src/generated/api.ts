@@ -14,3 +14,56 @@ import * as zod from "zod";
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
+
+/**
+ * Analyze input text for credibility, risk level, suspicious phrases, and explanation
+ * @summary Analyze text for misinformation
+ */
+export const AnalyzeTextBody = zod.object({
+  text: zod.string().describe("The text or content to analyze"),
+});
+
+export const AnalyzeTextResponse = zod.object({
+  credibilityScore: zod
+    .number()
+    .describe("Score from 0 to 100 (100 = fully credible)"),
+  riskLevel: zod.enum(["Low", "Medium", "High"]),
+  explanation: zod
+    .string()
+    .describe("Human-readable explanation of the analysis"),
+  suspiciousPhrases: zod
+    .array(zod.string())
+    .describe("List of suspicious phrases found in the text"),
+  id: zod.string().describe("Record ID for history tracking"),
+});
+
+/**
+ * Returns the last 20 analyses performed
+ * @summary Get recent analysis history
+ */
+export const GetAnalysisHistoryResponseItem = zod.object({
+  id: zod.string(),
+  textSnippet: zod.string().describe("First 200 chars of analyzed text"),
+  credibilityScore: zod.number(),
+  riskLevel: zod.enum(["Low", "Medium", "High"]),
+  explanation: zod.string(),
+  suspiciousPhrases: zod.array(zod.string()),
+  analyzedAt: zod.coerce.date(),
+});
+export const GetAnalysisHistoryResponse = zod.array(
+  GetAnalysisHistoryResponseItem,
+);
+
+/**
+ * Returns aggregate stats - total analyses, risk distribution, avg credibility
+ * @summary Get analysis statistics
+ */
+export const GetAnalysisStatsResponse = zod.object({
+  totalAnalyses: zod.number(),
+  avgCredibilityScore: zod.number(),
+  riskDistribution: zod.object({
+    Low: zod.number(),
+    Medium: zod.number(),
+    High: zod.number(),
+  }),
+});
