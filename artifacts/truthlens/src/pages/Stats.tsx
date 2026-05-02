@@ -1,7 +1,79 @@
 import { useGetAnalysisStats, getGetAnalysisStatsQueryKey } from "@workspace/api-client-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart3, ShieldAlert, Activity, Database, AlertTriangle, ShieldCheck } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
+
+function StatCard({
+  icon: Icon,
+  label,
+  value,
+  color,
+  glow,
+  delay,
+  testId,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: string | number;
+  color: string;
+  glow: string;
+  delay: number;
+  testId?: string;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay }}
+      whileHover={{ y: -4, transition: { duration: 0.15 } }}
+      className="rounded-xl relative overflow-hidden p-6"
+      style={{
+        background: "rgba(255,255,255,0.025)",
+        backdropFilter: "blur(20px)",
+        border: `1px solid ${glow.replace("0.4", "0.2")}`,
+      }}
+      onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = `0 0 40px ${glow}, inset 0 0 30px ${glow.replace("0.4", "0.05")}`; }}
+      onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = "none"; }}
+    >
+      {/* Decorative gradient */}
+      <div
+        className="absolute top-0 right-0 w-32 h-32 rounded-bl-full pointer-events-none"
+        style={{ background: `radial-gradient(circle, ${glow.replace("0.4", "0.08")} 0%, transparent 70%)` }}
+      />
+
+      <div className="flex items-start gap-4 relative z-10">
+        <div
+          className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+          style={{ background: `${glow.replace("0.4", "0.1")}`, border: `1px solid ${glow.replace("0.4", "0.3")}` }}
+        >
+          <Icon className="w-5 h-5" style={{ color }} />
+        </div>
+        <div>
+          <p
+            className="text-[10px] tracking-[0.2em] mb-2"
+            style={{ fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.3)" }}
+          >
+            {label}
+          </p>
+          <motion.p
+            key={String(value)}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 300, delay: delay + 0.1 }}
+            className="text-5xl font-bold tabular-nums"
+            style={{
+              fontFamily: "'Orbitron', monospace",
+              color,
+              textShadow: `0 0 20px ${glow}, 0 0 40px ${glow.replace("0.4", "0.2")}`,
+            }}
+            data-testid={testId}
+          >
+            {value}
+          </motion.p>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
 
 export default function Stats() {
   const { data: stats, isLoading } = useGetAnalysisStats({
@@ -9,101 +81,200 @@ export default function Stats() {
   });
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <header className="border-b border-primary/20 pb-4">
-        <h2 className="text-3xl font-display font-bold text-foreground flex items-center gap-3 uppercase tracking-wider">
-          <BarChart3 className="w-8 h-8 text-primary" />
-          Global Threat Stats
-        </h2>
-        <p className="text-muted-foreground font-mono mt-2 text-sm">Aggregate intelligence metrics.</p>
-      </header>
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+      className="space-y-8"
+    >
+      {/* Header */}
+      <div>
+        <div className="flex items-center gap-3 mb-2">
+          <div
+            className="w-8 h-8 rounded flex items-center justify-center flex-shrink-0"
+            style={{ background: "rgba(0, 229, 255, 0.1)", border: "1px solid rgba(0, 229, 255, 0.3)" }}
+          >
+            <BarChart3 className="w-4 h-4" style={{ color: "#00e5ff" }} />
+          </div>
+          <h2
+            className="text-2xl font-bold tracking-widest"
+            style={{ fontFamily: "'Orbitron', monospace", color: "#00e5ff", textShadow: "0 0 20px rgba(0, 229, 255, 0.5)" }}
+          >
+            THREAT METRICS
+          </h2>
+        </div>
+        <p
+          className="text-xs tracking-widest ml-11"
+          style={{ fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.3)" }}
+        >
+          AGGREGATE INTELLIGENCE DATA
+        </p>
+        <div className="mt-4" style={{ height: "1px", background: "linear-gradient(90deg, rgba(0, 229, 255, 0.4), rgba(168, 85, 247, 0.4), transparent)" }} />
+      </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="h-32 bg-card/40 animate-pulse rounded-lg border border-primary/10"></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {[1, 2].map(i => (
+            <motion.div
+              key={i}
+              animate={{ opacity: [0.3, 0.6, 0.3] }}
+              transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.15 }}
+              className="h-36 rounded-xl"
+              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}
+            />
           ))}
         </div>
       ) : !stats || stats.totalAnalyses === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 border border-dashed border-primary/20 rounded-lg bg-black/20">
-           <Database className="w-16 h-16 text-primary/20 mb-4" />
-           <p className="font-mono text-muted-foreground uppercase tracking-widest text-sm">Insufficient data for statistical analysis.</p>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex flex-col items-center justify-center py-24 rounded-xl gap-4"
+          style={{ background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(0, 229, 255, 0.15)" }}
+        >
+          <motion.div
+            animate={{ opacity: [0.3, 0.7, 0.3] }}
+            transition={{ duration: 3, repeat: Infinity }}
+            className="w-16 h-16 rounded-full flex items-center justify-center"
+            style={{ border: "1px solid rgba(0, 229, 255, 0.15)", background: "rgba(0, 229, 255, 0.03)" }}
+          >
+            <Database className="w-7 h-7" style={{ color: "rgba(0, 229, 255, 0.3)" }} />
+          </motion.div>
+          <p
+            className="text-xs tracking-[0.2em]"
+            style={{ fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.25)" }}
+          >
+            INSUFFICIENT DATA · RUN ANALYSIS FIRST
+          </p>
+        </motion.div>
       ) : (
-        <div className="space-y-8">
+        <div className="space-y-6">
+          {/* Top stat cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-            <Card className="border-primary/30 bg-card/60 backdrop-blur relative overflow-hidden group hover:border-primary transition-colors">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[100px] pointer-events-none"></div>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-mono text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-                  <Database className="w-4 h-4 text-primary" />
-                  Total Transmissions
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-5xl font-display font-bold text-foreground drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]" data-testid="text-total-analyses">
-                  {stats.totalAnalyses}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-primary/30 bg-card/60 backdrop-blur relative overflow-hidden group hover:border-primary transition-colors">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[100px] pointer-events-none"></div>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-mono text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-primary" />
-                  Avg Credibility Index
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className={cn(
-                  "text-5xl font-display font-bold",
-                  stats.avgCredibilityScore < 40 ? "text-destructive drop-shadow-[0_0_10px_rgba(244,63,94,0.5)]" :
-                  stats.avgCredibilityScore < 70 ? "text-amber-500 drop-shadow-[0_0_10px_rgba(245,158,11,0.5)]" :
-                  "text-primary drop-shadow-[0_0_10px_rgba(6,182,212,0.5)]"
-                )} data-testid="text-avg-score">
-                  {Math.round(stats.avgCredibilityScore)}
-                </div>
-              </CardContent>
-            </Card>
+            <StatCard
+              icon={Database}
+              label="TOTAL TRANSMISSIONS ANALYZED"
+              value={stats.totalAnalyses}
+              color="#00e5ff"
+              glow="rgba(0, 229, 255, 0.4)"
+              delay={0.05}
+              testId="text-total-analyses"
+            />
+            <StatCard
+              icon={Activity}
+              label="AVG CREDIBILITY INDEX"
+              value={Math.round(stats.avgCredibilityScore)}
+              color={stats.avgCredibilityScore < 40 ? "#ef4444" : stats.avgCredibilityScore < 70 ? "#f59e0b" : "#00e5ff"}
+              glow={stats.avgCredibilityScore < 40 ? "rgba(239, 68, 68, 0.4)" : stats.avgCredibilityScore < 70 ? "rgba(245, 158, 11, 0.4)" : "rgba(0, 229, 255, 0.4)"}
+              delay={0.1}
+              testId="text-avg-score"
+            />
           </div>
 
-          <Card className="border-primary/20 bg-card/60 backdrop-blur">
-            <CardHeader className="border-b border-primary/10">
-              <CardTitle className="text-sm font-mono uppercase tracking-widest flex items-center gap-2 text-primary">
-                <ShieldAlert className="w-4 h-4" />
-                Risk Distribution Matrix
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-8">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {/* Low Risk */}
-                <div className="flex flex-col items-center justify-center p-6 bg-black/40 rounded border border-primary/20">
-                  <ShieldCheck className="w-10 h-10 text-primary mb-3 opacity-80" />
-                  <div className="text-3xl font-bold font-mono text-primary">{stats.riskDistribution.Low}</div>
-                  <div className="text-xs text-muted-foreground uppercase tracking-widest mt-2 font-mono">Low Risk</div>
-                </div>
+          {/* Risk distribution */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="rounded-xl overflow-hidden"
+            style={{
+              background: "rgba(255,255,255,0.02)",
+              backdropFilter: "blur(20px)",
+              border: "1px solid rgba(255,255,255,0.06)",
+            }}
+          >
+            <div
+              className="px-6 py-4 flex items-center gap-2"
+              style={{ borderBottom: "1px solid rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.02)" }}
+            >
+              <ShieldAlert className="w-3.5 h-3.5" style={{ color: "#a855f7" }} />
+              <span
+                className="text-[11px] tracking-[0.25em]"
+                style={{ fontFamily: "'Space Mono', monospace", color: "#a855f7" }}
+              >
+                RISK DISTRIBUTION MATRIX
+              </span>
+            </div>
 
-                {/* Medium Risk */}
-                <div className="flex flex-col items-center justify-center p-6 bg-black/40 rounded border border-amber-500/20">
-                  <AlertTriangle className="w-10 h-10 text-amber-500 mb-3 opacity-80" />
-                  <div className="text-3xl font-bold font-mono text-amber-500">{stats.riskDistribution.Medium}</div>
-                  <div className="text-xs text-muted-foreground uppercase tracking-widest mt-2 font-mono">Medium Risk</div>
-                </div>
+            <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[
+                {
+                  icon: ShieldCheck,
+                  label: "LOW RISK",
+                  value: stats.riskDistribution.Low,
+                  color: "#00e5ff",
+                  bg: "rgba(0, 229, 255, 0.06)",
+                  border: "rgba(0, 229, 255, 0.2)",
+                  glow: "rgba(0, 229, 255, 0.3)",
+                },
+                {
+                  icon: AlertTriangle,
+                  label: "MEDIUM RISK",
+                  value: stats.riskDistribution.Medium,
+                  color: "#f59e0b",
+                  bg: "rgba(245, 158, 11, 0.06)",
+                  border: "rgba(245, 158, 11, 0.2)",
+                  glow: "rgba(245, 158, 11, 0.3)",
+                },
+                {
+                  icon: ShieldAlert,
+                  label: "HIGH RISK",
+                  value: stats.riskDistribution.High,
+                  color: "#ef4444",
+                  bg: "rgba(239, 68, 68, 0.06)",
+                  border: "rgba(239, 68, 68, 0.2)",
+                  glow: "rgba(239, 68, 68, 0.3)",
+                },
+              ].map(({ icon: Icon, label, value, color, bg, border, glow }, i) => (
+                <motion.div
+                  key={label}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.3 + i * 0.1 }}
+                  whileHover={{ scale: 1.03, transition: { duration: 0.15 } }}
+                  className="flex flex-col items-center justify-center gap-3 p-6 rounded-xl relative overflow-hidden"
+                  style={{ background: bg, border: `1px solid ${border}` }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = `0 0 30px ${glow}`; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = "none"; }}
+                >
+                  <Icon className="w-8 h-8" style={{ color, opacity: 0.7 }} />
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 300, delay: 0.35 + i * 0.1 }}
+                    className="text-4xl font-bold"
+                    style={{
+                      fontFamily: "'Orbitron', monospace",
+                      color,
+                      textShadow: `0 0 20px ${glow}`,
+                    }}
+                  >
+                    {value}
+                  </motion.div>
+                  <span
+                    className="text-[10px] tracking-[0.2em]"
+                    style={{ fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.3)" }}
+                  >
+                    {label}
+                  </span>
 
-                {/* High Risk */}
-                <div className="flex flex-col items-center justify-center p-6 bg-black/40 rounded border border-destructive/20 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-destructive/5 animate-pulse"></div>
-                  <ShieldAlert className="w-10 h-10 text-destructive mb-3 opacity-80 relative z-10" />
-                  <div className="text-3xl font-bold font-mono text-destructive relative z-10">{stats.riskDistribution.High}</div>
-                  <div className="text-xs text-destructive/80 uppercase tracking-widest mt-2 font-mono relative z-10">High Risk</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                  {/* Percentage bar */}
+                  {stats.totalAnalyses > 0 && (
+                    <div className="w-full rounded-full overflow-hidden h-1" style={{ background: "rgba(255,255,255,0.06)" }}>
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${(value / stats.totalAnalyses) * 100}%` }}
+                        transition={{ duration: 1, delay: 0.4 + i * 0.1, ease: "easeOut" }}
+                        className="h-full rounded-full"
+                        style={{ background: color, boxShadow: `0 0 8px ${glow}` }}
+                      />
+                    </div>
+                  )}
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
