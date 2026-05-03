@@ -147,6 +147,66 @@ const SCENARIOS: Scenario[] = [
       { id: "report", label: "Report & Block", sublabel: "Platform report", severity: "safe", emoji: "🚫" },
     ],
   },
+  {
+    id: "romance_scam",
+    title: "Romance Scam",
+    emoji: "💔",
+    color: "#ec4899",
+    description: "Online lover needs emergency cash",
+    context:
+      "Hey 💕 I know we've only talked 3 weeks but I feel so connected to you.\n\nI'm stuck at Dubai airport — my wallet was stolen and I can't board my flight home. I'm so embarrassed asking but I just need £800 to cover the ticket.\n\nI'll pay you back the moment I land. You're the only one I trust 🙏",
+    choices: [
+      { id: "send", label: "Send the £800", sublabel: "Help them out", severity: "dangerous", emoji: "💸" },
+      { id: "partial", label: "Send £100 First", sublabel: "Test with small amount", severity: "dangerous", emoji: "💳" },
+      { id: "videocall", label: "Demand a Video Call", sublabel: "Verify identity", severity: "risky", emoji: "📹" },
+      { id: "report", label: "Report & Block", sublabel: "Classic romance scam", severity: "safe", emoji: "🛡️" },
+    ],
+  },
+  {
+    id: "deepfake_video",
+    title: "Viral Deepfake Clip",
+    emoji: "🎭",
+    color: "#8b5cf6",
+    description: "PM announces bank freeze at midnight",
+    context:
+      "🔴 BREAKING — 14M views and rising!\n\n\"The Prime Minister just announced ALL bank accounts will be frozen at midnight. Transfer savings to crypto NOW before it's too late.\"\n\n⚠️ They're trying to delete this — SHARE BEFORE IT'S GONE!\n\nPosted by: @RealNewsAlert247  (account created 2 days ago)",
+    choices: [
+      { id: "share", label: "Share Immediately", sublabel: "Warn everyone!", severity: "dangerous", emoji: "🔄" },
+      { id: "transfer", label: "Move Your Savings", sublabel: "Better safe than sorry", severity: "dangerous", emoji: "🏦" },
+      { id: "search", label: "Search Official News", sublabel: "Check BBC / Reuters", severity: "risky", emoji: "🔍" },
+      { id: "report", label: "Flag as Deepfake", sublabel: "Report the content", severity: "safe", emoji: "🛡️" },
+    ],
+  },
+  {
+    id: "job_scam",
+    title: "Fake Job Offer",
+    emoji: "💼",
+    color: "#06b6d4",
+    description: "Dream remote job — pay £150 deposit",
+    context:
+      "CONGRATULATIONS! 🎉\n\nYou have been selected for a REMOTE POSITION at Amazon!\nSalary: £85,000/yr | Work from home | Start immediately\n\nTo secure your role, pay a one-time equipment & training deposit of £150 via bank transfer.\n\nThis position will be re-assigned if not confirmed within 12 hours. Reply YES to proceed.",
+    choices: [
+      { id: "pay", label: "Pay the £150", sublabel: "Don't lose the role!", severity: "dangerous", emoji: "💸" },
+      { id: "contract", label: "Ask for a Contract", sublabel: "Then maybe pay", severity: "risky", emoji: "📄" },
+      { id: "google", label: "Google the Recruiter", sublabel: "Verify before acting", severity: "risky", emoji: "🔍" },
+      { id: "report", label: "Report Scam", sublabel: "Real jobs don't charge", severity: "safe", emoji: "🛡️" },
+    ],
+  },
+  {
+    id: "ai_voice",
+    title: "AI Voice Clone Call",
+    emoji: "📞",
+    color: "#10b981",
+    description: "Your 'grandson' needs £2,000 bail",
+    context:
+      "You answer the phone. The voice sounds exactly like your grandson:\n\n\"Gran, it's me… I'm in trouble. Car accident abroad — I need £2,000 bail money. Please don't tell Mum and Dad, they'll be so upset. A lawyer will come to your door to collect it. Please hurry, I'm scared.\"\n\n[The voice is an AI clone — your grandson is safely at home]",
+    choices: [
+      { id: "cash", label: "Hand Cash to Lawyer", sublabel: "Help right away", severity: "dangerous", emoji: "💵" },
+      { id: "wire", label: "Wire Transfer Instead", sublabel: "More secure than cash?", severity: "dangerous", emoji: "🏦" },
+      { id: "their_number", label: "Call the Number They Give", sublabel: "Confirm with 'lawyer'", severity: "risky", emoji: "☎️" },
+      { id: "verify", label: "Call Grandson Directly", sublabel: "Use his real number", severity: "safe", emoji: "📱" },
+    ],
+  },
 ];
 
 /* ── Severity config ─────────────────────────────────────────── */
