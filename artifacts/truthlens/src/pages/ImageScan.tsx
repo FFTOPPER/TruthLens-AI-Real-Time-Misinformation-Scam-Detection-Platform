@@ -63,7 +63,7 @@ function ManipBar({ label, value, color }: { label: string; value: number; color
           {value}%
         </span>
       </div>
-      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.07)" }}>
+      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "var(--c-border-sub)" }}>
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${value}%` }}
@@ -207,7 +207,7 @@ export default function ImageScan() {
             OCR · AI Analysis
           </span>
         </div>
-        <div className="mt-4" style={{ height: "1px", background: "rgba(255,255,255,0.07)" }} />
+        <div className="mt-4" style={{ height: "1px", background: "var(--c-border-sub)" }} />
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -243,7 +243,7 @@ export default function ImageScan() {
               </motion.div>
 
               <div className="text-center px-6">
-                <p style={{ fontFamily: F, fontSize: "14px", fontWeight: 500, color: "rgba(255,255,255,0.6)" }}>
+                <p style={{ fontFamily: F, fontSize: "14px", fontWeight: 500, color: "var(--c-txt1)" }}>
                   {isDragging ? "Drop image here" : "Upload Screenshot or Image"}
                 </p>
                 <p style={{ fontFamily: F, fontSize: "11px", color: "#374151", marginTop: "5px" }}>
@@ -278,7 +278,7 @@ export default function ImageScan() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.28 }}
               className="rounded-xl overflow-hidden relative"
-              style={{ background: "#161b27", border: "1px solid rgba(255,255,255,0.08)" }}
+              style={{ background: "#161b27", border: "1px solid var(--c-border)" }}
             >
               {/* Remove button */}
               <button
@@ -376,11 +376,11 @@ export default function ImageScan() {
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.3 }}
                 className="rounded-xl overflow-hidden"
-                style={{ background: "#161b27", border: "1px solid rgba(255,255,255,0.08)" }}
+                style={{ background: "#161b27", border: "1px solid var(--c-border)" }}
               >
                 {/* Header with tabs */}
                 <div className="px-4 py-2.5 flex items-center gap-3 flex-wrap"
-                  style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+                  style={{ borderBottom: "1px solid var(--c-border-sub)" }}>
                   <div className="flex items-center gap-2 flex-1">
                     <Eye className="w-3 h-3" style={{ color: "#3b82f6" }} />
                     <span style={{ fontFamily: F, fontSize: "11px", fontWeight: 600, letterSpacing: "0.05em", color: "#3b82f6", textTransform: "uppercase" as const }}>
@@ -406,7 +406,7 @@ export default function ImageScan() {
                             fontFamily: F, fontSize: "10px", fontWeight: 500,
                             padding: "3px 9px", borderRadius: "6px", cursor: "pointer",
                             background: activeTab === tab ? "rgba(59,130,246,0.12)" : "transparent",
-                            border: activeTab === tab ? "1px solid rgba(59,130,246,0.3)" : "1px solid rgba(255,255,255,0.08)",
+                            border: activeTab === tab ? "1px solid rgba(59,130,246,0.3)" : "1px solid var(--c-border)",
                             color: activeTab === tab ? "#3b82f6" : "#6b7280",
                             transition: "all 0.15s",
                           }}
@@ -511,14 +511,14 @@ export default function ImageScan() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 className="rounded-xl flex flex-col items-center justify-center gap-3 text-center"
-                style={{ minHeight: "220px", background: "#161b27", border: "1px solid rgba(255,255,255,0.08)" }}
+                style={{ minHeight: "220px", background: "#161b27", border: "1px solid var(--c-border)" }}
               >
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center"
                   style={{ background: "rgba(59,130,246,0.07)", border: "1px solid rgba(59,130,246,0.14)" }}>
                   <ShieldCheck className="w-5 h-5" style={{ color: "rgba(59,130,246,0.4)" }} />
                 </div>
                 <div>
-                  <p style={{ fontFamily: F, fontSize: "14px", fontWeight: 500, color: "rgba(255,255,255,0.3)" }}>
+                  <p style={{ fontFamily: F, fontSize: "14px", fontWeight: 500, color: "var(--c-txt3)" }}>
                     Results appear here
                   </p>
                   <p style={{ fontFamily: F, fontSize: "11px", color: "#374151", marginTop: "5px" }}>
@@ -570,7 +570,7 @@ export default function ImageScan() {
                         </div>
                       </div>
                       <div className="flex-1">
-                        <div className="h-1.5 rounded-full overflow-hidden mb-2" style={{ background: "rgba(255,255,255,0.07)" }}>
+                        <div className="h-1.5 rounded-full overflow-hidden mb-2" style={{ background: "var(--c-border-sub)" }}>
                           <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: `${result.credibilityScore}%` }}
@@ -594,9 +594,9 @@ export default function ImageScan() {
 
                 {/* Manipulation breakdown */}
                 <div className="rounded-xl overflow-hidden"
-                  style={{ background: "#161b27", border: "1px solid rgba(255,255,255,0.08)" }}>
+                  style={{ background: "#161b27", border: "1px solid var(--c-border)" }}>
                   <div className="px-4 py-2.5 flex items-center gap-2"
-                    style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+                    style={{ borderBottom: "1px solid var(--c-border-sub)" }}>
                     <Zap className="w-3 h-3" style={{ color: "#6b7280" }} />
                     <span style={{ fontFamily: F, fontSize: "10px", fontWeight: 600, letterSpacing: "0.06em", color: "#6b7280", textTransform: "uppercase" as const }}>
                       Manipulation Signals
@@ -653,11 +653,11 @@ export default function ImageScan() {
                   style={{
                     fontFamily: F, fontWeight: 500,
                     background: "transparent",
-                    border: "1px solid rgba(255,255,255,0.08)",
+                    border: "1px solid var(--c-border)",
                     color: "#374151",
                     cursor: "pointer",
                   }}
-                  whileHover={{ borderColor: "rgba(255,255,255,0.15)", color: "#6b7280" }}
+                  whileHover={{ borderColor: "var(--c-txt4)", color: "#6b7280" }}
                 >
                   <RotateCcw className="w-2.5 h-2.5" />
                   Edit text &amp; re-analyse

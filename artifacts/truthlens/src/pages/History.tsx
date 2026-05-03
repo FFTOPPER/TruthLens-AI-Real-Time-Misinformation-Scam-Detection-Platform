@@ -26,7 +26,7 @@ type ManipulationBreakdown = {
 
 function MiniBar({ value, color }: { value: number; color: string }) {
   return (
-    <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.07)" }}>
+    <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: "var(--c-border-sub)" }}>
       <motion.div
         className="h-full rounded-full"
         initial={{ width: 0 }}
@@ -49,7 +49,7 @@ function ManipulationMini({ breakdown }: { breakdown: ManipulationBreakdown }) {
     <div className="flex items-center gap-2 mt-2.5">
       {bars.map(b => (
         <div key={b.label} className="flex-1 flex flex-col gap-0.5">
-          <span style={{ fontFamily: F, fontSize: "9px", fontWeight: 500, color: "rgba(255,255,255,0.25)" }}>
+          <span style={{ fontFamily: F, fontSize: "9px", fontWeight: 500, color: "var(--c-txt3)" }}>
             {b.label}
           </span>
           <MiniBar value={b.value} color={b.color} />
@@ -105,7 +105,7 @@ export default function History() {
             </span>
           </div>
         </div>
-        <div className="mt-4" style={{ height: "1px", background: "rgba(255,255,255,0.07)" }} />
+        <div className="mt-4" style={{ height: "1px", background: "var(--c-border-sub)" }} />
       </div>
 
       {/* Content */}
@@ -116,8 +116,8 @@ export default function History() {
               key={i}
               className="h-24 rounded-xl"
               style={{
-                background: "rgba(255,255,255,0.025)",
-                border: "1px solid rgba(255,255,255,0.06)",
+                background: "var(--c-card)",
+                border: "1px solid var(--c-border-sub)",
                 animation: `pulse ${1.4 + i * 0.15}s ease infinite`,
               }}
             />
@@ -128,19 +128,19 @@ export default function History() {
           initial={{ opacity: 0, scale: 0.97 }}
           animate={{ opacity: 1, scale: 1 }}
           className="flex flex-col items-center justify-center py-20 rounded-xl gap-4"
-          style={{ background: "rgba(255,255,255,0.015)", border: "1px dashed rgba(255,255,255,0.1)" }}
+          style={{ background: "var(--c-card)", border: "1px dashed var(--c-border)" }}
         >
           <div
             className="w-14 h-14 rounded-xl flex items-center justify-center"
-            style={{ border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.03)" }}
+            style={{ border: "1px solid var(--c-border)", background: "var(--c-card)" }}
           >
-            <Globe className="w-6 h-6" style={{ color: "rgba(255,255,255,0.18)" }} />
+            <Globe className="w-6 h-6" style={{ color: "var(--c-txt4)" }} />
           </div>
           <div className="text-center">
-            <p style={{ fontFamily: F, fontSize: "14px", fontWeight: 500, color: "rgba(255,255,255,0.32)" }}>
+            <p style={{ fontFamily: F, fontSize: "14px", fontWeight: 500, color: "var(--c-txt3)" }}>
               No scan history yet
             </p>
-            <p style={{ fontFamily: F, fontSize: "12px", color: "rgba(255,255,255,0.16)", marginTop: "4px" }}>
+            <p style={{ fontFamily: F, fontSize: "12px", color: "var(--c-txt4)", marginTop: "4px" }}>
               Start scanning to build your intelligence feed
             </p>
           </div>

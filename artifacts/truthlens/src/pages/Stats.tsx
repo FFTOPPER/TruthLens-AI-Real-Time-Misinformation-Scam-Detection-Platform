@@ -45,9 +45,9 @@ function DonutChart({ low, medium, high, total }: { low: number; medium: number;
 
   return (
     <svg width="128" height="128" viewBox="0 0 128 128" className="flex-shrink-0">
-      <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="13" />
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--c-border-sub)" strokeWidth="13" />
       {total === 0 ? (
-        <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="13" strokeDasharray="4 8" />
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--c-border)" strokeWidth="13" strokeDasharray="4 8" />
       ) : (
         segs.map((seg, i) =>
           seg.fraction > 0 ? (
@@ -74,7 +74,7 @@ function DonutChart({ low, medium, high, total }: { low: number; medium: number;
       <text x={cx} y={cy - 6} textAnchor="middle" fill="#3b82f6" fontSize="22" fontFamily="Inter, system-ui, sans-serif" fontWeight="bold">
         {total}
       </text>
-      <text x={cx} y={cy + 12} textAnchor="middle" fill="rgba(255,255,255,0.3)" fontSize="8" fontFamily="Inter, system-ui, sans-serif" letterSpacing="1">
+      <text x={cx} y={cy + 12} textAnchor="middle" fill="var(--c-txt3)" fontSize="8" fontFamily="Inter, system-ui, sans-serif" letterSpacing="1">
         TOTAL
       </text>
     </svg>
@@ -88,7 +88,7 @@ function ScoreRing({ score }: { score: number }) {
 
   return (
     <svg width="104" height="104" viewBox="0 0 104 104" className="flex-shrink-0">
-      <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="9" />
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--c-border-sub)" strokeWidth="9" />
       <motion.circle
         cx={cx} cy={cy} r={r}
         fill="none"
@@ -108,7 +108,7 @@ function ScoreRing({ score }: { score: number }) {
       <text x={cx} y={cy - 4} textAnchor="middle" fill={color} fontSize="18" fontFamily="Inter, system-ui, sans-serif" fontWeight="bold">
         {Math.round(score)}
       </text>
-      <text x={cx} y={cy + 12} textAnchor="middle" fill="rgba(255,255,255,0.28)" fontSize="7" fontFamily="Inter, system-ui, sans-serif" letterSpacing="1">
+      <text x={cx} y={cy + 12} textAnchor="middle" fill="var(--c-txt3)" fontSize="7" fontFamily="Inter, system-ui, sans-serif" letterSpacing="1">
         AVG SCORE
       </text>
     </svg>
@@ -133,7 +133,7 @@ function Bar({ label, value, max, color, icon: Icon, delay }: {
           {label}
         </span>
       </div>
-      <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+      <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: "var(--c-border-sub)" }}>
         <motion.div
           className="h-full rounded-full"
           initial={{ width: 0 }}
@@ -165,7 +165,7 @@ function ManipBar({ label, value, color, delay }: { label: string; value: number
         <span style={{ fontFamily: F, fontSize: "11px", fontWeight: 500, color: "#6b7280" }}>{label}</span>
         <span style={{ fontFamily: F, fontSize: "11px", fontWeight: 700, color }}>{value}%</span>
       </div>
-      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "var(--c-border-sub)" }}>
         <motion.div
           className="h-full rounded-full"
           initial={{ width: 0 }}
@@ -190,9 +190,9 @@ function Card({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay }}
       className="rounded-xl overflow-hidden"
-      style={{ background: "#161b27", border: "1px solid rgba(255,255,255,0.08)" }}
+      style={{ background: "#161b27", border: "1px solid var(--c-border)" }}
     >
-      <div className="px-5 py-3 flex items-center gap-2" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+      <div className="px-5 py-3 flex items-center gap-2" style={{ borderBottom: "1px solid var(--c-border-sub)" }}>
         <Icon className="w-3.5 h-3.5" style={{ color, opacity: 0.8 }} />
         <span style={{ fontFamily: F, fontSize: "11px", fontWeight: 600, letterSpacing: "0.05em", color: "#6b7280", textTransform: "uppercase" as const }}>
           {title}
@@ -246,7 +246,7 @@ export default function Stats() {
             </p>
           </div>
         </div>
-        <div className="mt-4" style={{ height: "1px", background: "rgba(255,255,255,0.07)" }} />
+        <div className="mt-4" style={{ height: "1px", background: "var(--c-border-sub)" }} />
       </div>
 
       {isLoading ? (
@@ -254,7 +254,7 @@ export default function Stats() {
           {[1, 2, 3].map(i => (
             <div key={i}
               className="h-32 rounded-xl"
-              style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)", animation: `pulse ${1.4 + i * 0.15}s ease infinite` }}
+              style={{ background: "var(--c-card)", border: "1px solid var(--c-border-sub)", animation: `pulse ${1.4 + i * 0.15}s ease infinite` }}
             />
           ))}
         </div>
@@ -283,7 +283,7 @@ export default function Stats() {
                 </div>
               </div>
 
-              <div className="hidden sm:block w-px self-stretch" style={{ background: "rgba(255,255,255,0.07)" }} />
+              <div className="hidden sm:block w-px self-stretch" style={{ background: "var(--c-border-sub)" }} />
 
               {/* Score ring */}
               <div className="flex flex-col items-center gap-2">
@@ -293,7 +293,7 @@ export default function Stats() {
                 </span>
               </div>
 
-              <div className="hidden sm:block w-px self-stretch" style={{ background: "rgba(255,255,255,0.07)" }} />
+              <div className="hidden sm:block w-px self-stretch" style={{ background: "var(--c-border-sub)" }} />
 
               {/* Stat numbers */}
               <div className="flex-1 min-w-[120px] flex flex-col gap-4">
@@ -374,7 +374,7 @@ export default function Stats() {
             </div>
             {total === 0 && (
               <div className="px-5 pb-5">
-                <p style={{ fontFamily: F, fontSize: "11px", fontWeight: 500, color: "#374151", textAlign: "center", paddingTop: "12px", borderTop: "1px dashed rgba(255,255,255,0.06)" }}>
+                <p style={{ fontFamily: F, fontSize: "11px", fontWeight: 500, color: "#374151", textAlign: "center", paddingTop: "12px", borderTop: "1px dashed var(--c-border-sub)" }}>
                   Run analyses to see manipulation averages
                 </p>
               </div>
@@ -409,7 +409,7 @@ export default function Stats() {
                   {label}
                 </span>
                 {total > 0 && (
-                  <div className="w-full h-0.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+                  <div className="w-full h-0.5 rounded-full overflow-hidden" style={{ background: "var(--c-border-sub)" }}>
                     <motion.div
                       className="h-full rounded-full"
                       initial={{ width: 0 }}

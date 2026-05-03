@@ -3,9 +3,11 @@ import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard, History, Globe, Settings,
   ShieldAlert, ChevronLeft, Menu, X, Activity, FileImage, BrainCircuit, Film,
+  Sun, Moon,
 } from "lucide-react";
 import { useHealthCheck, getHealthCheckQueryKey } from "@workspace/api-client-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTheme } from "@/context/ThemeContext";
 
 const F = "Inter, system-ui, sans-serif";
 
@@ -25,6 +27,52 @@ const NAV_ITEMS = [
 
 const SIDEBAR_EXPANDED  = 240;
 const SIDEBAR_COLLAPSED = 64;
+
+/* ─── Theme toggle button ──────────────────────────────────────── */
+function ThemeToggle({ size = "sm" }: { size?: "sm" | "md" }) {
+  const { isDark, toggle } = useTheme();
+  const dim = size === "md" ? "36px" : "30px";
+  const iconSize = size === "md" ? "w-4 h-4" : "w-3.5 h-3.5";
+  return (
+    <motion.button
+      onClick={toggle}
+      className="flex items-center justify-center rounded-lg flex-shrink-0"
+      style={{
+        width: dim, height: dim,
+        background: "var(--c-card-md)",
+        border: "1px solid var(--c-border)",
+        cursor: "pointer",
+      }}
+      whileHover={{ scale: 1.08 }}
+      whileTap={{ scale: 0.91 }}
+      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+    >
+      <AnimatePresence mode="wait" initial={false}>
+        {isDark ? (
+          <motion.div
+            key="moon"
+            initial={{ rotate: -40, opacity: 0 }}
+            animate={{ rotate: 0, opacity: 1 }}
+            exit={{ rotate: 40, opacity: 0 }}
+            transition={{ duration: 0.18 }}
+          >
+            <Moon className={iconSize} style={{ color: "var(--c-txt3)" }} />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="sun"
+            initial={{ rotate: 40, opacity: 0 }}
+            animate={{ rotate: 0, opacity: 1 }}
+            exit={{ rotate: -40, opacity: 0 }}
+            transition={{ duration: 0.18 }}
+          >
+            <Sun className={iconSize} style={{ color: "#f59e0b" }} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.button>
+  );
+}
 
 /* ─── Sidebar nav item ─────────────────────────────────────────── */
 function NavItem({
@@ -55,14 +103,14 @@ function NavItem({
         {!isActive && (
           <div
             className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none"
-            style={{ background: "rgba(255,255,255,0.04)", transition: "opacity 0.15s" }}
+            style={{ background: "var(--c-card-md)", transition: "opacity 0.15s" }}
           />
         )}
 
         {/* Icon */}
         <Icon
           className="w-[17px] h-[17px] flex-shrink-0 transition-colors duration-200"
-          style={{ color: isActive ? "#3b82f6" : "rgba(255,255,255,0.28)" }}
+          style={{ color: isActive ? "#3b82f6" : "var(--c-txt3)" }}
         />
 
         {/* Label */}
@@ -80,7 +128,7 @@ function NavItem({
                   fontFamily: F,
                   fontSize: "13px",
                   fontWeight: 500,
-                  color: isActive ? "#e2e8f0" : "rgba(255,255,255,0.5)",
+                  color: isActive ? "var(--c-hi)" : "var(--c-txt2)",
                   whiteSpace: "nowrap",
                   transition: "color 0.15s",
                 }}>
@@ -90,7 +138,7 @@ function NavItem({
                   fontFamily: F,
                   fontSize: "10px",
                   fontWeight: 400,
-                  color: isActive ? "rgba(59,130,246,0.55)" : "rgba(255,255,255,0.18)",
+                  color: isActive ? "rgba(59,130,246,0.55)" : "var(--c-txt4)",
                   whiteSpace: "nowrap",
                   marginTop: "2px",
                 }}>
@@ -106,13 +154,13 @@ function NavItem({
           <div
             className="absolute left-full ml-3 px-2.5 py-1.5 rounded-lg pointer-events-none opacity-0 group-hover:opacity-100 z-50 whitespace-nowrap"
             style={{
-              background: "#161b27",
-              border: "1px solid rgba(255,255,255,0.1)",
-              boxShadow: "0 4px 16px rgba(0,0,0,0.5)",
+              background: "var(--c-tooltip)",
+              border: "1px solid var(--c-border)",
+              boxShadow: "0 4px 16px rgba(0,0,0,0.18)",
               transition: "opacity 0.15s",
             }}
           >
-            <span style={{ fontFamily: F, fontSize: "12px", fontWeight: 500, color: "#e2e8f0" }}>
+            <span style={{ fontFamily: F, fontSize: "12px", fontWeight: 500, color: "var(--c-hi)" }}>
               {item.label}
             </span>
           </div>
@@ -142,7 +190,7 @@ function SidebarContent({
         className="flex-shrink-0"
         style={{
           padding: collapsed ? "18px 0 14px" : "18px 16px 14px",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          borderBottom: "1px solid var(--c-border-sub)",
           transition: "padding 0.3s",
         }}
       >
@@ -181,7 +229,7 @@ function SidebarContent({
                     fontFamily: F,
                     fontSize: "14px",
                     fontWeight: 700,
-                    color: "#e2e8f0",
+                    color: "var(--c-hi)",
                     whiteSpace: "nowrap",
                     letterSpacing: "-0.01em",
                   }}>
@@ -191,7 +239,7 @@ function SidebarContent({
                     fontFamily: F,
                     fontSize: "10px",
                     fontWeight: 400,
-                    color: "rgba(255,255,255,0.3)",
+                    color: "var(--c-txt3)",
                     whiteSpace: "nowrap",
                     marginTop: "1px",
                   }}>
@@ -219,7 +267,7 @@ function SidebarContent({
                 transition={{ duration: 2.5, repeat: Infinity }}
                 style={{ background: isOnline ? "#22c55e" : "#ef4444" }}
               />
-              <span style={{ fontFamily: F, fontSize: "10px", fontWeight: 400, color: "rgba(255,255,255,0.28)" }}>
+              <span style={{ fontFamily: F, fontSize: "10px", fontWeight: 400, color: "var(--c-txt3)" }}>
                 System {isOnline ? "Online" : "Offline"}
               </span>
             </motion.div>
@@ -241,14 +289,14 @@ function SidebarContent({
 
       {/* ── Collapse toggle (desktop) ── */}
       {showToggle && onToggle && (
-        <div className="flex-shrink-0 px-2 py-2" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+        <div className="flex-shrink-0 px-2 py-2" style={{ borderBottom: "1px solid var(--c-border-sub)" }}>
           <motion.button
             onClick={onToggle}
             className="w-full flex items-center rounded-lg px-2 py-1.5 group"
             style={{
               justifyContent: collapsed ? "center" : "space-between",
-              background: "rgba(255,255,255,0.02)",
-              border: "1px solid rgba(255,255,255,0.06)",
+              background: "var(--c-card)",
+              border: "1px solid var(--c-border-sub)",
               cursor: "pointer",
               transition: "justify-content 0.3s",
             }}
@@ -263,7 +311,7 @@ function SidebarContent({
                   exit={{ opacity: 0, width: 0 }}
                   transition={{ duration: 0.2 }}
                   className="overflow-hidden"
-                  style={{ fontFamily: F, fontSize: "10px", fontWeight: 400, color: "rgba(255,255,255,0.25)", whiteSpace: "nowrap" }}
+                  style={{ fontFamily: F, fontSize: "10px", fontWeight: 400, color: "var(--c-txt3)", whiteSpace: "nowrap" }}
                 >
                   Collapse sidebar
                 </motion.span>
@@ -273,7 +321,7 @@ function SidebarContent({
               animate={{ rotate: collapsed ? 180 : 0 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
             >
-              <ChevronLeft className="w-3.5 h-3.5" style={{ color: "rgba(255,255,255,0.28)" }} />
+              <ChevronLeft className="w-3.5 h-3.5" style={{ color: "var(--c-txt3)" }} />
             </motion.div>
           </motion.button>
         </div>
@@ -289,7 +337,7 @@ function SidebarContent({
             transition={{ duration: 0.18 }}
             className="px-4 pt-4 pb-1 flex-shrink-0"
           >
-            <span style={{ fontFamily: F, fontSize: "10px", fontWeight: 500, letterSpacing: "0.05em", color: "rgba(255,255,255,0.16)", textTransform: "uppercase" as const }}>
+            <span style={{ fontFamily: F, fontSize: "10px", fontWeight: 500, letterSpacing: "0.05em", color: "var(--c-txt4)", textTransform: "uppercase" as const }}>
               Navigation
             </span>
           </motion.div>
@@ -316,7 +364,7 @@ function SidebarContent({
       </nav>
 
       {/* ── Divider ── */}
-      <div style={{ height: "1px", background: "rgba(255,255,255,0.05)", flexShrink: 0 }} />
+      <div style={{ height: "1px", background: "var(--c-border-sub)", flexShrink: 0 }} />
 
       {/* ── Footer ── */}
       <div
@@ -343,7 +391,7 @@ function SidebarContent({
               transition={{ duration: 0.2 }}
               className="overflow-hidden flex-shrink-0"
             >
-              <p style={{ fontFamily: F, fontSize: "10px", fontWeight: 400, color: "rgba(255,255,255,0.2)", whiteSpace: "nowrap" }}>
+              <p style={{ fontFamily: F, fontSize: "10px", fontWeight: 400, color: "var(--c-txt4)", whiteSpace: "nowrap" }}>
                 v0.9.4 · AI Analysis System
               </p>
             </motion.div>
@@ -354,7 +402,7 @@ function SidebarContent({
   );
 }
 
-/* ─── Layout ───────────────────────────────────────────────────── */
+/* ─── Layout ────────────────────────────────────────────────────── */
 export function Layout({ children }: LayoutProps) {
   const [location] = useLocation();
   const [collapsed, setCollapsed] = useState(false);
@@ -371,7 +419,7 @@ export function Layout({ children }: LayoutProps) {
   const activeItem = NAV_ITEMS.find(n => n.href === location);
 
   return (
-    <div className="flex h-screen overflow-hidden relative" style={{ backgroundColor: "#0f1117" }}>
+    <div className="flex h-screen overflow-hidden relative" style={{ backgroundColor: "var(--c-bg)" }}>
       {/* Background */}
       <div className="app-bg" />
 
@@ -381,9 +429,9 @@ export function Layout({ children }: LayoutProps) {
         animate={{ width: sidebarW }}
         transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
         style={{
-          background: "#0b0e14",
-          borderRight: "1px solid rgba(255,255,255,0.07)",
-          boxShadow: "2px 0 24px rgba(0,0,0,0.4)",
+          background: "var(--c-sidebar)",
+          borderRight: "1px solid var(--c-border-sub)",
+          boxShadow: "2px 0 16px rgba(0,0,0,0.15)",
           overflow: "hidden",
           minWidth: sidebarW,
         }}
@@ -397,56 +445,59 @@ export function Layout({ children }: LayoutProps) {
       </motion.aside>
 
       {/* Sidebar divider */}
-      <div className="hidden lg:block w-px flex-shrink-0 z-20" style={{ background: "rgba(255,255,255,0.06)" }} />
+      <div className="hidden lg:block w-px flex-shrink-0 z-20" style={{ background: "var(--c-border-sub)" }} />
 
       {/* ══ MOBILE TOP BAR ════════════════════════════════════════ */}
       <div
-        className="lg:hidden fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-4 h-14"
+        className="lg:hidden fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-4 h-14 gap-3"
         style={{
-          background: "rgba(11,14,20,0.97)",
+          background: "var(--c-mobilebar)",
           backdropFilter: "blur(16px)",
-          borderBottom: "1px solid rgba(255,255,255,0.07)",
+          borderBottom: "1px solid var(--c-border-sub)",
         }}
       >
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 flex-shrink-0">
           <div
             className="w-7 h-7 rounded-md flex items-center justify-center"
             style={{ background: "rgba(59,130,246,0.1)", border: "1px solid rgba(59,130,246,0.22)" }}
           >
             <ShieldAlert className="w-3.5 h-3.5" style={{ color: "#3b82f6" }} />
           </div>
-          <span style={{ fontFamily: F, fontSize: "14px", fontWeight: 700, color: "#e2e8f0", letterSpacing: "-0.01em" }}>
+          <span style={{ fontFamily: F, fontSize: "14px", fontWeight: 700, color: "var(--c-hi)", letterSpacing: "-0.01em" }}>
             TruthLens AI
           </span>
         </div>
 
         {activeItem && (
-          <span style={{ fontFamily: F, fontSize: "11px", fontWeight: 400, color: "rgba(255,255,255,0.25)" }}
-            className="hidden sm:block">
+          <span style={{ fontFamily: F, fontSize: "11px", fontWeight: 400, color: "var(--c-txt3)" }}
+            className="hidden sm:block flex-1 truncate">
             {activeItem.sub}
           </span>
         )}
 
-        <motion.button
-          onClick={() => setMobileOpen(v => !v)}
-          className="w-9 h-9 flex items-center justify-center rounded-lg"
-          style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
-          whileHover={{ background: "rgba(59,130,246,0.08)", borderColor: "rgba(59,130,246,0.2)" }}
-          whileTap={{ scale: 0.93 }}
-          aria-label="Toggle navigation"
-        >
-          <AnimatePresence mode="wait">
-            {mobileOpen ? (
-              <motion.div key="x" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.14 }}>
-                <X className="w-4 h-4" style={{ color: "#3b82f6" }} />
-              </motion.div>
-            ) : (
-              <motion.div key="m" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.14 }}>
-                <Menu className="w-4 h-4" style={{ color: "rgba(255,255,255,0.5)" }} />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.button>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <ThemeToggle size="sm" />
+          <motion.button
+            onClick={() => setMobileOpen(v => !v)}
+            className="w-9 h-9 flex items-center justify-center rounded-lg"
+            style={{ background: "var(--c-card-md)", border: "1px solid var(--c-border)" }}
+            whileHover={{ background: "rgba(59,130,246,0.08)", borderColor: "rgba(59,130,246,0.2)" }}
+            whileTap={{ scale: 0.93 }}
+            aria-label="Toggle navigation"
+          >
+            <AnimatePresence mode="wait">
+              {mobileOpen ? (
+                <motion.div key="x" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.14 }}>
+                  <X className="w-4 h-4" style={{ color: "#3b82f6" }} />
+                </motion.div>
+              ) : (
+                <motion.div key="m" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.14 }}>
+                  <Menu className="w-4 h-4" style={{ color: "var(--c-txt2)" }} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.button>
+        </div>
       </div>
 
       {/* ══ MOBILE DRAWER ════════════════════════════════════════ */}
@@ -465,9 +516,9 @@ export function Layout({ children }: LayoutProps) {
               className="fixed top-0 left-0 bottom-0 z-50 lg:hidden flex flex-col overflow-hidden"
               style={{
                 width: SIDEBAR_EXPANDED,
-                background: "#0b0e14",
-                borderRight: "1px solid rgba(255,255,255,0.08)",
-                boxShadow: "6px 0 32px rgba(0,0,0,0.6)",
+                background: "var(--c-sidebar)",
+                borderRight: "1px solid var(--c-border)",
+                boxShadow: "6px 0 32px rgba(0,0,0,0.2)",
               }}
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
@@ -491,33 +542,36 @@ export function Layout({ children }: LayoutProps) {
         <div
           className="hidden lg:flex items-center justify-between px-8 h-11 flex-shrink-0 sticky top-0 z-10"
           style={{
-            background: "rgba(15,17,23,0.9)",
+            background: "var(--c-topbar)",
             backdropFilter: "blur(12px)",
-            borderBottom: "1px solid rgba(255,255,255,0.06)",
+            borderBottom: "1px solid var(--c-border-sub)",
           }}
         >
           {/* Breadcrumb */}
           <div className="flex items-center gap-2">
-            <span style={{ fontFamily: F, fontSize: "11px", fontWeight: 500, color: "rgba(255,255,255,0.2)" }}>
+            <span style={{ fontFamily: F, fontSize: "11px", fontWeight: 500, color: "var(--c-txt4)" }}>
               TruthLens
             </span>
-            <span style={{ color: "rgba(255,255,255,0.18)", fontSize: "12px" }}>›</span>
-            <span style={{ fontFamily: F, fontSize: "11px", fontWeight: 500, color: "rgba(255,255,255,0.45)" }}>
+            <span style={{ color: "var(--c-txt4)", fontSize: "12px" }}>›</span>
+            <span style={{ fontFamily: F, fontSize: "11px", fontWeight: 500, color: "var(--c-txt2)" }}>
               {activeItem?.label ?? ""}
             </span>
           </div>
 
-          {/* Live indicator */}
-          <div className="flex items-center gap-2">
-            <motion.div
-              className="w-1.5 h-1.5 rounded-full"
-              animate={{ opacity: [1, 0.3, 1] }}
-              transition={{ duration: 2.5, repeat: Infinity }}
-              style={{ background: "#22c55e" }}
-            />
-            <span style={{ fontFamily: F, fontSize: "10px", fontWeight: 400, color: "rgba(255,255,255,0.2)" }}>
-              Live feed active
-            </span>
+          {/* Right side: toggle + live indicator */}
+          <div className="flex items-center gap-3">
+            <ThemeToggle size="sm" />
+            <div className="flex items-center gap-2">
+              <motion.div
+                className="w-1.5 h-1.5 rounded-full"
+                animate={{ opacity: [1, 0.3, 1] }}
+                transition={{ duration: 2.5, repeat: Infinity }}
+                style={{ background: "#22c55e" }}
+              />
+              <span style={{ fontFamily: F, fontSize: "10px", fontWeight: 400, color: "var(--c-txt4)" }}>
+                Live feed active
+              </span>
+            </div>
           </div>
         </div>
 

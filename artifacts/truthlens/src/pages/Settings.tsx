@@ -9,7 +9,7 @@ const F = "Inter, system-ui, sans-serif";
 
 function ToggleSwitch({ enabled, label, sub }: { enabled: boolean; label: string; sub?: string }) {
   return (
-    <div className="flex items-center justify-between py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+    <div className="flex items-center justify-between py-3" style={{ borderBottom: "1px solid var(--c-card-md)" }}>
       <div>
         <p style={{ fontFamily: F, fontSize: "13px", fontWeight: 500, color: enabled ? "#c9d1d9" : "#6b7280" }}>
           {label}
@@ -26,8 +26,8 @@ function ToggleSwitch({ enabled, label, sub }: { enabled: boolean; label: string
           width: 38,
           height: 20,
           borderRadius: 10,
-          background: enabled ? "rgba(59,130,246,0.25)" : "rgba(255,255,255,0.07)",
-          border: enabled ? "1px solid rgba(59,130,246,0.4)" : "1px solid rgba(255,255,255,0.12)",
+          background: enabled ? "rgba(59,130,246,0.25)" : "var(--c-border-sub)",
+          border: enabled ? "1px solid rgba(59,130,246,0.4)" : "1px solid var(--c-border)",
           transition: "background 0.2s, border-color 0.2s",
         }}
       >
@@ -40,7 +40,7 @@ function ToggleSwitch({ enabled, label, sub }: { enabled: boolean; label: string
             width: 14,
             height: 14,
             borderRadius: 7,
-            background: enabled ? "#3b82f6" : "rgba(255,255,255,0.25)",
+            background: enabled ? "#3b82f6" : "var(--c-txt3)",
           }}
         />
       </div>
@@ -67,11 +67,11 @@ function Section({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.32, delay }}
       className="rounded-xl overflow-hidden"
-      style={{ background: "#161b27", border: "1px solid rgba(255,255,255,0.08)" }}
+      style={{ background: "#161b27", border: "1px solid var(--c-border)" }}
     >
       <div
         className="flex items-center gap-2.5 px-5 py-3.5"
-        style={{ borderBottom: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.01)" }}
+        style={{ borderBottom: "1px solid var(--c-border-sub)", background: "var(--c-card)" }}
       >
         <Icon className="w-3.5 h-3.5" style={{ color, opacity: 0.8 }} />
         <span style={{ fontFamily: F, fontSize: "11px", fontWeight: 600, letterSpacing: "0.05em", color: "#6b7280", textTransform: "uppercase" as const }}>
@@ -85,7 +85,7 @@ function Section({
 
 function InfoRow({ label, value, accent }: { label: string; value: string; accent?: string }) {
   return (
-    <div className="flex items-center justify-between py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+    <div className="flex items-center justify-between py-3" style={{ borderBottom: "1px solid var(--c-card-md)" }}>
       <span style={{ fontFamily: F, fontSize: "12px", fontWeight: 500, color: "#6b7280" }}>
         {label}
       </span>
@@ -126,7 +126,7 @@ export default function SettingsPage() {
             </p>
           </div>
         </div>
-        <div className="mt-4" style={{ height: "1px", background: "rgba(255,255,255,0.07)" }} />
+        <div className="mt-4" style={{ height: "1px", background: "var(--c-border-sub)" }} />
       </div>
 
       {/* AI Engine */}

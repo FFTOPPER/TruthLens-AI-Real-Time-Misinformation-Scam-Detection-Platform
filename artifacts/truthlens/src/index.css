@@ -88,6 +88,7 @@
   }
 }
 
+/* ── Theme custom properties ──────────────────────────────────── */
 :root {
   --button-outline: rgba(255,255,255,.07);
   --badge-outline:  rgba(255,255,255,.05);
@@ -150,6 +151,69 @@
   --shadow-lg:  0px 12px 36px 0px rgba(0,0,0,0.4);
   --shadow-xl:  0px 16px 48px 0px rgba(0,0,0,0.4);
   --shadow-2xl: 0px 24px 64px 0px rgba(0,0,0,0.4);
+
+  /* ── App theme tokens (dark defaults) ── */
+  --c-bg:          #0f1117;
+  --c-surface:     #161b27;
+  --c-sidebar:     #0b0e14;
+  --c-border:      rgba(255,255,255,0.09);
+  --c-border-sub:  rgba(255,255,255,0.05);
+  --c-border-em:   rgba(255,255,255,0.15);
+  --c-card:        rgba(255,255,255,0.025);
+  --c-card-md:     rgba(255,255,255,0.045);
+  --c-hi:          rgba(255,255,255,0.92);
+  --c-txt1:        rgba(255,255,255,0.72);
+  --c-txt2:        rgba(255,255,255,0.47);
+  --c-txt3:        rgba(255,255,255,0.30);
+  --c-txt4:        rgba(255,255,255,0.18);
+  --c-topbar:      rgba(15,17,23,0.92);
+  --c-mobilebar:   rgba(11,14,20,0.97);
+  --c-tooltip:     #161b27;
+}
+
+/* ── Light theme overrides ──────────────────────────────────── */
+html.light {
+  color-scheme: light;
+
+  --background: 220 14% 96%;
+  --foreground: 222 47% 11%;
+  --border: 220 13% 88%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --card-border: 220 13% 88%;
+  --sidebar: 220 20% 97%;
+  --sidebar-foreground: 222 30% 30%;
+  --sidebar-border: 220 13% 88%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  --popover-border: 220 13% 88%;
+  --muted: 220 14% 94%;
+  --muted-foreground: 220 9% 46%;
+  --input: 220 13% 88%;
+
+  --c-bg:          #f0f2f5;
+  --c-surface:     #ffffff;
+  --c-sidebar:     #f4f5f8;
+  --c-border:      rgba(0,0,0,0.10);
+  --c-border-sub:  rgba(0,0,0,0.06);
+  --c-border-em:   rgba(0,0,0,0.16);
+  --c-card:        rgba(0,0,0,0.025);
+  --c-card-md:     rgba(0,0,0,0.045);
+  --c-hi:          rgba(0,0,0,0.87);
+  --c-txt1:        rgba(0,0,0,0.70);
+  --c-txt2:        rgba(0,0,0,0.52);
+  --c-txt3:        rgba(0,0,0,0.38);
+  --c-txt4:        rgba(0,0,0,0.25);
+  --c-topbar:      rgba(240,242,245,0.92);
+  --c-mobilebar:   rgba(244,245,248,0.97);
+  --c-tooltip:     #ffffff;
+
+  --shadow-2xs: 0px 1px 2px 0px rgba(0,0,0,0.08);
+  --shadow-xs:  0px 1px 3px 0px rgba(0,0,0,0.08);
+  --shadow-sm:  0px 2px 6px  0px rgba(0,0,0,0.07);
+  --shadow:     0px 4px 12px 0px rgba(0,0,0,0.07);
+  --shadow-md:  0px 6px 20px 0px rgba(0,0,0,0.07);
+  --shadow-lg:  0px 12px 36px 0px rgba(0,0,0,0.07);
 }
 
 @layer base {
@@ -169,7 +233,7 @@
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
-    background-color: #0f1117;
+    background-color: var(--c-bg);
     min-height: 100vh;
     overflow-x: hidden;
   }
@@ -190,24 +254,35 @@
   }
 }
 
+/* ── Smooth theme transition ────────────────────────────────── */
+html.theme-transitioning,
+html.theme-transitioning * {
+  transition:
+    background-color 0.35s ease,
+    color 0.35s ease,
+    border-color 0.35s ease,
+    fill 0.2s ease,
+    box-shadow 0.35s ease !important;
+}
+
 /* ── Background ─────────────────────────────────────────────── */
 .app-bg {
   position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background-color: #0f1117;
+  background-color: var(--c-bg);
 }
 
 /* ── Card base ──────────────────────────────────────────────── */
 .glass-card {
-  background: #161b27;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
   transition: border-color 0.2s ease;
 }
 
 .glass-card:hover {
-  border-color: rgba(255, 255, 255, 0.13);
+  border-color: var(--c-border-em);
 }
 
 /* ── Card lift ──────────────────────────────────────────────── */
@@ -217,7 +292,7 @@
 
 .card-lift:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
 }
 
 /* ── Animate-in utility ─────────────────────────────────────── */
@@ -228,14 +303,14 @@
 /* ── Scrollbar ──────────────────────────────────────────────── */
 ::-webkit-scrollbar       { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+::-webkit-scrollbar-thumb { background: var(--c-border); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--c-border-em); }
 
 /* ── Mobile nav drawer backdrop ─────────────────────────────── */
 .nav-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.65);
+  background: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(4px);
   z-index: 40;
 }

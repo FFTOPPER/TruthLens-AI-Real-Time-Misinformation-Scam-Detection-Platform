@@ -41,7 +41,7 @@ function RiskGauge({ score, riskLevel }: { score: number; riskLevel: keyof typeo
   return (
     <div className="relative flex items-center justify-center" style={{ width: 136, height: 136 }}>
       <svg width="136" height="136" viewBox="0 0 136 136">
-        <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="7"
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="var(--c-border-sub)" strokeWidth="7"
           strokeDasharray={`${arc} ${circ}`} strokeLinecap="round"
           transform={`rotate(135 ${cx} ${cy})`} />
         <motion.circle cx={cx} cy={cy} r={r} fill="none" stroke={col} strokeWidth="7"
@@ -81,7 +81,7 @@ function SubScore({ label, value, color, emoji }: { label: string; value: number
           {value}
         </span>
       </div>
-      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.07)" }}>
+      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "var(--c-border-sub)" }}>
         <motion.div className="h-full rounded-full"
           initial={{ width: 0 }} animate={{ width: `${value}%` }}
           transition={{ duration: 1.0, ease: "easeOut", delay: 0.55 }}
@@ -187,16 +187,16 @@ export default function VideoScan() {
             Deepfake · Misinfo AI
           </span>
         </div>
-        <div className="mt-4" style={{ height: "1px", background: "rgba(255,255,255,0.07)" }} />
+        <div className="mt-4" style={{ height: "1px", background: "var(--c-border-sub)" }} />
       </motion.div>
 
       {/* Input card */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06 }}
         className="rounded-xl overflow-hidden"
-        style={{ background: "#161b27", border: "1px solid rgba(255,255,255,0.08)" }}>
+        style={{ background: "#161b27", border: "1px solid var(--c-border)" }}>
 
         {/* Mode tabs */}
-        <div className="flex" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+        <div className="flex" style={{ borderBottom: "1px solid var(--c-border-sub)" }}>
           {([ ["url", Link2, "Paste URL"], ["upload", Upload, "Upload File"] ] as const).map(([m, Icon, lbl]) => (
             <button key={m} onClick={() => { setMode(m); setResult(null); }}
               className="flex-1 flex items-center justify-center gap-2 py-3"
@@ -226,12 +226,12 @@ export default function VideoScan() {
                   onKeyDown={e => e.key === "Enter" && analyze()}
                   className="w-full pl-10 pr-10 py-3 rounded-lg outline-none"
                   style={{
-                    background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)",
+                    background: "var(--c-card-md)", border: "1px solid var(--c-border)",
                     color: "#e2e8f0", fontFamily: F, fontSize: "13px", caretColor: "#3b82f6",
                     transition: "border-color 0.15s",
                   }}
                   onFocus={e => (e.currentTarget.style.borderColor = "rgba(59,130,246,0.4)")}
-                  onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.09)")}
+                  onBlur={e => (e.currentTarget.style.borderColor = "var(--c-border)")}
                 />
                 {url && (
                   <button onClick={() => { setUrl(""); setResult(null); }}
@@ -364,7 +364,7 @@ export default function VideoScan() {
         {isAnalyzing && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="rounded-xl p-4 space-y-3"
-            style={{ background: "#161b27", border: "1px solid rgba(255,255,255,0.08)" }}>
+            style={{ background: "#161b27", border: "1px solid var(--c-border)" }}>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
               {["Scanning URL", "Fetching Metadata", "AI Processing", "Computing Risk Score"].map((step, i) => (
                 <motion.div key={step} className="flex items-center gap-1.5"
@@ -377,7 +377,7 @@ export default function VideoScan() {
                 </motion.div>
               ))}
             </div>
-            <div className="h-px w-full rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.07)" }}>
+            <div className="h-px w-full rounded-full overflow-hidden" style={{ background: "var(--c-border-sub)" }}>
               <motion.div className="h-full rounded-full"
                 style={{ background: "linear-gradient(90deg, transparent, #3b82f6, transparent)", width: "28%" }}
                 animate={{ x: ["-28%", "400%"] }}
@@ -412,7 +412,7 @@ export default function VideoScan() {
                 </div>
                 <button onClick={reset}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg"
-                  style={{ fontFamily: F, fontSize: "11px", fontWeight: 500, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)", color: "#6b7280", cursor: "pointer" }}>
+                  style={{ fontFamily: F, fontSize: "11px", fontWeight: 500, background: "var(--c-card-md)", border: "1px solid var(--c-border)", color: "#6b7280", cursor: "pointer" }}>
                   <RefreshCw className="w-3 h-3" />
                   New Scan
                 </button>
@@ -423,7 +423,7 @@ export default function VideoScan() {
 
                 {/* Gauge column */}
                 <div className="rounded-xl p-5 flex flex-col items-center gap-4"
-                  style={{ background: "#161b27", border: "1px solid rgba(255,255,255,0.08)" }}>
+                  style={{ background: "#161b27", border: "1px solid var(--c-border)" }}>
                   <p style={{ fontFamily: F, fontSize: "10px", fontWeight: 600, letterSpacing: "0.07em", color: "#374151" }}>
                     OVERALL RISK
                   </p>
@@ -440,7 +440,7 @@ export default function VideoScan() {
 
                   {/* Video info */}
                   <div className="rounded-xl p-4"
-                    style={{ background: "#161b27", border: "1px solid rgba(255,255,255,0.08)" }}>
+                    style={{ background: "#161b27", border: "1px solid var(--c-border)" }}>
                     <div className="flex items-center gap-2 mb-2.5">
                       <Film className="w-3.5 h-3.5" style={{ color: "#6b7280" }} />
                       <span style={{ fontFamily: F, fontSize: "10px", fontWeight: 600, letterSpacing: "0.06em", color: "#374151", textTransform: "uppercase" as const }}>
@@ -478,7 +478,7 @@ export default function VideoScan() {
 
                   {/* Explanation */}
                   <div className="rounded-xl p-4"
-                    style={{ background: "#161b27", border: "1px solid rgba(255,255,255,0.08)" }}>
+                    style={{ background: "#161b27", border: "1px solid var(--c-border)" }}>
                     <div className="flex items-center gap-2 mb-3">
                       <Info className="w-3.5 h-3.5" style={{ color: "#6b7280" }} />
                       <span style={{ fontFamily: F, fontSize: "10px", fontWeight: 600, letterSpacing: "0.06em", color: "#374151", textTransform: "uppercase" as const }}>

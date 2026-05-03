@@ -37,10 +37,10 @@ function WebGLUnavailable() {
   return (
     <div className="w-full h-full flex flex-col items-center justify-center gap-3"
       style={{ background: "rgba(4,6,14,0.97)" }}>
-      <Monitor className="w-8 h-8" style={{ color: "rgba(255,255,255,0.18)" }} />
-      <p style={{ fontFamily: F, fontSize: "12px", color: "rgba(255,255,255,0.28)", textAlign: "center", lineHeight: "1.8" }}>
+      <Monitor className="w-8 h-8" style={{ color: "var(--c-txt4)" }} />
+      <p style={{ fontFamily: F, fontSize: "12px", color: "var(--c-txt3)", textAlign: "center", lineHeight: "1.8" }}>
         3D requires WebGL<br />
-        <span style={{ color: "rgba(255,255,255,0.16)" }}>Enable GPU acceleration in your browser</span>
+        <span style={{ color: "var(--c-txt4)" }}>Enable GPU acceleration in your browser</span>
       </p>
     </div>
   );
@@ -441,7 +441,7 @@ function ThoughtBubble({
               fontSize: "6.5px", fontWeight: 700,
               letterSpacing: "0.07em", lineHeight: "1.4",
               marginTop: "4px", textTransform: "uppercase",
-              color: isSelected ? "white" : hovered ? sevColor : "rgba(255,255,255,0.78)",
+              color: isSelected ? "white" : hovered ? sevColor : "var(--c-txt1)",
               textShadow: "0 1px 5px rgba(0,0,0,0.98)",
             }}>
               {choice.label}
@@ -518,7 +518,7 @@ function OutcomePanel({ outcome, onReset }: { outcome: Outcome; onReset: () => v
             <div style={{ fontFamily: F, fontSize: "12px", fontWeight: 700, color: sev.color, letterSpacing: "0.05em" }}>
               {(outcome.title ?? "OUTCOME GENERATED").toUpperCase()}
             </div>
-            <div style={{ fontFamily: F, fontSize: "10px", color: "rgba(255,255,255,0.3)", letterSpacing: "0.06em", marginTop: "2px" }}>
+            <div style={{ fontFamily: F, fontSize: "10px", color: "var(--c-txt3)", letterSpacing: "0.06em", marginTop: "2px" }}>
               {sev.label} OUTCOME
             </div>
           </div>
@@ -526,8 +526,8 @@ function OutcomePanel({ outcome, onReset }: { outcome: Outcome; onReset: () => v
         <motion.button
           onClick={onReset}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] tracking-widest"
-          style={{ fontFamily: F, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)", color: "rgba(255,255,255,0.4)", cursor: "pointer" }}
-          whileHover={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.7)" }}
+          style={{ fontFamily: F, background: "var(--c-card-md)", border: "1px solid var(--c-border)", color: "var(--c-txt2)", cursor: "pointer" }}
+          whileHover={{ background: "var(--c-border)", color: "var(--c-txt1)" }}
           whileTap={{ scale: 0.96 }}
         >
           <RefreshCw className="w-2.5 h-2.5" />
@@ -540,16 +540,16 @@ function OutcomePanel({ outcome, onReset }: { outcome: Outcome; onReset: () => v
         <div className="space-y-4">
           {/* Immediate effect */}
           <div className="flex gap-3 p-3.5 rounded-xl"
-            style={{ background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.06)" }}>
+            style={{ background: "rgba(0,0,0,0.2)", border: "1px solid var(--c-border-sub)" }}>
             <span style={{ fontSize: "18px", flexShrink: 0 }}>{outcome.severity === "safe" ? "🎯" : "💥"}</span>
-            <p style={{ color: "rgba(255,255,255,0.88)", fontFamily: F, fontSize: "13px", lineHeight: "1.68", fontWeight: 500 }}>
+            <p style={{ color: "var(--c-hi)", fontFamily: F, fontSize: "13px", lineHeight: "1.68", fontWeight: 500 }}>
               {outcome.immediateEffect}
             </p>
           </div>
 
           {/* Chain of events */}
           <div>
-            <p style={{ fontFamily: F, fontSize: "10px", fontWeight: 500, color: "rgba(255,255,255,0.28)", marginBottom: "10px" }}>
+            <p style={{ fontFamily: F, fontSize: "10px", fontWeight: 500, color: "var(--c-txt3)", marginBottom: "10px" }}>
               CHAIN OF EVENTS
             </p>
             <div className="space-y-2">
@@ -567,7 +567,7 @@ function OutcomePanel({ outcome, onReset }: { outcome: Outcome; onReset: () => v
                   >
                     {i + 1}
                   </div>
-                  <p style={{ color: "rgba(255,255,255,0.7)", fontFamily: F, fontSize: "12.5px", lineHeight: "1.58" }}>
+                  <p style={{ color: "var(--c-txt1)", fontFamily: F, fontSize: "12.5px", lineHeight: "1.58" }}>
                     {step}
                   </p>
                 </motion.div>
@@ -581,10 +581,10 @@ function OutcomePanel({ outcome, onReset }: { outcome: Outcome; onReset: () => v
             animate={{ opacity: 1 }}
             transition={{ delay: 0.65 }}
             className="flex gap-3 p-3 rounded-lg"
-            style={{ background: "rgba(0,0,0,0.18)", border: "1px solid rgba(255,255,255,0.05)" }}
+            style={{ background: "rgba(0,0,0,0.18)", border: "1px solid var(--c-card-md)" }}
           >
             <span style={{ fontSize: "14px", flexShrink: 0 }}>📊</span>
-            <p style={{ color: "rgba(255,255,255,0.48)", fontFamily: F, fontSize: "11px", lineHeight: "1.65" }}>
+            <p style={{ color: "var(--c-txt2)", fontFamily: F, fontSize: "11px", lineHeight: "1.65" }}>
               {outcome.statistic}
             </p>
           </motion.div>
@@ -594,7 +594,7 @@ function OutcomePanel({ outcome, onReset }: { outcome: Outcome; onReset: () => v
         <div className="space-y-4">
           {/* Recovery or reinforcement */}
           <div>
-            <p style={{ fontFamily: F, fontSize: "10px", fontWeight: 500, color: "rgba(255,255,255,0.28)", marginBottom: "10px" }}>
+            <p style={{ fontFamily: F, fontSize: "10px", fontWeight: 500, color: "var(--c-txt3)", marginBottom: "10px" }}>
               {outcome.severity === "safe" ? "✅ WHY THIS WORKS" : "🔧 HOW TO RECOVER"}
             </p>
             <div className="space-y-2">
@@ -611,7 +611,7 @@ function OutcomePanel({ outcome, onReset }: { outcome: Outcome; onReset: () => v
                   }}
                 >
                   <ChevronRight className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: outcome.severity === "safe" ? "#22c55e" : "#a855f7" }} />
-                  <p style={{ color: "rgba(255,255,255,0.75)", fontFamily: F, fontSize: "12.5px", lineHeight: "1.52" }}>
+                  <p style={{ color: "var(--c-txt1)", fontFamily: F, fontSize: "12.5px", lineHeight: "1.52" }}>
                     {step}
                   </p>
                 </motion.div>
@@ -637,7 +637,7 @@ function OutcomePanel({ outcome, onReset }: { outcome: Outcome; onReset: () => v
                 KEY LESSON
               </span>
             </div>
-            <p style={{ color: "rgba(255,255,255,0.92)", fontFamily: F, fontSize: "14px", fontWeight: 600, lineHeight: "1.58" }}>
+            <p style={{ color: "var(--c-hi)", fontFamily: F, fontSize: "14px", fontWeight: 600, lineHeight: "1.58" }}>
               {outcome.lesson}
             </p>
           </motion.div>
@@ -720,7 +720,7 @@ export default function WhatIf() {
             Interactive Simulator
           </span>
         </div>
-        <p style={{ fontFamily: F, fontSize: "12px", color: "rgba(255,255,255,0.32)" }}>
+        <p style={{ fontFamily: F, fontSize: "12px", color: "var(--c-txt3)" }}>
           Choose your response · Watch what happens · Learn from outcomes
         </p>
       </motion.div>
@@ -733,8 +733,8 @@ export default function WhatIf() {
             onClick={() => handleScenarioChange(s)}
             className="flex flex-col items-start gap-1.5 p-3 rounded-xl text-left"
             style={{
-              background: activeScenario.id === s.id ? `${s.color}12` : "rgba(255,255,255,0.02)",
-              border: activeScenario.id === s.id ? `1px solid ${s.color}48` : "1px solid rgba(255,255,255,0.07)",
+              background: activeScenario.id === s.id ? `${s.color}12` : "var(--c-card)",
+              border: activeScenario.id === s.id ? `1px solid ${s.color}48` : "1px solid var(--c-border-sub)",
               cursor: "pointer",
               transition: "all 0.2s",
             }}
@@ -745,13 +745,13 @@ export default function WhatIf() {
             <div>
               <div style={{
                 fontFamily: F, fontSize: "12px", fontWeight: 600,
-                color: activeScenario.id === s.id ? s.color : "rgba(255,255,255,0.55)",
+                color: activeScenario.id === s.id ? s.color : "var(--c-txt2)",
               }}>
                 {s.title}
               </div>
               <div style={{
                 fontFamily: F, fontSize: "10px",
-                color: "rgba(255,255,255,0.28)", marginTop: "2px",
+                color: "var(--c-txt3)", marginTop: "2px",
               }}>
                 {s.description}
               </div>
@@ -778,7 +778,7 @@ export default function WhatIf() {
             <div className="p-4">
               <pre style={{
                 fontFamily: F, fontSize: "12.5px", lineHeight: "1.72",
-                color: "rgba(255,255,255,0.72)", whiteSpace: "pre-wrap", wordBreak: "break-word",
+                color: "var(--c-txt1)", whiteSpace: "pre-wrap", wordBreak: "break-word",
               }}>
                 {activeScenario.context}
               </pre>
@@ -786,12 +786,12 @@ export default function WhatIf() {
           </div>
 
           {/* Status / instruction box */}
-          <div className="p-3.5 rounded-xl" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)" }}>
+          <div className="p-3.5 rounded-xl" style={{ background: "var(--c-card)", border: "1px solid var(--c-border-sub)" }}>
             <AnimatePresence mode="wait">
               {!selectedChoice && (
                 <motion.p key="hint"
                   initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                  style={{ fontFamily: F, fontSize: "11px", color: "rgba(255,255,255,0.35)", lineHeight: "1.65" }}>
+                  style={{ fontFamily: F, fontSize: "11px", color: "var(--c-txt3)", lineHeight: "1.65" }}>
                   👆 Click a thought bubble above the person to choose your response
                 </motion.p>
               )}
@@ -810,7 +810,7 @@ export default function WhatIf() {
               {outcome && (
                 <motion.p key="done"
                   initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                  style={{ fontFamily: F, fontSize: "11px", color: "rgba(255,255,255,0.32)" }}>
+                  style={{ fontFamily: F, fontSize: "11px", color: "var(--c-txt3)" }}>
                   ↓ Scroll down to see the full outcome
                 </motion.p>
               )}
@@ -834,7 +834,7 @@ export default function WhatIf() {
         {/* Right: 3D Canvas — shown FIRST on mobile */}
         <div
           className="lg:col-span-3 rounded-xl overflow-hidden order-1 lg:order-2"
-          style={{ height: "500px", border: "1px solid rgba(255,255,255,0.07)", background: "rgba(4,6,14,0.97)" }}
+          style={{ height: "500px", border: "1px solid var(--c-border-sub)", background: "rgba(4,6,14,0.97)" }}
         >
           {webgl === null && (
             <div className="w-full h-full flex items-center justify-center">

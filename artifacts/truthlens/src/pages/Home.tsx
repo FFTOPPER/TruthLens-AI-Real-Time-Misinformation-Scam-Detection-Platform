@@ -76,7 +76,7 @@ function PatternCard3D({ pattern, idx }: { pattern: ExplainPattern; idx: number 
             {sev.label}
           </span>
         </div>
-        <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.65)", fontFamily: F, fontSize: "12px", lineHeight: "1.55" }}>
+        <p className="text-xs leading-relaxed" style={{ color: "var(--c-txt1)", fontFamily: F, fontSize: "12px", lineHeight: "1.55" }}>
           {pattern.description}
         </p>
         {/* 3-D depth layer */}
@@ -131,7 +131,7 @@ function ExplainPanel({ data }: { data: ExplainData }) {
             <p className="text-[9px] mb-1.5 font-medium" style={{ fontFamily: F, color: "rgba(6,182,212,0.6)" }}>
               AI Advisor · plain English
             </p>
-            <p style={{ color: "rgba(255,255,255,0.88)", fontFamily: F, fontSize: "14px", fontWeight: 400, lineHeight: "1.65" }}>
+            <p style={{ color: "var(--c-hi)", fontFamily: F, fontSize: "14px", fontWeight: 400, lineHeight: "1.65" }}>
               "{data.summary}"
             </p>
           </div>
@@ -145,7 +145,7 @@ function ExplainPanel({ data }: { data: ExplainData }) {
               Why this matters
             </span>
           </div>
-          <p style={{ color: "rgba(255,255,255,0.68)", fontFamily: F, fontSize: "13px", lineHeight: "1.72" }}>
+          <p style={{ color: "var(--c-txt1)", fontFamily: F, fontSize: "13px", lineHeight: "1.72" }}>
             {data.whyMisleading}
           </p>
         </motion.div>
@@ -198,10 +198,10 @@ function ExplainPanel({ data }: { data: ExplainData }) {
                     </span>
                   </div>
                   <div>
-                    <p className="font-semibold mb-0.5" style={{ color: "rgba(255,255,255,0.88)", fontFamily: F, fontSize: "13px" }}>
+                    <p className="font-semibold mb-0.5" style={{ color: "var(--c-hi)", fontFamily: F, fontSize: "13px" }}>
                       {s.action}
                     </p>
-                    <p style={{ color: "rgba(255,255,255,0.42)", fontFamily: F, fontSize: "11.5px" }}>
+                    <p style={{ color: "var(--c-txt2)", fontFamily: F, fontSize: "11.5px" }}>
                       {s.why}
                     </p>
                   </div>
@@ -245,8 +245,8 @@ function NeuralDiagram({ techniques }: { techniques: CognitiveTechnique[] }) {
   return (
     <svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg" className="w-full max-w-[180px] mx-auto">
       {/* Orbit rings */}
-      <circle cx={CX} cy={CY} r={82} fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="0.5" />
-      <circle cx={CX} cy={CY} r={60} fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" strokeDasharray="4,6" />
+      <circle cx={CX} cy={CY} r={82} fill="none" stroke="var(--c-card-md)" strokeWidth="0.5" />
+      <circle cx={CX} cy={CY} r={60} fill="none" stroke="var(--c-card)" strokeWidth="0.5" strokeDasharray="4,6" />
       {/* Connection lines */}
       {nodes.map(node => {
         const tech = techniques.find(t => t.name === node.name);
@@ -254,7 +254,7 @@ function NeuralDiagram({ techniques }: { techniques: CognitiveTechnique[] }) {
         const cfg = TECH_CFG[node.name];
         return (
           <line key={node.name} x1={CX} y1={CY} x2={node.cx} y2={node.cy}
-            stroke={active ? cfg.color : "rgba(255,255,255,0.06)"}
+            stroke={active ? cfg.color : "var(--c-border-sub)"}
             strokeWidth={active ? 1.5 : 0.5}
             strokeDasharray={active ? "" : "3,4"}
             opacity={active ? 0.7 : 0.3}
@@ -270,19 +270,19 @@ function NeuralDiagram({ techniques }: { techniques: CognitiveTechnique[] }) {
           <g key={node.name}>
             {active && <circle cx={node.cx} cy={node.cy} r={19} fill={`${cfg.color}18`} stroke={`${cfg.color}55`} strokeWidth="1" />}
             <circle cx={node.cx} cy={node.cy} r={12}
-              fill={active ? `${cfg.color}28` : "rgba(255,255,255,0.03)"}
-              stroke={active ? cfg.color : "rgba(255,255,255,0.1)"}
+              fill={active ? `${cfg.color}28` : "var(--c-card)"}
+              stroke={active ? cfg.color : "var(--c-border)"}
               strokeWidth={active ? 1.5 : 0.5}
             />
             <circle cx={node.cx} cy={node.cy} r={4}
-              fill={active ? cfg.color : "rgba(255,255,255,0.1)"}
+              fill={active ? cfg.color : "var(--c-border)"}
             />
             <text x={node.cx} y={node.cy + (node.cy < CY ? -18 : node.cy > CY ? 22 : 0)}
               dy={node.cy === CY ? (node.cx < CX ? 0 : 0) : 0}
               dx={node.cy === CY ? (node.cx < CX ? -22 : 22) : 0}
               textAnchor={node.cy === CY ? (node.cx < CX ? "end" : "start") : "middle"}
               dominantBaseline="middle"
-              fill={active ? cfg.color : "rgba(255,255,255,0.18)"}
+              fill={active ? cfg.color : "var(--c-txt4)"}
               fontSize="6" fontFamily="Inter, system-ui, sans-serif"
             >{node.label}</text>
           </g>
@@ -306,26 +306,26 @@ function CognitiveTechCard({ tech, idx }: { tech: CognitiveTechnique; idx: numbe
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.65 + idx * 0.07 }}
       className="p-2.5 rounded-lg"
-      style={{ background: tech.active ? cfg.bg : "rgba(255,255,255,0.02)", border: `1px solid ${tech.active ? cfg.border : "rgba(255,255,255,0.06)"}` }}
+      style={{ background: tech.active ? cfg.bg : "var(--c-card)", border: `1px solid ${tech.active ? cfg.border : "var(--c-border-sub)"}` }}
     >
       <div className="flex items-center justify-between mb-1">
         <div className="flex items-center gap-1.5">
-          <span style={{ color: tech.active ? cfg.color : "rgba(255,255,255,0.2)", fontSize: "10px" }}>{cfg.icon}</span>
-          <span className="text-[9px] font-semibold" style={{ fontFamily: F, color: tech.active ? cfg.color : "rgba(255,255,255,0.2)" }}>
+          <span style={{ color: tech.active ? cfg.color : "var(--c-txt4)", fontSize: "10px" }}>{cfg.icon}</span>
+          <span className="text-[9px] font-semibold" style={{ fontFamily: F, color: tech.active ? cfg.color : "var(--c-txt4)" }}>
             {tech.name}
           </span>
         </div>
         <span className="text-[8px] px-1.5 py-0.5 rounded-full"
           style={{ fontFamily: F,
-            background: tech.active ? `${cfg.color}22` : "rgba(255,255,255,0.04)",
-            color: tech.active ? cfg.color : "rgba(255,255,255,0.18)",
-            border: `1px solid ${tech.active ? `${cfg.color}44` : "rgba(255,255,255,0.06)"}` }}
+            background: tech.active ? `${cfg.color}22` : "var(--c-card-md)",
+            color: tech.active ? cfg.color : "var(--c-txt4)",
+            border: `1px solid ${tech.active ? `${cfg.color}44` : "var(--c-border-sub)"}` }}
         >
           {tech.active ? "ACTIVE" : "NONE"}
         </span>
       </div>
       <p className="text-[10px] leading-snug"
-        style={{ color: tech.active ? "rgba(255,255,255,0.58)" : "rgba(255,255,255,0.2)", fontFamily: F, fontSize: "11px" }}>
+        style={{ color: tech.active ? "var(--c-txt2)" : "var(--c-txt4)", fontFamily: F, fontSize: "11px" }}>
         {tech.mechanism}
       </p>
     </motion.div>
@@ -356,7 +356,7 @@ function ScanOverlay({ active }: { active: boolean }) {
             transition={{ duration: 1.1, repeat: Infinity, ease: "linear" }}
           />
           <div className="flex flex-col items-center gap-2">
-            <span style={{ fontFamily: F, fontSize: "14px", fontWeight: 600, color: "rgba(255,255,255,0.7)" }}>
+            <span style={{ fontFamily: F, fontSize: "14px", fontWeight: 600, color: "var(--c-txt1)" }}>
               Analyzing…
             </span>
             <div className="flex items-center gap-1.5">
@@ -390,7 +390,7 @@ interface ManipulationBarProps {
 
 function ManipulationBar({ label, sublabel, value, color, glow, delay, icon }: ManipulationBarProps) {
   const intensity = value >= 70 ? "HIGH" : value >= 40 ? "MED" : "LOW";
-  const intensityColor = value >= 70 ? "#ef4444" : value >= 40 ? "#f59e0b" : "rgba(255,255,255,0.3)";
+  const intensityColor = value >= 70 ? "#ef4444" : value >= 40 ? "#f59e0b" : "var(--c-txt3)";
 
   return (
     <motion.div
@@ -403,10 +403,10 @@ function ManipulationBar({ label, sublabel, value, color, glow, delay, icon }: M
         <div className="flex items-center gap-2">
           <span className="text-base leading-none">{icon}</span>
           <div>
-            <span className="text-[11px] font-semibold" style={{ fontFamily: F, color: "rgba(255,255,255,0.75)" }}>
+            <span className="text-[11px] font-semibold" style={{ fontFamily: F, color: "var(--c-txt1)" }}>
               {label}
             </span>
-            <p className="text-[9px] leading-tight" style={{ fontFamily: F, color: "rgba(255,255,255,0.25)" }}>
+            <p className="text-[9px] leading-tight" style={{ fontFamily: F, color: "var(--c-txt3)" }}>
               {sublabel}
             </p>
           </div>
@@ -423,7 +423,7 @@ function ManipulationBar({ label, sublabel, value, color, glow, delay, icon }: M
           </span>
         </div>
       </div>
-      <div className="relative h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.04)" }}>
+      <div className="relative h-2 rounded-full overflow-hidden" style={{ background: "var(--c-card-md)", border: "1px solid var(--c-card-md)" }}>
         <motion.div
           className="absolute top-0 left-0 h-full rounded-full"
           initial={{ width: 0 }}
@@ -436,7 +436,7 @@ function ManipulationBar({ label, sublabel, value, color, glow, delay, icon }: M
           initial={{ left: "-10%" }}
           animate={{ left: "110%" }}
           transition={{ duration: 1.5, delay: delay + 0.4, ease: "easeOut" }}
-          style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)" }}
+          style={{ background: "linear-gradient(90deg, transparent, var(--c-txt2), transparent)" }}
         />
       </div>
     </motion.div>
@@ -544,7 +544,7 @@ export default function Home() {
           className="relative flex flex-col items-center text-center py-12 px-4 overflow-hidden rounded-2xl"
           style={{
             background: "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(59,130,246,0.05) 0%, rgba(59,130,246,0.02) 50%, transparent 100%)",
-            border: "1px solid rgba(255,255,255,0.05)",
+            border: "1px solid var(--c-card-md)",
           }}
         >
           {/* Background grid lines */}
@@ -597,7 +597,7 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.5 }}
             className="text-lg mb-8 max-w-md"
-            style={{ color: "rgba(255,255,255,0.5)", lineHeight: "1.6" }}
+            style={{ color: "var(--c-txt2)", lineHeight: "1.6" }}
           >
             Know what's real.
           </motion.p>
@@ -616,10 +616,10 @@ export default function Home() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.5 + i * 0.08 }}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
-                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
+                style={{ background: "var(--c-card-md)", border: "1px solid var(--c-border)" }}
               >
                 <span className="text-xs">{f.icon}</span>
-                <span className="text-[10px] tracking-wide" style={{ fontFamily: F, color: "rgba(255,255,255,0.45)" }}>
+                <span className="text-[10px] tracking-wide" style={{ fontFamily: F, color: "var(--c-txt2)" }}>
                   {f.text}
                 </span>
               </motion.div>
@@ -668,11 +668,11 @@ export default function Home() {
                   Threat Analysis
                 </h2>
               </div>
-              <p className="text-xs ml-11" style={{ fontFamily: F, color: "rgba(255,255,255,0.3)" }}>
+              <p className="text-xs ml-11" style={{ fontFamily: F, color: "var(--c-txt3)" }}>
                 Paste text · get the truth
               </p>
             </motion.div>
-            <div className="mt-4" style={{ height: "1px", background: "rgba(255,255,255,0.07)" }} />
+            <div className="mt-4" style={{ height: "1px", background: "var(--c-border-sub)" }} />
           </div>
 
           {/* ── Sample buttons ─────────────────────────────── */}
@@ -683,8 +683,8 @@ export default function Home() {
             className="flex flex-wrap gap-3"
           >
             <div className="flex items-center gap-2 mr-1">
-              <FlaskConical className="w-3.5 h-3.5" style={{ color: "rgba(255,255,255,0.3)" }} />
-              <span className="text-[10px]" style={{ fontFamily: F, color: "rgba(255,255,255,0.25)" }}>
+              <FlaskConical className="w-3.5 h-3.5" style={{ color: "var(--c-txt3)" }} />
+              <span className="text-[10px]" style={{ fontFamily: F, color: "var(--c-txt3)" }}>
                 Try a sample:
               </span>
             </div>
@@ -700,7 +700,7 @@ export default function Home() {
                   fontFamily: F,
                   background: `${s.tagColor}0d`,
                   border: `1px solid ${s.tagColor}30`,
-                  color: "rgba(255,255,255,0.6)",
+                  color: "var(--c-txt1)",
                 }}
                 whileHover={{ scale: 1.04, background: `${s.tagColor}18`, borderColor: `${s.tagColor}55` }}
                 whileTap={{ scale: 0.96 }}
@@ -727,17 +727,17 @@ export default function Home() {
                 transition={{ duration: 0.4, delay: 0.1 }}
                 className="rounded-xl relative overflow-hidden"
                 style={{
-                  background: "rgba(255,255,255,0.02)",
-                  border: "1px solid rgba(255,255,255,0.09)",
+                  background: "var(--c-card)",
+                  border: "1px solid var(--c-border)",
                 }}
               >
                 <span />
                 <div
                   className="px-6 py-4 flex items-center gap-2"
-                  style={{ borderBottom: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.02)" }}
+                  style={{ borderBottom: "1px solid var(--c-border-sub)", background: "var(--c-card)" }}
                 >
                   <ScanLine className="w-3.5 h-3.5" style={{ color: "#3b82f6" }} />
-                  <span className="text-[11px] font-semibold" style={{ fontFamily: F, color: "rgba(255,255,255,0.55)" }}>
+                  <span className="text-[11px] font-semibold" style={{ fontFamily: F, color: "var(--c-txt2)" }}>
                     Your text
                   </span>
                 </div>
@@ -750,8 +750,8 @@ export default function Home() {
                       className="w-full min-h-[200px] resize-none rounded-lg px-4 py-3 text-sm font-mono outline-none transition-all duration-300"
                       style={{
                         background: "rgba(0,0,0,0.4)",
-                        border: "1px solid rgba(255,255,255,0.06)",
-                        color: "rgba(255,255,255,0.8)",
+                        border: "1px solid var(--c-border-sub)",
+                        color: "var(--c-hi)",
                         fontFamily: F,
                         fontSize: "13px",
                         lineHeight: "1.7",
@@ -761,7 +761,7 @@ export default function Home() {
                         e.currentTarget.style.boxShadow = "0 0 0 3px rgba(59,130,246,0.08)";
                       }}
                       onBlur={e => {
-                        e.currentTarget.style.border = "1px solid rgba(255,255,255,0.06)";
+                        e.currentTarget.style.border = "1px solid var(--c-border-sub)";
                         e.currentTarget.style.boxShadow = "none";
                       }}
                       value={text}
@@ -770,7 +770,7 @@ export default function Home() {
                     />
                     <span
                       className="absolute bottom-3 right-3 text-[10px]"
-                      style={{ fontFamily: F, color: "rgba(255,255,255,0.2)" }}
+                      style={{ fontFamily: F, color: "var(--c-txt4)" }}
                     >
                       {text.length} chars
                     </span>
@@ -808,16 +808,16 @@ export default function Home() {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="rounded-xl overflow-hidden"
                 style={{
-                  background: "rgba(255,255,255,0.015)",
+                  background: "var(--c-card)",
                   backdropFilter: "blur(20px)",
-                  border: "1px solid rgba(255,255,255,0.06)",
+                  border: "1px solid var(--c-border-sub)",
                 }}
               >
                 <div
                   className="px-6 py-3 flex items-center gap-2"
-                  style={{ borderBottom: "1px solid rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.02)" }}
+                  style={{ borderBottom: "1px solid var(--c-card-md)", background: "var(--c-card)" }}
                 >
-                  <span className="text-[10px] font-semibold" style={{ fontFamily: F, color: "rgba(255,255,255,0.3)" }}>
+                  <span className="text-[10px] font-semibold" style={{ fontFamily: F, color: "var(--c-txt3)" }}>
                     ◈ Trust Signal
                   </span>
                 </div>
@@ -834,17 +834,17 @@ export default function Home() {
               transition={{ duration: 0.4, delay: 0.15 }}
               className="rounded-xl relative overflow-hidden"
               style={{
-                background: "rgba(255,255,255,0.02)",
-                border: "1px solid rgba(255,255,255,0.09)",
+                background: "var(--c-card)",
+                border: "1px solid var(--c-border)",
                 minHeight: "420px",
               }}
             >
               <div
                 className="px-6 py-4 flex items-center gap-2"
-                style={{ borderBottom: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.02)" }}
+                style={{ borderBottom: "1px solid var(--c-border-sub)", background: "var(--c-card)" }}
               >
-                <ShieldCheck className="w-3.5 h-3.5" style={{ color: "rgba(255,255,255,0.4)" }} />
-                <span className="text-[11px] font-semibold" style={{ fontFamily: F, color: "rgba(255,255,255,0.4)" }}>
+                <ShieldCheck className="w-3.5 h-3.5" style={{ color: "var(--c-txt2)" }} />
+                <span className="text-[11px] font-semibold" style={{ fontFamily: F, color: "var(--c-txt2)" }}>
                   Results
                 </span>
               </div>
@@ -859,7 +859,7 @@ export default function Home() {
                       exit={{ opacity: 0 }}
                       className="flex flex-col items-center justify-center h-full min-h-[320px] gap-4"
                     >
-                      <span className="text-[11px]" style={{ fontFamily: F, color: "rgba(255,255,255,0.4)" }}>
+                      <span className="text-[11px]" style={{ fontFamily: F, color: "var(--c-txt2)" }}>
                         Checking…
                       </span>
                     </motion.div>
@@ -875,7 +875,7 @@ export default function Home() {
                       {/* Gauge */}
                       <div
                         className="flex items-center justify-center py-4 rounded-xl"
-                        style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.04)" }}
+                        style={{ background: "rgba(0,0,0,0.3)", border: "1px solid var(--c-card-md)" }}
                       >
                         <Gauge score={result.credibilityScore} />
                       </div>
@@ -894,11 +894,11 @@ export default function Home() {
                         {/* Header */}
                         <div
                           className="px-4 py-3 flex items-center justify-between"
-                          style={{ borderBottom: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.02)" }}
+                          style={{ borderBottom: "1px solid var(--c-border-sub)", background: "var(--c-card)" }}
                         >
                           <div className="flex items-center gap-2">
                             <Eye className="w-3 h-3" style={{ color: "#3b82f6" }} />
-                            <span className="text-[10px]" style={{ fontFamily: F, color: "rgba(255,255,255,0.45)" }}>
+                            <span className="text-[10px]" style={{ fontFamily: F, color: "var(--c-txt2)" }}>
                               Findings
                             </span>
                           </div>
@@ -929,8 +929,8 @@ export default function Home() {
                                 transition={{ delay: 0.35 + i * 0.1, duration: 0.3 }}
                                 className="group flex items-start gap-3 px-3 py-2.5 rounded-lg cursor-default"
                                 style={{
-                                  background: "rgba(255,255,255,0.02)",
-                                  border: "1px solid rgba(255,255,255,0.04)",
+                                  background: "var(--c-card)",
+                                  border: "1px solid var(--c-card-md)",
                                   transition: "background 0.2s, border-color 0.2s",
                                 }}
                                 onMouseEnter={e => {
@@ -938,8 +938,8 @@ export default function Home() {
                                   (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(59,130,246,0.15)";
                                 }}
                                 onMouseLeave={e => {
-                                  (e.currentTarget as HTMLDivElement).style.background = "rgba(255,255,255,0.02)";
-                                  (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(255,255,255,0.04)";
+                                  (e.currentTarget as HTMLDivElement).style.background = "var(--c-card)";
+                                  (e.currentTarget as HTMLDivElement).style.borderColor = "var(--c-card-md)";
                                 }}
                               >
                                 {/* Bullet marker */}
@@ -947,7 +947,7 @@ export default function Home() {
                                   <motion.div
                                     className="w-1.5 h-1.5 rounded-full"
                                     style={{
-                                      background: i === 0 ? "#3b82f6" : "rgba(255,255,255,0.2)",
+                                      background: i === 0 ? "#3b82f6" : "var(--c-txt4)",
                                     }}
                                     animate={i === 0 ? { opacity: [0.6, 1, 0.6] } : {}}
                                     transition={{ duration: 2, repeat: Infinity }}
@@ -978,7 +978,7 @@ export default function Home() {
                                   </div>
                                   <p
                                     className="text-xs leading-relaxed"
-                                    style={{ color: "rgba(255,255,255,0.7)", lineHeight: "1.65", fontFamily: F, fontSize: "13px", fontWeight: 400 }}
+                                    style={{ color: "var(--c-txt1)", lineHeight: "1.65", fontFamily: F, fontSize: "13px", fontWeight: 400 }}
                                   >
                                     {sentence}
                                   </p>
@@ -1094,7 +1094,7 @@ export default function Home() {
                                 <p className="text-[9px] mb-1 font-medium" style={{ fontFamily: F, color: "rgba(16,185,129,0.6)" }}>
                                   Brain reaction
                                 </p>
-                                <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.75)", fontFamily: F, fontSize: "13px", fontWeight: 400 }}>
+                                <p className="text-xs leading-relaxed" style={{ color: "var(--c-txt1)", fontFamily: F, fontSize: "13px", fontWeight: 400 }}>
                                   {ci.brainReaction}
                                 </p>
                               </motion.div>
@@ -1158,7 +1158,7 @@ export default function Home() {
                                 style={{ background: "rgba(251,191,36,0.05)", border: "1px solid rgba(251,191,36,0.15)" }}
                               >
                                 <Cpu className="w-3 h-3 mb-2" style={{ color: "rgba(251,191,36,0.4)" }} />
-                                <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.75)", fontFamily: F, fontSize: "13px", fontWeight: 400, lineHeight: "1.7" }}>
+                                <p className="text-sm leading-relaxed" style={{ color: "var(--c-txt1)", fontFamily: F, fontSize: "13px", fontWeight: 400, lineHeight: "1.7" }}>
                                   {ext.counterTruth}
                                 </p>
                               </motion.div>
@@ -1259,10 +1259,10 @@ export default function Home() {
                         <ShieldCheck className="w-8 h-8" style={{ color: "rgba(168,85,247,0.4)" }} />
                       </motion.div>
                       <div className="text-center">
-                        <p className="text-xs" style={{ fontFamily: F, color: "rgba(255,255,255,0.2)" }}>
+                        <p className="text-xs" style={{ fontFamily: F, color: "var(--c-txt4)" }}>
                           Ready to scan
                         </p>
-                        <p className="text-[10px] mt-1" style={{ fontFamily: F, color: "rgba(255,255,255,0.1)" }}>
+                        <p className="text-[10px] mt-1" style={{ fontFamily: F, color: "var(--c-border)" }}>
                           Paste text · hit Scan
                         </p>
                       </div>
