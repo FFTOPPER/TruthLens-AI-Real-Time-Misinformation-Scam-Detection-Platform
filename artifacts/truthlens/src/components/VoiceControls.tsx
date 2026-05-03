@@ -149,13 +149,22 @@ function buildAnswer(question: string, res: AnalysisResult): string {
   return `So here is the full picture — ${explanation} Overall, this is ${risk.toLowerCase()} risk with a score of ${score} out of 100.`;
 }
 
-/* ─── Apply voice settings — deep, bold, clear male ──────────── */
-function applySettings(utterance: SpeechSynthesisUtterance) {
-  const voice = pickVoice();
-  if (voice) utterance.voice = voice;
-  utterance.rate   = 0.97;  // Slightly measured — every word lands clearly
-  utterance.pitch  = 0.78;  // Deep, authoritative male tone
-  utterance.volume = 1;
+/* ─── Fallback: browser Web Speech (male pitch) ──────────────── */
+function speakFallback(text: string, onStart: () => void, onEnd: () => void) {
+  if (!("speechSynthesis" in window)) return;
+  window.speechSynthesis.cancel();
+  const go = () => {
+    const utt = new SpeechSynthesisUtterance(text);
+    const voice = pickVoice();
+    if (voice) utt.voice = voice;
+    utt.rate = 0.97; utt.pitch = 0.78; utt.volume = 1;
+    utt.onstart = onStart;
+    utt.onend   = onEnd;
+    utt.onerror = onEnd;
+    window.speechSynthesis.speak(utt);
+  };
+  if (window.speechSynthesis.getVoices().length > 0) go();
+  else window.speechSynthesis.onvoiceschanged = go;
 }
 
 /* ─── Component ───────────────────────────────────────────────── */
@@ -165,45 +174,58 @@ export function VoiceControls({ result }: VoiceControlsProps) {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript]   = useState<string | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const audioRef       = useRef<HTMLAudioElement | null>(null);
 
-  const hasSpeechSynth = typeof window !== "undefined" && "speechSynthesis" in window;
   const hasMic = !!SpeechRecognitionAPI;
 
   useEffect(() => {
     return () => {
+      audioRef.current?.pause();
       window.speechSynthesis?.cancel();
       recognitionRef.current?.stop();
     };
   }, []);
 
-  const speak = useCallback((text: string) => {
-    if (!hasSpeechSynth) return;
-    window.speechSynthesis.cancel();
-
-    // Voices may not be loaded yet — wait for them
-    const go = () => {
-      const utterance = new SpeechSynthesisUtterance(text);
-      applySettings(utterance);
-      utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend   = () => setIsSpeaking(false);
-      utterance.onerror = () => setIsSpeaking(false);
-      window.speechSynthesis.speak(utterance);
-    };
-
-    if (window.speechSynthesis.getVoices().length > 0) {
-      go();
-    } else {
-      window.speechSynthesis.onvoiceschanged = () => { go(); };
-    }
-  }, [hasSpeechSynth]);
-
-  const speakResult = useCallback(() => {
+  /* Primary: OpenAI onyx via API → fallback to browser TTS */
+  const speakResult = useCallback(async () => {
     if (!result) return;
-    speak(buildSpeechText(result));
-  }, [result, speak]);
+    const text = buildSpeechText(result);
+
+    // Stop anything currently playing
+    audioRef.current?.pause();
+    window.speechSynthesis?.cancel();
+
+    try {
+      const res = await fetch("/api/analysis/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      if (!res.ok) throw new Error("TTS API error");
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      audio.onplay  = () => setIsSpeaking(true);
+      audio.onended = () => { setIsSpeaking(false); URL.revokeObjectURL(url); };
+      audio.onerror = () => { setIsSpeaking(false); URL.revokeObjectURL(url); };
+      await audio.play();
+    } catch {
+      // Fallback to browser TTS if API unavailable
+      speakFallback(text, () => setIsSpeaking(true), () => setIsSpeaking(false));
+    }
+  }, [result]);
+
+  /* Q&A mic answers still use browser TTS (fast, no round-trip needed) */
+  const speak = useCallback((text: string) => {
+    audioRef.current?.pause();
+    speakFallback(text, () => setIsSpeaking(true), () => setIsSpeaking(false));
+  }, []);
 
   const stopSpeaking = useCallback(() => {
-    window.speechSynthesis.cancel();
+    audioRef.current?.pause();
+    audioRef.current = null;
+    window.speechSynthesis?.cancel();
     setIsSpeaking(false);
   }, []);
 
@@ -272,7 +294,7 @@ export function VoiceControls({ result }: VoiceControlsProps) {
       {/* Controls */}
       <div className="px-4 py-3 flex items-center gap-3 flex-wrap">
         {/* Speak / Stop */}
-        {hasSpeechSynth && (
+        {(
           <motion.button
             onClick={isSpeaking ? stopSpeaking : speakResult}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] tracking-[0.15em] font-semibold"
@@ -380,11 +402,6 @@ export function VoiceControls({ result }: VoiceControlsProps) {
         )}
       </AnimatePresence>
 
-      {!hasSpeechSynth && (
-        <p className="px-4 pb-3 text-[10px]" style={{ fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.22)" }}>
-          Speech not supported in this browser.
-        </p>
-      )}
     </motion.div>
   );
 }

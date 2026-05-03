@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { openai } from "@workspace/integrations-openai-ai-server";
+import { textToSpeech } from "@workspace/integrations-openai-ai-server/audio";
 import { db, analysesTable } from "@workspace/db";
 import { desc, sql } from "drizzle-orm";
 
@@ -198,6 +199,24 @@ router.get("/analysis/stats", async (req, res) => {
   } catch (err) {
     req.log.error({ err }, "Failed to fetch stats");
     res.status(500).json({ error: "Failed to fetch stats" });
+  }
+});
+
+/* ── TTS: OpenAI onyx voice (deep male) ───────────────────────── */
+router.post("/analysis/tts", async (req, res) => {
+  const { text } = req.body as { text: string };
+  if (!text || typeof text !== "string" || text.trim().length === 0) {
+    res.status(400).json({ error: "text is required" });
+    return;
+  }
+  try {
+    const audioBuffer = await textToSpeech(text.trim(), "onyx", "wav");
+    res.set("Content-Type", "audio/wav");
+    res.set("Cache-Control", "no-store");
+    res.send(audioBuffer);
+  } catch (err) {
+    req.log.error({ err }, "TTS failed");
+    res.status(500).json({ error: "TTS failed" });
   }
 });
 
