@@ -1,38 +1,39 @@
 import { useGetAnalysisHistory, getGetAnalysisHistoryQueryKey } from "@workspace/api-client-react";
 import { formatDistanceToNow } from "date-fns";
-import { Globe, AlertTriangle, ShieldCheck, ShieldAlert, Clock } from "lucide-react";
+import { Globe, AlertTriangle, ShieldCheck, ShieldAlert, Clock, Radio } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-
-const F = "Inter, system-ui, sans-serif";
 
 function riskConfig(level: string) {
   if (level === "High") return {
-    text: "#ef4444", bg: "rgba(239,68,68,0.08)", border: "rgba(239,68,68,0.18)",
-    label: "HIGH", icon: ShieldAlert,
+    text: "#ef4444", bg: "rgba(239,68,68,0.08)", border: "rgba(239,68,68,0.25)",
+    glow: "rgba(239,68,68,0.3)", label: "HIGH", icon: ShieldAlert,
   };
   if (level === "Medium") return {
-    text: "#f59e0b", bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.18)",
-    label: "MED", icon: AlertTriangle,
+    text: "#f59e0b", bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.25)",
+    glow: "rgba(245,158,11,0.3)", label: "MEDIUM", icon: AlertTriangle,
   };
   return {
-    text: "#22c55e", bg: "rgba(34,197,94,0.06)", border: "rgba(34,197,94,0.15)",
-    label: "SAFE", icon: ShieldCheck,
+    text: "#00ff88", bg: "rgba(0,255,136,0.06)", border: "rgba(0,255,136,0.2)",
+    glow: "rgba(0,255,136,0.25)", label: "SAFE", icon: ShieldCheck,
   };
 }
 
 type ManipulationBreakdown = {
-  fear: number; urgency: number; emotionalTriggers: number; fakeAuthority: number;
+  fear: number;
+  urgency: number;
+  emotionalTriggers: number;
+  fakeAuthority: number;
 };
 
 function MiniBar({ value, color }: { value: number; color: string }) {
   return (
-    <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: "var(--c-border-sub)" }}>
+    <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
       <motion.div
         className="h-full rounded-full"
         initial={{ width: 0 }}
         animate={{ width: `${value}%` }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        style={{ background: color }}
+        style={{ background: color, boxShadow: `0 0 4px ${color}` }}
       />
     </div>
   );
@@ -40,16 +41,16 @@ function MiniBar({ value, color }: { value: number; color: string }) {
 
 function ManipulationMini({ breakdown }: { breakdown: ManipulationBreakdown }) {
   const bars = [
-    { label: "Fear",      value: breakdown.fear,             color: "#ef4444" },
-    { label: "Urgency",   value: breakdown.urgency,          color: "#f97316" },
-    { label: "Emotion",   value: breakdown.emotionalTriggers, color: "#a855f7" },
-    { label: "Authority", value: breakdown.fakeAuthority,    color: "#f59e0b" },
+    { label: "FEAR", value: breakdown.fear, color: "#ef4444" },
+    { label: "URGENCY", value: breakdown.urgency, color: "#f97316" },
+    { label: "EMOTION", value: breakdown.emotionalTriggers, color: "#a855f7" },
+    { label: "AUTHORITY", value: breakdown.fakeAuthority, color: "#f59e0b" },
   ];
   return (
-    <div className="flex items-center gap-2 mt-2.5">
+    <div className="flex items-center gap-1.5 mt-2">
       {bars.map(b => (
         <div key={b.label} className="flex-1 flex flex-col gap-0.5">
-          <span style={{ fontFamily: F, fontSize: "9px", fontWeight: 500, color: "var(--c-txt3)" }}>
+          <span className="text-[7px] tracking-widest" style={{ fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.2)" }}>
             {b.label}
           </span>
           <MiniBar value={b.value} color={b.color} />
@@ -70,86 +71,94 @@ export default function History() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35 }}
-      className="space-y-6"
+      transition={{ duration: 0.4 }}
+      className="space-y-8"
     >
       {/* Header */}
       <div>
-        <div className="flex items-center justify-between mb-1">
+        <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-3">
             <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ background: "rgba(59,130,246,0.1)", border: "1px solid rgba(59,130,246,0.2)" }}
+              className="w-8 h-8 rounded flex items-center justify-center flex-shrink-0"
+              style={{ background: "rgba(0,229,255,0.1)", border: "1px solid rgba(0,229,255,0.3)" }}
             >
-              <Globe className="w-4 h-4" style={{ color: "#3b82f6" }} />
+              <Globe className="w-4 h-4" style={{ color: "#00e5ff" }} />
             </div>
-            <div>
-              <h2 style={{ fontFamily: F, fontSize: "18px", fontWeight: 700, color: "#e2e8f0", letterSpacing: "-0.01em" }}>
-                Scan History
-              </h2>
-              <p style={{ fontFamily: F, fontSize: "12px", color: "#475569", marginTop: "1px" }}>
-                All analyzed content, sorted by recency
-              </p>
-            </div>
+            <h2
+              className="text-xl sm:text-2xl font-bold tracking-widest"
+              style={{ fontFamily: "'Orbitron', monospace", color: "#00e5ff", textShadow: "0 0 20px rgba(0,229,255,0.5)" }}
+            >
+              GLOBAL INTELLIGENCE FEED
+            </h2>
           </div>
 
+          {/* Live indicator */}
           <div
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-full"
-            style={{ background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.16)" }}
+            style={{ background: "rgba(0,229,255,0.06)", border: "1px solid rgba(0,229,255,0.15)" }}
           >
-            <div className="w-1.5 h-1.5 rounded-full" style={{ background: "#22c55e" }} />
-            <span style={{ fontFamily: F, fontSize: "11px", fontWeight: 500, color: "#22c55e" }}>
-              Live
+            <motion.div
+              className="w-1.5 h-1.5 rounded-full"
+              style={{ background: "#00e5ff", boxShadow: "0 0 6px #00e5ff" }}
+              animate={{ opacity: [1, 0.2, 1] }}
+              transition={{ duration: 1.8, repeat: Infinity }}
+            />
+            <Radio className="w-2.5 h-2.5" style={{ color: "#00e5ff" }} />
+            <span className="text-[9px] tracking-[0.2em] font-semibold" style={{ fontFamily: "'Space Mono', monospace", color: "#00e5ff" }}>
+              LIVE
             </span>
           </div>
         </div>
-        <div className="mt-4" style={{ height: "1px", background: "var(--c-border-sub)" }} />
+        <p className="text-xs tracking-widest ml-11" style={{ fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.3)" }}>
+          REAL-TIME RECORD OF ALL EVALUATED TRANSMISSIONS
+        </p>
+        <div className="mt-4" style={{ height: "1px", background: "linear-gradient(90deg, rgba(0,229,255,0.4), rgba(168,85,247,0.3), transparent)" }} />
       </div>
 
       {/* Content */}
       {isLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map(i => (
-            <div
+            <motion.div
               key={i}
-              className="h-24 rounded-xl"
-              style={{
-                background: "var(--c-card)",
-                border: "1px solid var(--c-border-sub)",
-                animation: `pulse ${1.4 + i * 0.15}s ease infinite`,
-              }}
+              animate={{ opacity: [0.25, 0.55, 0.25] }}
+              transition={{ duration: 1.6, repeat: Infinity, delay: i * 0.18 }}
+              className="h-28 rounded-xl"
+              style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.05)" }}
             />
           ))}
         </div>
       ) : !history || history.length === 0 ? (
         <motion.div
-          initial={{ opacity: 0, scale: 0.97 }}
+          initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="flex flex-col items-center justify-center py-20 rounded-xl gap-4"
-          style={{ background: "var(--c-card)", border: "1px dashed var(--c-border)" }}
+          className="flex flex-col items-center justify-center py-24 rounded-xl gap-5"
+          style={{ background: "rgba(255,255,255,0.015)", border: "1px dashed rgba(0,229,255,0.15)" }}
         >
-          <div
-            className="w-14 h-14 rounded-xl flex items-center justify-center"
-            style={{ border: "1px solid var(--c-border)", background: "var(--c-card)" }}
+          <motion.div
+            animate={{ opacity: [0.2, 0.6, 0.2], scale: [1, 1.05, 1] }}
+            transition={{ duration: 3.5, repeat: Infinity }}
+            className="w-16 h-16 rounded-full flex items-center justify-center"
+            style={{ border: "1px solid rgba(0,229,255,0.18)", background: "rgba(0,229,255,0.04)" }}
           >
-            <Globe className="w-6 h-6" style={{ color: "var(--c-txt4)" }} />
-          </div>
-          <div className="text-center">
-            <p style={{ fontFamily: F, fontSize: "14px", fontWeight: 500, color: "var(--c-txt3)" }}>
-              No scan history yet
+            <Globe className="w-7 h-7" style={{ color: "rgba(0,229,255,0.35)" }} />
+          </motion.div>
+          <div className="text-center space-y-1">
+            <p className="text-sm" style={{ fontFamily: "'Rajdhani', sans-serif", color: "rgba(255,255,255,0.4)", letterSpacing: "0.05em" }}>
+              No global intelligence yet.
             </p>
-            <p style={{ fontFamily: F, fontSize: "12px", color: "var(--c-txt4)", marginTop: "4px" }}>
-              Start scanning to build your intelligence feed
+            <p className="text-xs tracking-[0.18em]" style={{ fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.2)" }}>
+              START SCANNING TO BUILD INSIGHTS
             </p>
           </div>
         </motion.div>
       ) : (
-        <div className="space-y-2.5">
-          <div className="flex items-center justify-between mb-2">
-            <span style={{ fontFamily: F, fontSize: "11px", fontWeight: 500, color: "#374151" }}>
-              {history.length} record{history.length !== 1 ? "s" : ""}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[10px] tracking-[0.2em]" style={{ fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.25)" }}>
+              {history.length} RECORD{history.length !== 1 ? "S" : ""} · SORTED BY RECENCY
             </span>
           </div>
 
@@ -176,44 +185,55 @@ export default function History() {
                 <motion.div
                   key={record.id}
                   layout
-                  initial={{ opacity: 0, y: -8, scale: 0.99 }}
+                  initial={{ opacity: 0, y: -12, scale: 0.98 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, x: -16 }}
-                  transition={{ duration: 0.25, delay: i < 6 ? i * 0.04 : 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3, delay: i < 5 ? i * 0.05 : 0 }}
                   className="group rounded-xl relative overflow-hidden cursor-default"
                   style={{
-                    background: "#161b27",
+                    background: "rgba(255,255,255,0.02)",
+                    backdropFilter: "blur(12px)",
                     border: `1px solid ${cfg.border}`,
-                    transition: "border-color 0.15s",
+                    transition: "box-shadow 0.2s ease, border-color 0.2s ease",
                   }}
                   onMouseEnter={e => {
-                    (e.currentTarget as HTMLDivElement).style.borderColor = cfg.text + "38";
+                    const el = e.currentTarget as HTMLDivElement;
+                    el.style.boxShadow = `0 0 28px ${cfg.glow}`;
+                    el.style.borderColor = cfg.text + "55";
                   }}
                   onMouseLeave={e => {
-                    (e.currentTarget as HTMLDivElement).style.borderColor = cfg.border;
+                    const el = e.currentTarget as HTMLDivElement;
+                    el.style.boxShadow = "none";
+                    el.style.borderColor = cfg.border;
                   }}
                   data-testid={`card-history-record-${record.id}`}
                 >
                   {/* Left accent bar */}
                   <motion.div
                     className="absolute left-0 top-0 bottom-0 w-0.5"
-                    style={{ background: cfg.text }}
+                    style={{ background: `linear-gradient(180deg, ${cfg.text}, transparent 80%)` }}
                     initial={{ scaleY: 0, originY: 0 }}
                     animate={{ scaleY: 1 }}
-                    transition={{ duration: 0.3, delay: i * 0.04 }}
+                    transition={{ duration: 0.4, delay: i * 0.05 }}
+                  />
+
+                  {/* Subtle bg glow */}
+                  <div
+                    className="absolute right-0 top-0 bottom-0 w-32 pointer-events-none"
+                    style={{ background: `linear-gradient(270deg, ${cfg.bg}, transparent)` }}
                   />
 
                   <div className="flex items-start gap-4 px-5 py-4 relative">
                     {/* Score circle */}
                     <div
-                      className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0"
+                      className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-base"
                       style={{
-                        fontFamily: F,
-                        fontSize: "15px",
-                        fontWeight: 700,
+                        fontFamily: "'Orbitron', monospace",
                         color: cfg.text,
                         background: cfg.bg,
                         border: `1.5px solid ${cfg.border}`,
+                        boxShadow: `0 0 14px ${cfg.glow}`,
+                        textShadow: `0 0 8px ${cfg.text}`,
                       }}
                     >
                       {Math.round(record.credibilityScore)}
@@ -221,15 +241,15 @@ export default function History() {
 
                     {/* Info */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                      {/* Top row */}
+                      <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
                         {/* Risk badge */}
                         <div
-                          className="flex items-center gap-1.5 px-2 py-0.5 rounded-md"
+                          className="flex items-center gap-1 px-2 py-0.5 rounded-full"
                           style={{
-                            fontFamily: F,
-                            fontSize: "10px",
-                            fontWeight: 600,
-                            letterSpacing: "0.04em",
+                            fontFamily: "'Orbitron', monospace",
+                            fontSize: "9px",
+                            letterSpacing: "0.18em",
                             color: cfg.text,
                             background: cfg.bg,
                             border: `1px solid ${cfg.border}`,
@@ -241,10 +261,10 @@ export default function History() {
 
                         {/* Timestamp */}
                         <div className="flex items-center gap-1 flex-shrink-0">
-                          <Clock className="w-2.5 h-2.5" style={{ color: "#374151" }} />
+                          <Clock className="w-2.5 h-2.5" style={{ color: "rgba(255,255,255,0.2)" }} />
                           <span
-                            className="tabular-nums"
-                            style={{ fontFamily: F, fontSize: "10px", color: "#374151", fontWeight: 400 }}
+                            className="text-[9px] tabular-nums"
+                            style={{ fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.28)" }}
                           >
                             {relativeTime}
                           </span>
@@ -253,12 +273,12 @@ export default function History() {
 
                       {/* Text snippet */}
                       <p
-                        className="line-clamp-2"
+                        className="text-xs leading-relaxed line-clamp-2"
                         style={{
-                          fontFamily: F,
-                          color: "#6b7280",
-                          fontSize: "12px",
-                          lineHeight: "1.6",
+                          fontFamily: "'Space Mono', monospace",
+                          color: "rgba(255,255,255,0.38)",
+                          fontSize: "10px",
+                          lineHeight: "1.7",
                           borderLeft: `2px solid ${cfg.border}`,
                           paddingLeft: "8px",
                         }}
@@ -266,7 +286,10 @@ export default function History() {
                         {record.textSnippet}
                       </p>
 
-                      {breakdown && <ManipulationMini breakdown={breakdown} />}
+                      {/* Mini manipulation bars */}
+                      {breakdown && (
+                        <ManipulationMini breakdown={breakdown} />
+                      )}
                     </div>
                   </div>
                 </motion.div>

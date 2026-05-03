@@ -37,10 +37,10 @@ function WebGLUnavailable() {
   return (
     <div className="w-full h-full flex flex-col items-center justify-center gap-3"
       style={{ background: "rgba(4,6,14,0.97)" }}>
-      <Monitor className="w-8 h-8" style={{ color: "var(--c-txt4)" }} />
-      <p style={{ fontFamily: F, fontSize: "12px", color: "var(--c-txt3)", textAlign: "center", lineHeight: "1.8" }}>
-        3D requires WebGL<br />
-        <span style={{ color: "var(--c-txt4)" }}>Enable GPU acceleration in your browser</span>
+      <Monitor className="w-8 h-8" style={{ color: "rgba(255,255,255,0.18)" }} />
+      <p style={{ fontFamily: "'Space Mono', monospace", fontSize: "9px", letterSpacing: "0.16em", color: "rgba(255,255,255,0.28)", textAlign: "center", lineHeight: "1.8" }}>
+        3D REQUIRES WEBGL<br />
+        <span style={{ color: "rgba(255,255,255,0.16)" }}>ENABLE GPU ACCELERATION IN YOUR BROWSER</span>
       </p>
     </div>
   );
@@ -211,12 +211,10 @@ const SCENARIOS: Scenario[] = [
 
 /* ── Severity config ─────────────────────────────────────────── */
 const SEV = {
-  dangerous: { color: "#ef4444", bg: "rgba(239,68,68,0.07)",   border: "rgba(239,68,68,0.22)",  label: "DANGEROUS", icon: "⚠️" },
-  risky:     { color: "#f97316", bg: "rgba(249,115,22,0.07)",  border: "rgba(249,115,22,0.22)", label: "RISKY",     icon: "⚡" },
-  safe:      { color: "#22c55e", bg: "rgba(34,197,94,0.06)",   border: "rgba(34,197,94,0.18)",  label: "SAFE",      icon: "✅" },
+  dangerous: { color: "#ef4444", bg: "rgba(239,68,68,0.07)", border: "rgba(239,68,68,0.22)", label: "DANGEROUS", icon: "⚠️" },
+  risky:     { color: "#f97316", bg: "rgba(249,115,22,0.07)", border: "rgba(249,115,22,0.22)", label: "RISKY",     icon: "⚡" },
+  safe:      { color: "#00ff88", bg: "rgba(0,255,136,0.06)",  border: "rgba(0,255,136,0.20)",  label: "SAFE",      icon: "✅" },
 };
-
-const F = "Inter, system-ui, sans-serif";
 
 /* ── 3D Character ───────────────────────────────────────────── */
 function Character3D({ charState }: { charState: CharState }) {
@@ -393,7 +391,7 @@ function ThoughtBubble({
   const [hovered, setHovered] = useState(false);
   const sevColor =
     choice.severity === "dangerous" ? "#ef4444" :
-    choice.severity === "risky"     ? "#f97316" : "#22c55e";
+    choice.severity === "risky"     ? "#f97316" : "#00ff88";
 
   return (
     <Float speed={speed} rotationIntensity={0} floatIntensity={0.55} floatingRange={[-0.07, 0.07]}>
@@ -437,11 +435,11 @@ function ThoughtBubble({
           <div style={{ textAlign: "center", width: "76px" }}>
             <div style={{ fontSize: "22px", lineHeight: "1" }}>{choice.emoji}</div>
             <div style={{
-              fontFamily: F,
+              fontFamily: "'Space Mono', monospace",
               fontSize: "6.5px", fontWeight: 700,
               letterSpacing: "0.07em", lineHeight: "1.4",
               marginTop: "4px", textTransform: "uppercase",
-              color: isSelected ? "white" : hovered ? sevColor : "var(--c-txt1)",
+              color: isSelected ? "white" : hovered ? sevColor : "rgba(255,255,255,0.78)",
               textShadow: "0 1px 5px rgba(0,0,0,0.98)",
             }}>
               {choice.label}
@@ -515,10 +513,10 @@ function OutcomePanel({ outcome, onReset }: { outcome: Outcome; onReset: () => v
         <div className="flex items-center gap-3">
           <span style={{ fontSize: "22px" }}>{sev.icon}</span>
           <div>
-            <div style={{ fontFamily: F, fontSize: "12px", fontWeight: 700, color: sev.color, letterSpacing: "0.05em" }}>
+            <div style={{ fontFamily: "'Orbitron', monospace", fontSize: "12px", fontWeight: 700, color: sev.color, letterSpacing: "0.1em" }}>
               {(outcome.title ?? "OUTCOME GENERATED").toUpperCase()}
             </div>
-            <div style={{ fontFamily: F, fontSize: "10px", color: "var(--c-txt3)", letterSpacing: "0.06em", marginTop: "2px" }}>
+            <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "7.5px", color: "rgba(255,255,255,0.3)", letterSpacing: "0.14em", marginTop: "2px" }}>
               {sev.label} OUTCOME
             </div>
           </div>
@@ -526,8 +524,8 @@ function OutcomePanel({ outcome, onReset }: { outcome: Outcome; onReset: () => v
         <motion.button
           onClick={onReset}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] tracking-widest"
-          style={{ fontFamily: F, background: "var(--c-card-md)", border: "1px solid var(--c-border)", color: "var(--c-txt2)", cursor: "pointer" }}
-          whileHover={{ background: "var(--c-border)", color: "var(--c-txt1)" }}
+          style={{ fontFamily: "'Space Mono', monospace", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)", color: "rgba(255,255,255,0.4)", cursor: "pointer" }}
+          whileHover={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.7)" }}
           whileTap={{ scale: 0.96 }}
         >
           <RefreshCw className="w-2.5 h-2.5" />
@@ -540,16 +538,16 @@ function OutcomePanel({ outcome, onReset }: { outcome: Outcome; onReset: () => v
         <div className="space-y-4">
           {/* Immediate effect */}
           <div className="flex gap-3 p-3.5 rounded-xl"
-            style={{ background: "rgba(0,0,0,0.2)", border: "1px solid var(--c-border-sub)" }}>
+            style={{ background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.06)" }}>
             <span style={{ fontSize: "18px", flexShrink: 0 }}>{outcome.severity === "safe" ? "🎯" : "💥"}</span>
-            <p style={{ color: "var(--c-hi)", fontFamily: F, fontSize: "13px", lineHeight: "1.68", fontWeight: 500 }}>
+            <p style={{ color: "rgba(255,255,255,0.88)", fontFamily: "'Rajdhani', sans-serif", fontSize: "13px", lineHeight: "1.68", fontWeight: 500 }}>
               {outcome.immediateEffect}
             </p>
           </div>
 
           {/* Chain of events */}
           <div>
-            <p style={{ fontFamily: F, fontSize: "10px", fontWeight: 500, color: "var(--c-txt3)", marginBottom: "10px" }}>
+            <p style={{ fontFamily: "'Space Mono', monospace", fontSize: "8px", letterSpacing: "0.18em", color: "rgba(255,255,255,0.28)", marginBottom: "10px" }}>
               CHAIN OF EVENTS
             </p>
             <div className="space-y-2">
@@ -567,7 +565,7 @@ function OutcomePanel({ outcome, onReset }: { outcome: Outcome; onReset: () => v
                   >
                     {i + 1}
                   </div>
-                  <p style={{ color: "var(--c-txt1)", fontFamily: F, fontSize: "12.5px", lineHeight: "1.58" }}>
+                  <p style={{ color: "rgba(255,255,255,0.7)", fontFamily: "'Rajdhani', sans-serif", fontSize: "12.5px", lineHeight: "1.58" }}>
                     {step}
                   </p>
                 </motion.div>
@@ -581,10 +579,10 @@ function OutcomePanel({ outcome, onReset }: { outcome: Outcome; onReset: () => v
             animate={{ opacity: 1 }}
             transition={{ delay: 0.65 }}
             className="flex gap-3 p-3 rounded-lg"
-            style={{ background: "rgba(0,0,0,0.18)", border: "1px solid var(--c-card-md)" }}
+            style={{ background: "rgba(0,0,0,0.18)", border: "1px solid rgba(255,255,255,0.05)" }}
           >
             <span style={{ fontSize: "14px", flexShrink: 0 }}>📊</span>
-            <p style={{ color: "var(--c-txt2)", fontFamily: F, fontSize: "11px", lineHeight: "1.65" }}>
+            <p style={{ color: "rgba(255,255,255,0.48)", fontFamily: "'Space Mono', monospace", fontSize: "9px", lineHeight: "1.65", letterSpacing: "0.03em" }}>
               {outcome.statistic}
             </p>
           </motion.div>
@@ -594,7 +592,7 @@ function OutcomePanel({ outcome, onReset }: { outcome: Outcome; onReset: () => v
         <div className="space-y-4">
           {/* Recovery or reinforcement */}
           <div>
-            <p style={{ fontFamily: F, fontSize: "10px", fontWeight: 500, color: "var(--c-txt3)", marginBottom: "10px" }}>
+            <p style={{ fontFamily: "'Space Mono', monospace", fontSize: "8px", letterSpacing: "0.18em", color: "rgba(255,255,255,0.28)", marginBottom: "10px" }}>
               {outcome.severity === "safe" ? "✅ WHY THIS WORKS" : "🔧 HOW TO RECOVER"}
             </p>
             <div className="space-y-2">
@@ -606,12 +604,12 @@ function OutcomePanel({ outcome, onReset }: { outcome: Outcome; onReset: () => v
                   transition={{ delay: 0.3 + i * 0.1 }}
                   className="flex items-start gap-2.5 p-2.5 rounded-lg"
                   style={{
-                    background: outcome.severity === "safe" ? "rgba(34,197,94,0.04)" : "rgba(168,85,247,0.05)",
-                    border: `1px solid ${outcome.severity === "safe" ? "rgba(34,197,94,0.14)" : "rgba(168,85,247,0.12)"}`,
+                    background: outcome.severity === "safe" ? "rgba(0,255,136,0.04)" : "rgba(168,85,247,0.05)",
+                    border: `1px solid ${outcome.severity === "safe" ? "rgba(0,255,136,0.12)" : "rgba(168,85,247,0.12)"}`,
                   }}
                 >
-                  <ChevronRight className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: outcome.severity === "safe" ? "#22c55e" : "#a855f7" }} />
-                  <p style={{ color: "var(--c-txt1)", fontFamily: F, fontSize: "12.5px", lineHeight: "1.52" }}>
+                  <ChevronRight className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: outcome.severity === "safe" ? "#00ff88" : "#a855f7" }} />
+                  <p style={{ color: "rgba(255,255,255,0.75)", fontFamily: "'Rajdhani', sans-serif", fontSize: "12.5px", lineHeight: "1.52" }}>
                     {step}
                   </p>
                 </motion.div>
@@ -633,11 +631,11 @@ function OutcomePanel({ outcome, onReset }: { outcome: Outcome; onReset: () => v
           >
             <div className="flex items-center gap-2 mb-2">
               <Zap className="w-3.5 h-3.5" style={{ color: sev.color }} />
-              <span style={{ fontFamily: F, fontSize: "10px", fontWeight: 600, color: sev.color }}>
+              <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "8px", letterSpacing: "0.18em", color: sev.color }}>
                 KEY LESSON
               </span>
             </div>
-            <p style={{ color: "var(--c-hi)", fontFamily: F, fontSize: "14px", fontWeight: 600, lineHeight: "1.58" }}>
+            <p style={{ color: "rgba(255,255,255,0.92)", fontFamily: "'Rajdhani', sans-serif", fontSize: "14px", fontWeight: 600, lineHeight: "1.58" }}>
               {outcome.lesson}
             </p>
           </motion.div>
@@ -708,20 +706,20 @@ export default function WhatIf() {
             style={{ background: "rgba(251,191,36,0.12)", border: "1px solid rgba(251,191,36,0.3)" }}>
             <BrainCircuit className="w-4 h-4" style={{ color: "#fbbf24" }} />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight"
-            style={{ fontFamily: F, color: "#fbbf24" }}>
-            What If?
+          <h1 className="text-2xl font-bold tracking-wider"
+            style={{ fontFamily: "'Orbitron', monospace", color: "#fbbf24", textShadow: "0 0 20px rgba(251,191,36,0.4)" }}>
+            WHAT IF?
           </h1>
           <span style={{
-            fontFamily: F, fontSize: "10px", fontWeight: 500,
-            color: "rgba(251,191,36,0.7)", background: "rgba(251,191,36,0.08)",
-            border: "1px solid rgba(251,191,36,0.2)", borderRadius: "9999px", padding: "2px 10px",
+            fontFamily: "'Space Mono', monospace", fontSize: "8px", letterSpacing: "0.2em",
+            color: "rgba(251,191,36,0.6)", background: "rgba(251,191,36,0.08)",
+            border: "1px solid rgba(251,191,36,0.2)", borderRadius: "9999px", padding: "1px 8px",
           }}>
-            Interactive Simulator
+            INTERACTIVE SIMULATOR
           </span>
         </div>
-        <p style={{ fontFamily: F, fontSize: "12px", color: "var(--c-txt3)" }}>
-          Choose your response · Watch what happens · Learn from outcomes
+        <p style={{ fontFamily: "'Space Mono', monospace", fontSize: "10px", color: "rgba(255,255,255,0.28)", letterSpacing: "0.14em" }}>
+          CHOOSE YOUR RESPONSE · WATCH WHAT HAPPENS · LEARN FROM OUTCOMES
         </p>
       </motion.div>
 
@@ -733,9 +731,10 @@ export default function WhatIf() {
             onClick={() => handleScenarioChange(s)}
             className="flex flex-col items-start gap-1.5 p-3 rounded-xl text-left"
             style={{
-              background: activeScenario.id === s.id ? `${s.color}12` : "var(--c-card)",
-              border: activeScenario.id === s.id ? `1px solid ${s.color}48` : "1px solid var(--c-border-sub)",
+              background: activeScenario.id === s.id ? `${s.color}12` : "rgba(255,255,255,0.02)",
+              border: activeScenario.id === s.id ? `1px solid ${s.color}48` : "1px solid rgba(255,255,255,0.07)",
               cursor: "pointer",
+              boxShadow: activeScenario.id === s.id ? `0 0 20px ${s.color}1a` : "none",
               transition: "all 0.2s",
             }}
             whileHover={{ scale: 1.02 }}
@@ -744,14 +743,15 @@ export default function WhatIf() {
             <span style={{ fontSize: "20px" }}>{s.emoji}</span>
             <div>
               <div style={{
-                fontFamily: F, fontSize: "12px", fontWeight: 600,
-                color: activeScenario.id === s.id ? s.color : "var(--c-txt2)",
+                fontFamily: "'Orbitron', monospace", fontSize: "8.5px", fontWeight: 700,
+                letterSpacing: "0.08em",
+                color: activeScenario.id === s.id ? s.color : "rgba(255,255,255,0.55)",
               }}>
-                {s.title}
+                {s.title.toUpperCase()}
               </div>
               <div style={{
-                fontFamily: F, fontSize: "10px",
-                color: "var(--c-txt3)", marginTop: "2px",
+                fontFamily: "'Space Mono', monospace", fontSize: "7px",
+                color: "rgba(255,255,255,0.26)", letterSpacing: "0.1em", marginTop: "2px",
               }}>
                 {s.description}
               </div>
@@ -771,14 +771,14 @@ export default function WhatIf() {
             <div className="px-4 py-2.5 flex items-center gap-2"
               style={{ borderBottom: `1px solid ${activeScenario.color}20` }}>
               <span style={{ fontSize: "14px" }}>{activeScenario.emoji}</span>
-              <span style={{ fontFamily: F, fontSize: "11px", fontWeight: 500, color: activeScenario.color }}>
-                You received
+              <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "9px", letterSpacing: "0.16em", color: activeScenario.color }}>
+                YOU RECEIVED
               </span>
             </div>
             <div className="p-4">
               <pre style={{
-                fontFamily: F, fontSize: "12.5px", lineHeight: "1.72",
-                color: "var(--c-txt1)", whiteSpace: "pre-wrap", wordBreak: "break-word",
+                fontFamily: "'Rajdhani', sans-serif", fontSize: "12.5px", lineHeight: "1.72",
+                color: "rgba(255,255,255,0.72)", whiteSpace: "pre-wrap", wordBreak: "break-word",
               }}>
                 {activeScenario.context}
               </pre>
@@ -786,13 +786,13 @@ export default function WhatIf() {
           </div>
 
           {/* Status / instruction box */}
-          <div className="p-3.5 rounded-xl" style={{ background: "var(--c-card)", border: "1px solid var(--c-border-sub)" }}>
+          <div className="p-3.5 rounded-xl" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)" }}>
             <AnimatePresence mode="wait">
               {!selectedChoice && (
                 <motion.p key="hint"
                   initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                  style={{ fontFamily: F, fontSize: "11px", color: "var(--c-txt3)", lineHeight: "1.65" }}>
-                  👆 Click a thought bubble above the person to choose your response
+                  style={{ fontFamily: "'Space Mono', monospace", fontSize: "9px", color: "rgba(255,255,255,0.35)", letterSpacing: "0.13em", lineHeight: "1.65" }}>
+                  👆 CLICK A THOUGHT BUBBLE ABOVE THE PERSON TO CHOOSE YOUR RESPONSE
                 </motion.p>
               )}
               {selectedChoice && isLoading && (
@@ -802,16 +802,16 @@ export default function WhatIf() {
                   <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
                     <BrainCircuit className="w-3.5 h-3.5" style={{ color: "#fbbf24" }} />
                   </motion.div>
-                  <span style={{ fontFamily: F, fontSize: "11px", color: "#fbbf24" }}>
-                    Simulating outcome…
+                  <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "9px", color: "#fbbf24", letterSpacing: "0.14em" }}>
+                    SIMULATING OUTCOME…
                   </span>
                 </motion.div>
               )}
               {outcome && (
                 <motion.p key="done"
                   initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                  style={{ fontFamily: F, fontSize: "11px", color: "var(--c-txt3)" }}>
-                  ↓ Scroll down to see the full outcome
+                  style={{ fontFamily: "'Space Mono', monospace", fontSize: "9px", color: "rgba(255,255,255,0.32)", letterSpacing: "0.13em" }}>
+                  ↓ SCROLL DOWN TO SEE THE FULL OUTCOME
                 </motion.p>
               )}
             </AnimatePresence>
@@ -823,8 +823,8 @@ export default function WhatIf() {
               <div key={s} className="flex items-center gap-1.5 p-2 rounded-lg"
                 style={{ background: SEV[s].bg, border: `1px solid ${SEV[s].border}` }}>
                 <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: SEV[s].color }} />
-                <span style={{ fontFamily: F, fontSize: "9px", fontWeight: 600, color: SEV[s].color }}>
-                  {s.charAt(0).toUpperCase() + s.slice(1)}
+                <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "6.5px", color: SEV[s].color, letterSpacing: "0.1em" }}>
+                  {s.toUpperCase()}
                 </span>
               </div>
             ))}
@@ -834,7 +834,7 @@ export default function WhatIf() {
         {/* Right: 3D Canvas — shown FIRST on mobile */}
         <div
           className="lg:col-span-3 rounded-xl overflow-hidden order-1 lg:order-2"
-          style={{ height: "500px", border: "1px solid var(--c-border-sub)", background: "rgba(4,6,14,0.97)" }}
+          style={{ height: "500px", border: "1px solid rgba(255,255,255,0.07)", background: "rgba(4,6,14,0.97)" }}
         >
           {webgl === null && (
             <div className="w-full h-full flex items-center justify-center">
