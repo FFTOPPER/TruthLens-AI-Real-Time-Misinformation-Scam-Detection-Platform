@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { openai } from "@workspace/integrations-openai-ai-server";
-import { textToSpeech } from "@workspace/integrations-openai-ai-server/audio";
+import { textToSpeech, convertToWav } from "@workspace/integrations-openai-ai-server/audio";
 import { db, analysesTable } from "@workspace/db";
 import { desc, sql } from "drizzle-orm";
 
@@ -134,6 +134,60 @@ Scoring guidelines:
   } catch (err) {
     req.log.error({ err }, "Analysis failed");
     res.status(500).json({ error: "Analysis failed" });
+  }
+});
+
+/* ── Voice Q&A ──────────────────────────────────────────────── */
+router.post("/analysis/ask", async (req, res) => {
+  const { audioBase64, analysisContext } = req.body as {
+    audioBase64: string;
+    analysisContext: {
+      credibilityScore: number;
+      riskLevel: string;
+      explanation: string;
+      suspiciousPhrases: string[];
+      manipulationBreakdown: ManipulationBreakdown;
+    };
+  };
+
+  if (!audioBase64 || !analysisContext) {
+    res.status(400).json({ error: "audioBase64 and analysisContext are required" });
+    return;
+  }
+
+  try {
+    const rawBuffer = Buffer.from(audioBase64, "base64");
+    const wavBuffer = await convertToWav(rawBuffer);
+    const wavBase64 = wavBuffer.toString("base64");
+
+    const { credibilityScore, riskLevel, explanation, manipulationBreakdown: mb, suspiciousPhrases } = analysisContext;
+
+    const systemPrompt = `You are a warm, concise AI assistant for TruthLens, a content credibility app. The user is asking about a piece of content that was analyzed with these results:
+- Credibility: ${credibilityScore}/100 (${riskLevel} risk)
+- Summary: ${explanation}
+- Manipulation signals — fear: ${mb.fear}/100, urgency: ${mb.urgency}/100, emotional: ${mb.emotionalTriggers}/100, fake authority: ${mb.fakeAuthority}/100
+- Flagged phrases: ${suspiciousPhrases.join(", ") || "none"}
+Answer the user's spoken question in 1-3 short conversational sentences. Be warm, direct, no jargon.`;
+
+    const response = await (openai.chat.completions.create as Function)({
+      model: "gpt-audio",
+      modalities: ["text", "audio"],
+      audio: { voice: "echo", format: "mp3" },
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: [{ type: "input_audio", input_audio: { data: wavBase64, format: "wav" } }] },
+      ],
+    });
+
+    const message = response.choices[0]?.message as Record<string, unknown>;
+    const audio = message?.audio as Record<string, unknown> | undefined;
+    const transcript = (audio?.transcript as string) || (message?.content as string) || "";
+    const audioData = (audio?.data as string) ?? "";
+
+    res.json({ transcript, audioBase64: audioData });
+  } catch (err) {
+    req.log.error({ err }, "Voice Q&A failed");
+    res.status(500).json({ error: "Voice Q&A failed" });
   }
 });
 
