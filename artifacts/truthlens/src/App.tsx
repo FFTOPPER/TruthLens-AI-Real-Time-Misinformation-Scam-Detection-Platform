@@ -8,6 +8,7 @@ import Home from "@/pages/Home";
 import History from "@/pages/History";
 import Stats from "@/pages/Stats";
 import Settings from "@/pages/Settings";
+import ImageScan from "@/pages/ImageScan";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,6 +26,7 @@ function Router() {
         <Route path="/" component={Home} />
         <Route path="/history" component={History} />
         <Route path="/stats" component={Stats} />
+        <Route path="/image-scan" component={ImageScan} />
         <Route path="/settings" component={Settings} />
         <Route component={NotFound} />
       </Switch>

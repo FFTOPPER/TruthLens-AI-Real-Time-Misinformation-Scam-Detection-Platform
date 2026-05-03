@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard, History, Globe, Settings,
-  ShieldAlert, ChevronLeft, Menu, X, Activity,
+  ShieldAlert, ChevronLeft, Menu, X, Activity, FileImage,
 } from "lucide-react";
 import { useHealthCheck, getHealthCheckQueryKey } from "@workspace/api-client-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,10 +12,11 @@ interface LayoutProps {
 }
 
 const NAV_ITEMS = [
-  { href: "/",         label: "Dashboard",           icon: LayoutDashboard, sub: "ANALYSIS TERMINAL" },
-  { href: "/history",  label: "Scan History",         icon: History,         sub: "INTELLIGENCE FEED" },
-  { href: "/stats",    label: "Global Intelligence",  icon: Globe,           sub: "THREAT METRICS" },
-  { href: "/settings", label: "Settings",             icon: Settings,        sub: "SYSTEM CONFIG" },
+  { href: "/",            label: "Dashboard",           icon: LayoutDashboard, sub: "ANALYSIS TERMINAL" },
+  { href: "/history",     label: "Scan History",        icon: History,         sub: "INTELLIGENCE FEED" },
+  { href: "/stats",       label: "Global Intelligence", icon: Globe,           sub: "THREAT METRICS" },
+  { href: "/image-scan",  label: "Image Scan",          icon: FileImage,       sub: "OCR · AI ANALYSIS" },
+  { href: "/settings",    label: "Settings",            icon: Settings,        sub: "SYSTEM CONFIG" },
 ];
 
 const SIDEBAR_EXPANDED = 240;
