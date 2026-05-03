@@ -1,11 +1,13 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createWorker } from "tesseract.js";
 import {
-  ImagePlus, ScanLine, AlertTriangle, ShieldCheck,
-  FileImage, X, Zap, Eye, RotateCcw, CheckCircle2,
+  FileImage, ImagePlus, ScanLine, CheckCircle2,
+  AlertTriangle, X, Eye, RotateCcw, ShieldCheck, Zap,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+
+const F = "Inter, system-ui, sans-serif";
 
 /* ── Types ─────────────────────────────────────────────────── */
 interface AnalysisResult {
@@ -14,65 +16,39 @@ interface AnalysisResult {
   explanation: string;
   suspiciousPhrases: string[];
   manipulationBreakdown: {
-    fear: number;
-    urgency: number;
-    emotionalTriggers: number;
-    fakeAuthority: number;
+    fear: number; urgency: number; emotionalTriggers: number; fakeAuthority: number;
   };
 }
 
-/* ── Highlight suspicious phrases in text ──────────────────── */
-function HighlightedText({
-  text,
-  phrases,
-}: {
-  text: string;
-  phrases: string[];
-}) {
-  if (!phrases.length) {
-    return (
-      <p style={{ color: "rgba(255,255,255,0.7)", fontFamily: "'Rajdhani', sans-serif", fontSize: "13px", lineHeight: "1.7", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
-        {text}
-      </p>
-    );
-  }
-
-  // Build a regex that matches any suspicious phrase (case-insensitive)
+/* ── Highlighted text ──────────────────────────────────────── */
+function HighlightedText({ text, phrases }: { text: string; phrases: string[] }) {
+  if (!phrases.length) return <p style={{ fontFamily: F, fontSize: "13px", color: "#c9d1d9", lineHeight: "1.7", whiteSpace: "pre-wrap" }}>{text}</p>;
   const escaped = phrases.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
   const regex = new RegExp(`(${escaped.join("|")})`, "gi");
   const parts = text.split(regex);
-
   return (
-    <p style={{ color: "rgba(255,255,255,0.7)", fontFamily: "'Rajdhani', sans-serif", fontSize: "13px", lineHeight: "1.7", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
-      {parts.map((part, i) => {
-        const isMatch = phrases.some(p => p.toLowerCase() === part.toLowerCase());
-        return isMatch ? (
-          <mark
-            key={i}
-            style={{
-              background: "rgba(239,68,68,0.22)",
-              color: "#fca5a5",
-              border: "1px solid rgba(239,68,68,0.35)",
-              borderRadius: "3px",
-              padding: "1px 3px",
-              fontWeight: 600,
-            }}
-          >
+    <p style={{ fontFamily: F, fontSize: "13px", color: "#c9d1d9", lineHeight: "1.7", whiteSpace: "pre-wrap" }}>
+      {parts.map((part, i) =>
+        regex.test(part) ? (
+          <mark key={i} style={{
+            background: "rgba(239,68,68,0.18)", color: "#fca5a5",
+            borderRadius: "3px", padding: "0 2px",
+          }}>
             {part}
           </mark>
         ) : (
           <span key={i}>{part}</span>
-        );
-      })}
+        )
+      )}
     </p>
   );
 }
 
 /* ── Risk colour helper ────────────────────────────────────── */
 function riskColor(level: string) {
-  if (level === "Low") return { color: "#00ff88", bg: "rgba(0,255,136,0.08)", border: "rgba(0,255,136,0.25)" };
-  if (level === "Medium") return { color: "#f59e0b", bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.25)" };
-  return { color: "#ef4444", bg: "rgba(239,68,68,0.08)", border: "rgba(239,68,68,0.25)" };
+  if (level === "Low")    return { color: "#22c55e", bg: "rgba(34,197,94,0.07)",   border: "rgba(34,197,94,0.18)"  };
+  if (level === "Medium") return { color: "#f59e0b", bg: "rgba(245,158,11,0.07)",  border: "rgba(245,158,11,0.2)"  };
+  return                         { color: "#ef4444", bg: "rgba(239,68,68,0.07)",   border: "rgba(239,68,68,0.2)"   };
 }
 
 /* ── Manipulation bar ──────────────────────────────────────── */
@@ -80,20 +56,20 @@ function ManipBar({ label, value, color }: { label: string; value: number; color
   return (
     <div className="space-y-1">
       <div className="flex justify-between items-center">
-        <span className="text-[9px] tracking-[0.14em]" style={{ fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.4)" }}>
+        <span style={{ fontFamily: F, fontSize: "11px", fontWeight: 500, color: "#6b7280" }}>
           {label}
         </span>
-        <span className="text-[9px] font-bold" style={{ fontFamily: "'Space Mono', monospace", color }}>
+        <span style={{ fontFamily: F, fontSize: "11px", fontWeight: 700, color }}>
           {value}%
         </span>
       </div>
-      <div className="h-1 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+      <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.07)" }}>
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${value}%` }}
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="h-full rounded-full"
-          style={{ background: color, boxShadow: `0 0 6px ${color}66` }}
+          style={{ background: color, opacity: 0.85 }}
         />
       </div>
     </div>
@@ -117,7 +93,6 @@ export default function ImageScan() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  /* ── Load image — read as data URL so Tesseract worker can access it ── */
   const loadImage = useCallback((file: File) => {
     if (!file.type.startsWith("image/")) {
       toast({ title: "Invalid file", description: "Please upload a JPG or PNG image.", variant: "destructive" });
@@ -139,17 +114,15 @@ export default function ImageScan() {
     reader.readAsDataURL(file);
   }, [toast]);
 
-  /* ── Drag & drop ── */
-  const onDragOver = (e: React.DragEvent) => { e.preventDefault(); setIsDragging(true); };
+  const onDragOver  = (e: React.DragEvent) => { e.preventDefault(); setIsDragging(true); };
   const onDragLeave = () => setIsDragging(false);
-  const onDrop = (e: React.DragEvent) => {
+  const onDrop      = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
     const file = e.dataTransfer.files[0];
     if (file) loadImage(file);
   };
 
-  /* ── Run OCR — pass data URL so the worker can read it ── */
   const runOcr = useCallback(async () => {
     if (!imageSrc) return;
     setOcrStatus("running");
@@ -176,7 +149,6 @@ export default function ImageScan() {
     }
   }, [imageSrc, toast]);
 
-  /* ── Run analysis ── */
   const runAnalysis = useCallback(async () => {
     if (!extractedText.trim()) return;
     setAnalysisStatus("loading");
@@ -197,7 +169,6 @@ export default function ImageScan() {
     }
   }, [extractedText, toast]);
 
-  /* ── Reset ── */
   const reset = () => {
     setImageSrc(null);
     setImageFile(null);
@@ -211,92 +182,86 @@ export default function ImageScan() {
   const rc = result ? riskColor(result.riskLevel) : null;
 
   return (
-    <div className="min-h-screen px-4 py-8 lg:px-8 lg:py-10 max-w-5xl mx-auto space-y-6">
+    <div className="min-h-screen max-w-5xl mx-auto space-y-5">
 
-      {/* ── Header ── */}
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+      {/* Header */}
+      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
         <div className="flex items-center gap-3 mb-1">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-            style={{ background: "rgba(168,85,247,0.12)", border: "1px solid rgba(168,85,247,0.3)" }}>
+            style={{ background: "rgba(168,85,247,0.1)", border: "1px solid rgba(168,85,247,0.2)" }}>
             <FileImage className="w-4 h-4" style={{ color: "#a855f7" }} />
           </div>
-          <h1 className="text-2xl font-bold tracking-wider" style={{ fontFamily: "'Orbitron', monospace", color: "#a855f7", textShadow: "0 0 20px rgba(168,85,247,0.4)" }}>
-            IMAGE SCAN
-          </h1>
-          <span className="text-[8px] tracking-[0.2em] px-2 py-0.5 rounded-full"
-            style={{ fontFamily: "'Space Mono', monospace", color: "rgba(168,85,247,0.6)", background: "rgba(168,85,247,0.08)", border: "1px solid rgba(168,85,247,0.2)" }}>
-            OCR · AI ANALYSIS
+          <div>
+            <h1 style={{ fontFamily: F, fontSize: "18px", fontWeight: 700, color: "#e2e8f0", letterSpacing: "-0.01em" }}>
+              Image Scan
+            </h1>
+            <p style={{ fontFamily: F, fontSize: "12px", color: "#475569", marginTop: "1px" }}>
+              Upload a screenshot · extract text · detect misinformation
+            </p>
+          </div>
+          <span style={{
+            fontFamily: F, fontSize: "10px", fontWeight: 600, letterSpacing: "0.04em",
+            color: "#a855f7", background: "rgba(168,85,247,0.08)",
+            border: "1px solid rgba(168,85,247,0.18)", borderRadius: "9999px", padding: "2px 10px",
+          }}>
+            OCR · AI Analysis
           </span>
         </div>
-        <p style={{ fontFamily: "'Space Mono', monospace", fontSize: "10px", color: "rgba(255,255,255,0.28)", letterSpacing: "0.14em" }}>
-          UPLOAD A SCREENSHOT · EXTRACT TEXT · DETECT MISINFORMATION
-        </p>
+        <div className="mt-4" style={{ height: "1px", background: "rgba(255,255,255,0.07)" }} />
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
-        {/* ── LEFT: Upload + Preview ── */}
+        {/* LEFT: Upload + Preview */}
         <div className="space-y-4">
 
           {/* Upload area */}
           {!imageSrc ? (
             <motion.div
-              initial={{ opacity: 0, scale: 0.97 }}
+              initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.35 }}
+              transition={{ duration: 0.3 }}
               onDragOver={onDragOver}
               onDragLeave={onDragLeave}
               onDrop={onDrop}
               onClick={() => fileInputRef.current?.click()}
               className="relative rounded-xl cursor-pointer flex flex-col items-center justify-center gap-4 overflow-hidden"
               style={{
-                minHeight: "240px",
-                border: isDragging ? "2px dashed rgba(168,85,247,0.6)" : "2px dashed rgba(168,85,247,0.2)",
+                minHeight: "220px",
+                border: isDragging ? "2px dashed rgba(168,85,247,0.55)" : "2px dashed rgba(168,85,247,0.2)",
                 background: isDragging ? "rgba(168,85,247,0.06)" : "rgba(168,85,247,0.02)",
                 transition: "border-color 0.2s, background 0.2s",
               }}
             >
-              {/* Animated corner accents */}
-              {["tl", "tr", "bl", "br"].map((pos) => (
-                <div key={pos} className="absolute w-4 h-4" style={{
-                  top: pos.startsWith("t") ? 8 : "auto", bottom: pos.startsWith("b") ? 8 : "auto",
-                  left: pos.endsWith("l") ? 8 : "auto", right: pos.endsWith("r") ? 8 : "auto",
-                  borderTop: pos.startsWith("t") ? "1.5px solid rgba(168,85,247,0.4)" : "none",
-                  borderBottom: pos.startsWith("b") ? "1.5px solid rgba(168,85,247,0.4)" : "none",
-                  borderLeft: pos.endsWith("l") ? "1.5px solid rgba(168,85,247,0.4)" : "none",
-                  borderRight: pos.endsWith("r") ? "1.5px solid rgba(168,85,247,0.4)" : "none",
-                }} />
-              ))}
-
               <motion.div
-                animate={isDragging ? { scale: 1.12, rotate: 8 } : { scale: 1, rotate: 0 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                animate={isDragging ? { scale: 1.1, rotate: 6 } : { scale: 1, rotate: 0 }}
+                transition={{ type: "spring", stiffness: 300, damping: 22 }}
                 className="w-14 h-14 rounded-xl flex items-center justify-center"
-                style={{ background: "rgba(168,85,247,0.1)", border: "1px solid rgba(168,85,247,0.25)" }}
+                style={{ background: "rgba(168,85,247,0.08)", border: "1px solid rgba(168,85,247,0.2)" }}
               >
                 <ImagePlus className="w-6 h-6" style={{ color: "#a855f7" }} />
               </motion.div>
 
               <div className="text-center px-6">
-                <p style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: "15px", fontWeight: 600, color: "rgba(255,255,255,0.7)", letterSpacing: "0.04em" }}>
+                <p style={{ fontFamily: F, fontSize: "14px", fontWeight: 500, color: "rgba(255,255,255,0.6)" }}>
                   {isDragging ? "Drop image here" : "Upload Screenshot or Image"}
                 </p>
-                <p style={{ fontFamily: "'Space Mono', monospace", fontSize: "9px", color: "rgba(255,255,255,0.25)", letterSpacing: "0.14em", marginTop: "6px" }}>
-                  DRAG & DROP OR CLICK · JPG, PNG, WEBP
+                <p style={{ fontFamily: F, fontSize: "11px", color: "#374151", marginTop: "5px" }}>
+                  Drag & drop or click · JPG, PNG, WebP
                 </p>
               </div>
 
               <motion.div
-                className="px-5 py-2 rounded-lg text-[10px] tracking-[0.15em] font-semibold"
+                className="px-5 py-2 rounded-lg text-xs font-semibold"
                 style={{
-                  fontFamily: "'Orbitron', monospace",
+                  fontFamily: F,
                   background: "rgba(168,85,247,0.1)",
-                  border: "1px solid rgba(168,85,247,0.3)",
+                  border: "1px solid rgba(168,85,247,0.25)",
                   color: "#a855f7",
                 }}
-                whileHover={{ scale: 1.04, background: "rgba(168,85,247,0.16)" }}
+                whileHover={{ scale: 1.03, background: "rgba(168,85,247,0.16)" }}
               >
-                CHOOSE FILE
+                Choose File
               </motion.div>
 
               <input
@@ -309,32 +274,30 @@ export default function ImageScan() {
             </motion.div>
           ) : (
             <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
+              initial={{ opacity: 0, scale: 0.97 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.28 }}
               className="rounded-xl overflow-hidden relative"
-              style={{ border: "1px solid rgba(168,85,247,0.2)", background: "rgba(168,85,247,0.03)" }}
+              style={{ background: "#161b27", border: "1px solid rgba(255,255,255,0.08)" }}
             >
               {/* Remove button */}
               <button
                 onClick={reset}
                 className="absolute top-2 right-2 z-10 w-7 h-7 rounded-lg flex items-center justify-center"
-                style={{ background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.3)" }}
+                style={{ background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.25)" }}
               >
                 <X className="w-3.5 h-3.5" style={{ color: "#ef4444" }} />
               </button>
 
-              {/* Image preview */}
               <div className="p-3 pb-0">
                 <div className="rounded-lg overflow-hidden" style={{ maxHeight: "200px" }}>
                   <img src={imageSrc} alt="uploaded" className="w-full object-contain" style={{ maxHeight: "200px", objectPosition: "top" }} />
                 </div>
               </div>
 
-              {/* File name */}
               <div className="px-3 py-2 flex items-center gap-2">
-                <FileImage className="w-3 h-3 flex-shrink-0" style={{ color: "rgba(168,85,247,0.5)" }} />
-                <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "9px", color: "rgba(255,255,255,0.35)", letterSpacing: "0.1em" }}>
+                <FileImage className="w-3 h-3 flex-shrink-0" style={{ color: "#6b7280" }} />
+                <span style={{ fontFamily: F, fontSize: "11px", fontWeight: 400, color: "#6b7280" }}>
                   {imageFile?.name ?? "image"}
                 </span>
               </div>
@@ -344,13 +307,13 @@ export default function ImageScan() {
                 <div className="px-3 pb-3">
                   <motion.button
                     onClick={runOcr}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-[10px] tracking-[0.15em] font-semibold"
-                    style={{ fontFamily: "'Orbitron', monospace", background: "rgba(168,85,247,0.12)", border: "1px solid rgba(168,85,247,0.3)", color: "#a855f7" }}
-                    whileHover={{ scale: 1.02, background: "rgba(168,85,247,0.18)" }}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-semibold"
+                    style={{ fontFamily: F, background: "rgba(168,85,247,0.1)", border: "1px solid rgba(168,85,247,0.25)", color: "#a855f7" }}
+                    whileHover={{ scale: 1.01, background: "rgba(168,85,247,0.16)" }}
                     whileTap={{ scale: 0.98 }}
                   >
                     <ScanLine className="w-3.5 h-3.5" />
-                    EXTRACT TEXT (OCR)
+                    Extract Text (OCR)
                   </motion.button>
                 </div>
               )}
@@ -358,19 +321,19 @@ export default function ImageScan() {
               {ocrStatus === "running" && (
                 <div className="px-3 pb-3 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "8px", color: "rgba(168,85,247,0.7)", letterSpacing: "0.16em" }}>
-                      {ocrStage ? ocrStage.toUpperCase() : "SCANNING"}…
+                    <span style={{ fontFamily: F, fontSize: "11px", fontWeight: 500, color: "#a855f7" }}>
+                      {ocrStage ? ocrStage : "Scanning"}…
                     </span>
-                    <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "8px", color: "#a855f7", fontWeight: 700 }}>
+                    <span style={{ fontFamily: F, fontSize: "11px", fontWeight: 700, color: "#a855f7" }}>
                       {ocrProgress}%
                     </span>
                   </div>
-                  <div className="h-1 rounded-full overflow-hidden" style={{ background: "rgba(168,85,247,0.1)" }}>
+                  <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(168,85,247,0.1)" }}>
                     <motion.div
                       animate={{ width: `${ocrProgress}%` }}
                       transition={{ duration: 0.3 }}
                       className="h-full rounded-full"
-                      style={{ background: "linear-gradient(90deg, #a855f7, #06b6d4)", boxShadow: "0 0 8px rgba(168,85,247,0.5)" }}
+                      style={{ background: "#a855f7", opacity: 0.8 }}
                     />
                   </div>
                 </div>
@@ -378,13 +341,13 @@ export default function ImageScan() {
 
               {ocrStatus === "done" && (
                 <div className="px-3 pb-3 flex items-center gap-2">
-                  <CheckCircle2 className="w-3 h-3" style={{ color: "#00ff88" }} />
-                  <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "8px", color: "#00ff88", letterSpacing: "0.14em" }}>
-                    TEXT EXTRACTED
+                  <CheckCircle2 className="w-3 h-3" style={{ color: "#22c55e" }} />
+                  <span style={{ fontFamily: F, fontSize: "11px", fontWeight: 500, color: "#22c55e" }}>
+                    Text extracted
                   </span>
-                  <button onClick={runOcr} className="ml-auto flex items-center gap-1 opacity-40 hover:opacity-70 transition-opacity">
-                    <RotateCcw className="w-2.5 h-2.5" style={{ color: "rgba(255,255,255,0.5)" }} />
-                    <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "7px", color: "rgba(255,255,255,0.5)" }}>RESCAN</span>
+                  <button onClick={runOcr} className="ml-auto flex items-center gap-1 opacity-45 hover:opacity-80 transition-opacity">
+                    <RotateCcw className="w-2.5 h-2.5" style={{ color: "#6b7280" }} />
+                    <span style={{ fontFamily: F, fontSize: "10px", color: "#6b7280" }}>Rescan</span>
                   </button>
                 </div>
               )}
@@ -392,48 +355,47 @@ export default function ImageScan() {
               {ocrStatus === "error" && (
                 <div className="px-3 pb-3 flex items-center gap-2">
                   <AlertTriangle className="w-3 h-3" style={{ color: "#ef4444" }} />
-                  <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "8px", color: "#ef4444", letterSpacing: "0.14em" }}>
-                    EXTRACTION FAILED
+                  <span style={{ fontFamily: F, fontSize: "11px", fontWeight: 500, color: "#ef4444" }}>
+                    Extraction failed
                   </span>
                   <button onClick={runOcr} className="ml-auto flex items-center gap-1 opacity-60 hover:opacity-90 transition-opacity">
                     <RotateCcw className="w-2.5 h-2.5" style={{ color: "#f97316" }} />
-                    <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "7px", color: "#f97316" }}>RETRY</span>
+                    <span style={{ fontFamily: F, fontSize: "10px", color: "#f97316" }}>Retry</span>
                   </button>
                 </div>
               )}
             </motion.div>
           )}
 
-          {/* ── Extracted text panel ── */}
+          {/* Extracted text panel */}
           <AnimatePresence>
             {extractedText && (
               <motion.div
-                initial={{ opacity: 0, y: 12 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.35 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.3 }}
                 className="rounded-xl overflow-hidden"
-                style={{ border: "1px solid rgba(0,229,255,0.14)", background: "rgba(0,229,255,0.02)" }}
+                style={{ background: "#161b27", border: "1px solid rgba(255,255,255,0.08)" }}
               >
                 {/* Header with tabs */}
                 <div className="px-4 py-2.5 flex items-center gap-3 flex-wrap"
-                  style={{ borderBottom: "1px solid rgba(0,229,255,0.08)", background: "rgba(0,229,255,0.03)" }}>
+                  style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
                   <div className="flex items-center gap-2 flex-1">
-                    <Eye className="w-3 h-3" style={{ color: "#00e5ff" }} />
-                    <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "9px", color: "#00e5ff", letterSpacing: "0.18em" }}>
-                      EXTRACTED TEXT
+                    <Eye className="w-3 h-3" style={{ color: "#3b82f6" }} />
+                    <span style={{ fontFamily: F, fontSize: "11px", fontWeight: 600, letterSpacing: "0.05em", color: "#3b82f6", textTransform: "uppercase" as const }}>
+                      Extracted Text
                     </span>
-                    {/* Detected from image badge */}
                     <span style={{
-                      fontFamily: "'Space Mono', monospace", fontSize: "7px", letterSpacing: "0.12em",
-                      color: "#a855f7", background: "rgba(168,85,247,0.1)", border: "1px solid rgba(168,85,247,0.25)",
+                      fontFamily: F, fontSize: "10px", fontWeight: 500,
+                      color: "#a855f7", background: "rgba(168,85,247,0.08)",
+                      border: "1px solid rgba(168,85,247,0.2)",
                       borderRadius: "9999px", padding: "1px 7px",
                     }}>
-                      DETECTED FROM IMAGE
+                      From image
                     </span>
                   </div>
 
-                  {/* Tabs */}
                   {result && (
                     <div className="flex gap-1">
                       {(["raw", "highlighted"] as const).map(tab => (
@@ -441,14 +403,15 @@ export default function ImageScan() {
                           key={tab}
                           onClick={() => setActiveTab(tab)}
                           style={{
-                            fontFamily: "'Space Mono', monospace", fontSize: "7px", letterSpacing: "0.12em",
-                            padding: "3px 8px", borderRadius: "6px", cursor: "pointer",
-                            background: activeTab === tab ? "rgba(239,68,68,0.14)" : "transparent",
-                            border: activeTab === tab ? "1px solid rgba(239,68,68,0.35)" : "1px solid rgba(255,255,255,0.07)",
-                            color: activeTab === tab ? "#fca5a5" : "rgba(255,255,255,0.3)",
+                            fontFamily: F, fontSize: "10px", fontWeight: 500,
+                            padding: "3px 9px", borderRadius: "6px", cursor: "pointer",
+                            background: activeTab === tab ? "rgba(59,130,246,0.12)" : "transparent",
+                            border: activeTab === tab ? "1px solid rgba(59,130,246,0.3)" : "1px solid rgba(255,255,255,0.08)",
+                            color: activeTab === tab ? "#3b82f6" : "#6b7280",
+                            transition: "all 0.15s",
                           }}
                         >
-                          {tab === "raw" ? "RAW" : "HIGHLIGHTED"}
+                          {tab === "raw" ? "Raw" : "Highlighted"}
                         </button>
                       ))}
                     </div>
@@ -456,7 +419,6 @@ export default function ImageScan() {
                 </div>
 
                 <div className="p-4">
-                  {/* Editable raw text */}
                   {(!result || activeTab === "raw") && (
                     <textarea
                       value={extractedText}
@@ -465,31 +427,28 @@ export default function ImageScan() {
                       className="w-full resize-y focus:outline-none"
                       style={{
                         background: "transparent",
-                        color: "rgba(255,255,255,0.75)",
-                        fontFamily: "'Rajdhani', sans-serif",
+                        color: "#c9d1d9",
+                        fontFamily: F,
                         fontSize: "13px",
                         lineHeight: "1.7",
                         border: "none",
-                        letterSpacing: "0.02em",
                       }}
                       placeholder="Extracted text will appear here. You can edit it before analysis."
                     />
                   )}
 
-                  {/* Highlighted text */}
                   {result && activeTab === "highlighted" && (
                     <HighlightedText text={extractedText} phrases={result.suspiciousPhrases} />
                   )}
                 </div>
 
-                {/* Suspicious phrases legend */}
                 {result && activeTab === "highlighted" && result.suspiciousPhrases.length > 0 && (
                   <div className="px-4 pb-3 flex flex-wrap gap-1.5">
                     {result.suspiciousPhrases.map((p, i) => (
                       <span key={i} style={{
-                        fontFamily: "'Space Mono', monospace", fontSize: "7px", letterSpacing: "0.1em",
-                        color: "#fca5a5", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)",
-                        borderRadius: "4px", padding: "2px 6px",
+                        fontFamily: F, fontSize: "10px", fontWeight: 500,
+                        color: "#fca5a5", background: "rgba(239,68,68,0.09)", border: "1px solid rgba(239,68,68,0.22)",
+                        borderRadius: "4px", padding: "2px 7px",
                       }}>
                         ⚑ {p}
                       </span>
@@ -497,30 +456,29 @@ export default function ImageScan() {
                   </div>
                 )}
 
-                {/* Analyse button */}
                 {analysisStatus !== "done" && (
                   <div className="px-4 pb-4">
                     <motion.button
                       onClick={runAnalysis}
                       disabled={analysisStatus === "loading" || !extractedText.trim()}
-                      className="w-full flex items-center justify-center gap-2 py-3 rounded-lg text-[10px] tracking-[0.2em] font-semibold relative overflow-hidden"
+                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg font-semibold relative overflow-hidden"
                       style={{
-                        fontFamily: "'Orbitron', monospace",
-                        background: analysisStatus === "loading" ? "rgba(0,229,255,0.06)" : "rgba(0,229,255,0.1)",
-                        border: "1px solid rgba(0,229,255,0.3)",
-                        color: "#00e5ff",
+                        fontFamily: F, fontSize: "13px",
+                        background: analysisStatus === "loading" ? "rgba(59,130,246,0.07)" : "rgba(59,130,246,0.12)",
+                        border: "1px solid rgba(59,130,246,0.3)",
+                        color: "#3b82f6",
                         opacity: !extractedText.trim() ? 0.4 : 1,
                         cursor: !extractedText.trim() || analysisStatus === "loading" ? "default" : "pointer",
                       }}
-                      whileHover={extractedText.trim() && analysisStatus !== "loading" ? { scale: 1.01, background: "rgba(0,229,255,0.15)" } : {}}
+                      whileHover={extractedText.trim() && analysisStatus !== "loading" ? { scale: 1.01 } : {}}
                       whileTap={extractedText.trim() && analysisStatus !== "loading" ? { scale: 0.99 } : {}}
                     >
                       {analysisStatus === "loading" && (
                         <motion.div
                           className="absolute inset-0"
                           animate={{ x: ["-100%", "100%"] }}
-                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                          style={{ background: "linear-gradient(90deg, transparent, rgba(0,229,255,0.12), transparent)" }}
+                          transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
+                          style={{ background: "linear-gradient(90deg, transparent, rgba(59,130,246,0.12), transparent)" }}
                         />
                       )}
                       {analysisStatus === "loading" ? (
@@ -528,12 +486,12 @@ export default function ImageScan() {
                           <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
                             <Zap className="w-3.5 h-3.5" />
                           </motion.div>
-                          ANALYZING…
+                          Analyzing…
                         </>
                       ) : (
                         <>
                           <Zap className="w-3.5 h-3.5" />
-                          RUN AI ANALYSIS
+                          Run AI Analysis
                         </>
                       )}
                     </motion.button>
@@ -544,7 +502,7 @@ export default function ImageScan() {
           </AnimatePresence>
         </div>
 
-        {/* ── RIGHT: Analysis results ── */}
+        {/* RIGHT: Analysis results */}
         <div className="space-y-4">
           <AnimatePresence>
             {!result && analysisStatus === "idle" && (
@@ -553,18 +511,18 @@ export default function ImageScan() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 className="rounded-xl flex flex-col items-center justify-center gap-3 text-center"
-                style={{ minHeight: "240px", border: "1px solid rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.015)" }}
+                style={{ minHeight: "220px", background: "#161b27", border: "1px solid rgba(255,255,255,0.08)" }}
               >
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-                  style={{ background: "rgba(0,229,255,0.06)", border: "1px solid rgba(0,229,255,0.12)" }}>
-                  <ShieldCheck className="w-5 h-5" style={{ color: "rgba(0,229,255,0.4)" }} />
+                  style={{ background: "rgba(59,130,246,0.07)", border: "1px solid rgba(59,130,246,0.14)" }}>
+                  <ShieldCheck className="w-5 h-5" style={{ color: "rgba(59,130,246,0.4)" }} />
                 </div>
                 <div>
-                  <p style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: "14px", fontWeight: 600, color: "rgba(255,255,255,0.35)", letterSpacing: "0.04em" }}>
+                  <p style={{ fontFamily: F, fontSize: "14px", fontWeight: 500, color: "rgba(255,255,255,0.3)" }}>
                     Results appear here
                   </p>
-                  <p style={{ fontFamily: "'Space Mono', monospace", fontSize: "8px", color: "rgba(255,255,255,0.18)", letterSpacing: "0.14em", marginTop: "6px" }}>
-                    UPLOAD AN IMAGE → EXTRACT TEXT → ANALYSE
+                  <p style={{ fontFamily: F, fontSize: "11px", color: "#374151", marginTop: "5px" }}>
+                    Upload image → Extract text → Analyse
                   </p>
                 </div>
               </motion.div>
@@ -573,43 +531,41 @@ export default function ImageScan() {
             {result && (
               <motion.div
                 key="results"
-                initial={{ opacity: 0, x: 16 }}
+                initial={{ opacity: 0, x: 12 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.4 }}
+                transition={{ duration: 0.35 }}
                 className="space-y-4"
               >
                 {/* Score card */}
                 <div className="rounded-xl overflow-hidden"
-                  style={{ border: `1px solid ${rc!.border}`, background: rc!.bg }}>
+                  style={{ background: "#161b27", border: `1px solid ${rc!.border}` }}>
                   <div className="px-4 py-3 flex items-center justify-between"
-                    style={{ borderBottom: `1px solid ${rc!.border}` }}>
+                    style={{ borderBottom: `1px solid ${rc!.border}`, background: rc!.bg }}>
                     <div className="flex items-center gap-2">
                       {result.riskLevel === "Low"
                         ? <ShieldCheck className="w-4 h-4" style={{ color: rc!.color }} />
                         : <AlertTriangle className="w-4 h-4" style={{ color: rc!.color }} />}
-                      <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "10px", letterSpacing: "0.18em", color: rc!.color }}>
-                        CREDIBILITY ANALYSIS
+                      <span style={{ fontFamily: F, fontSize: "11px", fontWeight: 600, letterSpacing: "0.05em", color: rc!.color, textTransform: "uppercase" as const }}>
+                        Credibility Analysis
                       </span>
                     </div>
-                    {/* Image source badge */}
                     <span style={{
-                      fontFamily: "'Space Mono', monospace", fontSize: "7px", letterSpacing: "0.1em",
-                      color: "rgba(168,85,247,0.7)", background: "rgba(168,85,247,0.08)",
-                      border: "1px solid rgba(168,85,247,0.2)", borderRadius: "9999px", padding: "1px 7px",
+                      fontFamily: F, fontSize: "10px", fontWeight: 600,
+                      color: "#a855f7", background: "rgba(168,85,247,0.08)",
+                      border: "1px solid rgba(168,85,247,0.18)", borderRadius: "9999px", padding: "1px 8px",
                     }}>
-                      FROM IMAGE
+                      From Image
                     </span>
                   </div>
 
                   <div className="p-4 space-y-4">
-                    {/* Score + risk */}
                     <div className="flex items-center gap-4">
                       <div className="text-center">
-                        <div style={{ fontFamily: "'Orbitron', monospace", fontSize: "36px", fontWeight: 900, color: rc!.color, lineHeight: 1, textShadow: `0 0 20px ${rc!.color}66` }}>
+                        <div style={{ fontFamily: F, fontSize: "38px", fontWeight: 800, color: rc!.color, lineHeight: 1 }}>
                           {result.credibilityScore}
                         </div>
-                        <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "7px", color: "rgba(255,255,255,0.3)", letterSpacing: "0.14em", marginTop: "4px" }}>
+                        <div style={{ fontFamily: F, fontSize: "10px", fontWeight: 500, color: "#374151", marginTop: "3px" }}>
                           / 100
                         </div>
                       </div>
@@ -620,18 +576,17 @@ export default function ImageScan() {
                             animate={{ width: `${result.credibilityScore}%` }}
                             transition={{ duration: 1, ease: "easeOut" }}
                             className="h-full rounded-full"
-                            style={{ background: rc!.color, boxShadow: `0 0 8px ${rc!.color}66` }}
+                            style={{ background: rc!.color, opacity: 0.85 }}
                           />
                         </div>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md"
-                          style={{ fontFamily: "'Orbitron', monospace", color: rc!.color, background: `${rc!.color}18`, border: `1px solid ${rc!.color}33` }}>
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded-md"
+                          style={{ fontFamily: F, color: rc!.color, background: rc!.bg, border: `1px solid ${rc!.border}` }}>
                           {result.riskLevel.toUpperCase()} RISK
                         </span>
                       </div>
                     </div>
 
-                    {/* Explanation */}
-                    <p style={{ color: "rgba(255,255,255,0.72)", fontFamily: "'Rajdhani', sans-serif", fontSize: "13px", lineHeight: "1.65" }}>
+                    <p style={{ fontFamily: F, color: "#c9d1d9", fontSize: "13px", lineHeight: "1.65" }}>
                       {result.explanation}
                     </p>
                   </div>
@@ -639,48 +594,48 @@ export default function ImageScan() {
 
                 {/* Manipulation breakdown */}
                 <div className="rounded-xl overflow-hidden"
-                  style={{ border: "1px solid rgba(168,85,247,0.15)", background: "rgba(168,85,247,0.03)" }}>
+                  style={{ background: "#161b27", border: "1px solid rgba(255,255,255,0.08)" }}>
                   <div className="px-4 py-2.5 flex items-center gap-2"
-                    style={{ borderBottom: "1px solid rgba(168,85,247,0.1)" }}>
-                    <Zap className="w-3 h-3" style={{ color: "#a855f7" }} />
-                    <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "9px", letterSpacing: "0.18em", color: "#a855f7" }}>
-                      MANIPULATION SIGNALS
+                    style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+                    <Zap className="w-3 h-3" style={{ color: "#6b7280" }} />
+                    <span style={{ fontFamily: F, fontSize: "10px", fontWeight: 600, letterSpacing: "0.06em", color: "#6b7280", textTransform: "uppercase" as const }}>
+                      Manipulation Signals
                     </span>
                   </div>
                   <div className="p-4 space-y-3">
-                    <ManipBar label="FEAR"             value={result.manipulationBreakdown.fear}             color="#ef4444" />
-                    <ManipBar label="URGENCY"          value={result.manipulationBreakdown.urgency}          color="#f97316" />
-                    <ManipBar label="EMOTIONAL"        value={result.manipulationBreakdown.emotionalTriggers} color="#eab308" />
-                    <ManipBar label="FAKE AUTHORITY"   value={result.manipulationBreakdown.fakeAuthority}    color="#a855f7" />
+                    <ManipBar label="Fear"           value={result.manipulationBreakdown.fear}              color="#ef4444" />
+                    <ManipBar label="Urgency"         value={result.manipulationBreakdown.urgency}           color="#f97316" />
+                    <ManipBar label="Emotional"       value={result.manipulationBreakdown.emotionalTriggers} color="#eab308" />
+                    <ManipBar label="Fake Authority"  value={result.manipulationBreakdown.fakeAuthority}     color="#a855f7" />
                   </div>
                 </div>
 
                 {/* Suspicious phrases */}
                 {result.suspiciousPhrases.length > 0 && (
                   <motion.div
-                    initial={{ opacity: 0, y: 8 }}
+                    initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
                     className="rounded-xl overflow-hidden"
-                    style={{ border: "1px solid rgba(239,68,68,0.18)", background: "rgba(239,68,68,0.03)" }}
+                    style={{ background: "#161b27", border: "1px solid rgba(239,68,68,0.18)" }}
                   >
                     <div className="px-4 py-2.5 flex items-center gap-2"
                       style={{ borderBottom: "1px solid rgba(239,68,68,0.1)" }}>
-                      <AlertTriangle className="w-3 h-3" style={{ color: "#ef4444" }} />
-                      <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "9px", letterSpacing: "0.18em", color: "#ef4444" }}>
-                        FLAGGED PHRASES ({result.suspiciousPhrases.length})
+                      <AlertTriangle className="w-3 h-3" style={{ color: "#ef4444", opacity: 0.8 }} />
+                      <span style={{ fontFamily: F, fontSize: "10px", fontWeight: 600, letterSpacing: "0.06em", color: "#6b7280", textTransform: "uppercase" as const }}>
+                        Flagged Phrases ({result.suspiciousPhrases.length})
                       </span>
                     </div>
                     <div className="p-3 flex flex-wrap gap-1.5">
                       {result.suspiciousPhrases.map((p, i) => (
                         <motion.span
                           key={i}
-                          initial={{ opacity: 0, scale: 0.85 }}
+                          initial={{ opacity: 0, scale: 0.88 }}
                           animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: 0.25 + i * 0.05 }}
+                          transition={{ delay: 0.22 + i * 0.05 }}
                           style={{
-                            fontFamily: "'Space Mono', monospace", fontSize: "8px", letterSpacing: "0.08em",
-                            color: "#fca5a5", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)",
+                            fontFamily: F, fontSize: "11px", fontWeight: 500,
+                            color: "#fca5a5", background: "rgba(239,68,68,0.09)", border: "1px solid rgba(239,68,68,0.22)",
                             borderRadius: "5px", padding: "3px 8px",
                           }}
                         >
@@ -694,18 +649,18 @@ export default function ImageScan() {
                 {/* Re-analyse button */}
                 <motion.button
                   onClick={() => { setAnalysisStatus("idle"); setResult(null); setActiveTab("raw"); }}
-                  className="w-full flex items-center justify-center gap-2 py-2 rounded-lg text-[9px] tracking-[0.15em]"
+                  className="w-full flex items-center justify-center gap-2 py-2 rounded-lg text-xs"
                   style={{
-                    fontFamily: "'Space Mono', monospace",
+                    fontFamily: F, fontWeight: 500,
                     background: "transparent",
-                    border: "1px solid rgba(255,255,255,0.07)",
-                    color: "rgba(255,255,255,0.28)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    color: "#374151",
                     cursor: "pointer",
                   }}
-                  whileHover={{ borderColor: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.45)" }}
+                  whileHover={{ borderColor: "rgba(255,255,255,0.15)", color: "#6b7280" }}
                 >
                   <RotateCcw className="w-2.5 h-2.5" />
-                  EDIT TEXT & RE-ANALYSE
+                  Edit text &amp; re-analyse
                 </motion.button>
               </motion.div>
             )}

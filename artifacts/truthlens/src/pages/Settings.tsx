@@ -5,15 +5,17 @@ import {
 } from "lucide-react";
 import { useGetAnalysisStats, getGetAnalysisStatsQueryKey } from "@workspace/api-client-react";
 
+const F = "Inter, system-ui, sans-serif";
+
 function ToggleSwitch({ enabled, label, sub }: { enabled: boolean; label: string; sub?: string }) {
   return (
-    <div className="flex items-center justify-between py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+    <div className="flex items-center justify-between py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
       <div>
-        <p style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: "13px", fontWeight: 600, letterSpacing: "0.06em", color: "rgba(255,255,255,0.7)" }}>
+        <p style={{ fontFamily: F, fontSize: "13px", fontWeight: 500, color: enabled ? "#c9d1d9" : "#6b7280" }}>
           {label}
         </p>
         {sub && (
-          <p style={{ fontFamily: "'Space Mono', monospace", fontSize: "8px", letterSpacing: "0.15em", color: "rgba(255,255,255,0.22)", marginTop: "2px" }}>
+          <p style={{ fontFamily: F, fontSize: "11px", color: "#374151", marginTop: "2px" }}>
             {sub}
           </p>
         )}
@@ -24,10 +26,9 @@ function ToggleSwitch({ enabled, label, sub }: { enabled: boolean; label: string
           width: 38,
           height: 20,
           borderRadius: 10,
-          background: enabled ? "rgba(0,229,255,0.2)" : "rgba(255,255,255,0.06)",
-          border: enabled ? "1px solid rgba(0,229,255,0.35)" : "1px solid rgba(255,255,255,0.1)",
-          boxShadow: enabled ? "0 0 12px rgba(0,229,255,0.2)" : "none",
-          transition: "background 0.25s, border-color 0.25s, box-shadow 0.25s",
+          background: enabled ? "rgba(59,130,246,0.25)" : "rgba(255,255,255,0.07)",
+          border: enabled ? "1px solid rgba(59,130,246,0.4)" : "1px solid rgba(255,255,255,0.12)",
+          transition: "background 0.2s, border-color 0.2s",
         }}
       >
         <motion.div
@@ -39,8 +40,7 @@ function ToggleSwitch({ enabled, label, sub }: { enabled: boolean; label: string
             width: 14,
             height: 14,
             borderRadius: 7,
-            background: enabled ? "#00e5ff" : "rgba(255,255,255,0.3)",
-            boxShadow: enabled ? "0 0 8px rgba(0,229,255,0.6)" : "none",
+            background: enabled ? "#3b82f6" : "rgba(255,255,255,0.25)",
           }}
         />
       </div>
@@ -51,36 +51,32 @@ function ToggleSwitch({ enabled, label, sub }: { enabled: boolean; label: string
 function Section({
   icon: Icon,
   title,
-  color = "#00e5ff",
-  borderColor = "rgba(0,229,255,0.12)",
+  color = "#3b82f6",
   children,
   delay = 0,
 }: {
   icon: React.ElementType;
   title: string;
   color?: string;
-  borderColor?: string;
   children: React.ReactNode;
   delay?: number;
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 14 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, delay }}
+      transition={{ duration: 0.32, delay }}
       className="rounded-xl overflow-hidden"
-      style={{
-        background: "rgba(255,255,255,0.02)",
-        border: `1px solid ${borderColor}`,
-        backdropFilter: "blur(16px)",
-      }}
+      style={{ background: "#161b27", border: "1px solid rgba(255,255,255,0.08)" }}
     >
       <div
         className="flex items-center gap-2.5 px-5 py-3.5"
-        style={{ borderBottom: "1px solid rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.015)" }}
+        style={{ borderBottom: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.01)" }}
       >
-        <Icon className="w-3.5 h-3.5" style={{ color }} />
-        <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "9px", letterSpacing: "0.22em", color }}>{title}</span>
+        <Icon className="w-3.5 h-3.5" style={{ color, opacity: 0.8 }} />
+        <span style={{ fontFamily: F, fontSize: "11px", fontWeight: 600, letterSpacing: "0.05em", color: "#6b7280", textTransform: "uppercase" as const }}>
+          {title}
+        </span>
       </div>
       <div className="px-5 py-1">{children}</div>
     </motion.div>
@@ -89,19 +85,11 @@ function Section({
 
 function InfoRow({ label, value, accent }: { label: string; value: string; accent?: string }) {
   return (
-    <div className="flex items-center justify-between py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
-      <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "9px", letterSpacing: "0.15em", color: "rgba(255,255,255,0.3)" }}>
+    <div className="flex items-center justify-between py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+      <span style={{ fontFamily: F, fontSize: "12px", fontWeight: 500, color: "#6b7280" }}>
         {label}
       </span>
-      <span
-        style={{
-          fontFamily: "'Orbitron', monospace",
-          fontSize: "11px",
-          fontWeight: 600,
-          color: accent ?? "rgba(255,255,255,0.6)",
-          textShadow: accent ? `0 0 10px ${accent}55` : "none",
-        }}
-      >
+      <span style={{ fontFamily: F, fontSize: "12px", fontWeight: 600, color: accent ?? "#94a3b8" }}>
         {value}
       </span>
     </div>
@@ -115,119 +103,105 @@ export default function SettingsPage() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="space-y-5"
+      transition={{ duration: 0.35 }}
+      className="space-y-4"
     >
       {/* Header */}
       <div>
-        <div className="flex items-center gap-3 mb-2">
+        <div className="flex items-center gap-3 mb-1">
           <div
-            className="w-8 h-8 rounded flex items-center justify-center flex-shrink-0"
-            style={{ background: "rgba(168,85,247,0.1)", border: "1px solid rgba(168,85,247,0.3)" }}
+            className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+            style={{ background: "rgba(59,130,246,0.1)", border: "1px solid rgba(59,130,246,0.2)" }}
           >
-            <Settings className="w-4 h-4" style={{ color: "#a855f7" }} />
+            <Settings className="w-4 h-4" style={{ color: "#3b82f6" }} />
           </div>
-          <h2
-            className="text-xl sm:text-2xl font-bold tracking-widest"
-            style={{ fontFamily: "'Orbitron', monospace", color: "#a855f7", textShadow: "0 0 20px rgba(168,85,247,0.5)" }}
-          >
-            SYSTEM CONFIG
-          </h2>
+          <div>
+            <h2 style={{ fontFamily: F, fontSize: "18px", fontWeight: 700, color: "#e2e8f0", letterSpacing: "-0.01em" }}>
+              Settings
+            </h2>
+            <p style={{ fontFamily: F, fontSize: "12px", color: "#475569", marginTop: "1px" }}>
+              System configuration &amp; operator settings
+            </p>
+          </div>
         </div>
-        <p className="text-xs tracking-widest ml-11"
-          style={{ fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.28)" }}>
-          CONTROL PANEL · OPERATOR SETTINGS
-        </p>
-        <div className="mt-4" style={{ height: "1px", background: "linear-gradient(90deg, rgba(168,85,247,0.4), rgba(0,229,255,0.3), transparent)" }} />
+        <div className="mt-4" style={{ height: "1px", background: "rgba(255,255,255,0.07)" }} />
       </div>
 
-      {/* ── AI Engine ── */}
-      <Section icon={Cpu} title="AI ENGINE" color="#00e5ff" borderColor="rgba(0,229,255,0.12)" delay={0.06}>
-        <InfoRow label="MODEL" value="GPT-5 MINI" accent="#00e5ff" />
-        <InfoRow label="PROVIDER" value="OPENAI" accent="#00e5ff" />
-        <InfoRow label="MAX TOKENS" value="1024" />
-        <InfoRow label="ANALYSIS MODE" value="DEEP SCAN" accent="#a855f7" />
-        <InfoRow label="RESPONSE FORMAT" value="JSON STRICT" />
+      {/* AI Engine */}
+      <Section icon={Cpu} title="AI Engine" color="#3b82f6" delay={0.05}>
+        <InfoRow label="Model"           value="GPT-5 Mini"        accent="#3b82f6" />
+        <InfoRow label="Provider"        value="OpenAI"            accent="#3b82f6" />
+        <InfoRow label="Max Tokens"      value="1,200+"            />
+        <InfoRow label="Analysis Mode"   value="Deep Scan"         accent="#a855f7" />
+        <InfoRow label="Response Format" value="JSON Strict"       />
       </Section>
 
-      {/* ── Display ── */}
-      <Section icon={Eye} title="DISPLAY PREFERENCES" color="#a855f7" borderColor="rgba(168,85,247,0.12)" delay={0.1}>
-        <ToggleSwitch enabled label="Animated background orbs" sub="PERFORMANCE · GPU RENDERING" />
-        <ToggleSwitch enabled label="3D Trust Orb visualizer" sub="WEBGL · REQUIRES GPU CONTEXT" />
-        <ToggleSwitch enabled label="Smooth page transitions" sub="FRAMER MOTION · ANIMATION ENGINE" />
-        <ToggleSwitch enabled={false} label="High contrast mode" sub="ACCESSIBILITY · WCAG 2.1" />
+      {/* Display */}
+      <Section icon={Eye} title="Display Preferences" color="#a855f7" delay={0.09}>
+        <ToggleSwitch enabled label="3D Trust Orb visualizer"   sub="WebGL · requires GPU context" />
+        <ToggleSwitch enabled label="Smooth page transitions"   sub="Framer Motion · animation engine" />
+        <ToggleSwitch enabled={false} label="High contrast mode" sub="Accessibility · WCAG 2.1" />
       </Section>
 
-      {/* ── Notifications ── */}
-      <Section icon={Bell} title="ALERTS & NOTIFICATIONS" color="#f59e0b" borderColor="rgba(245,158,11,0.12)" delay={0.14}>
-        <ToggleSwitch enabled label="High-risk scan alerts" sub="REAL-TIME THREAT NOTIFICATION" />
-        <ToggleSwitch enabled label="Voice TTS readouts" sub="WEB SPEECH API · BROWSER NATIVE" />
-        <ToggleSwitch enabled={false} label="Sound effects on analysis" sub="AUDIO FEEDBACK · OPTIONAL" />
+      {/* Notifications */}
+      <Section icon={Bell} title="Alerts & Notifications" color="#f59e0b" delay={0.13}>
+        <ToggleSwitch enabled label="High-risk scan alerts"  sub="Real-time threat notification" />
+        <ToggleSwitch enabled label="Voice TTS readouts"     sub="Web Speech API · browser native" />
+        <ToggleSwitch enabled={false} label="Sound effects on analysis" sub="Audio feedback · optional" />
       </Section>
 
-      {/* ── Privacy ── */}
-      <Section icon={Lock} title="PRIVACY & DATA" color="#ef4444" borderColor="rgba(239,68,68,0.12)" delay={0.18}>
-        <ToggleSwitch enabled label="Store scan history" sub="POSTGRESQL · PERSISTENT STORAGE" />
-        <ToggleSwitch enabled label="Aggregate to global feed" sub="ANONYMISED · COMMUNITY INTELLIGENCE" />
-        <ToggleSwitch enabled={false} label="Share anonymised data" sub="RESEARCH · DISABLED BY DEFAULT" />
+      {/* Privacy */}
+      <Section icon={Lock} title="Privacy & Data" color="#ef4444" delay={0.17}>
+        <ToggleSwitch enabled label="Store scan history"         sub="PostgreSQL · persistent storage" />
+        <ToggleSwitch enabled label="Aggregate to global feed"   sub="Anonymised · community intelligence" />
+        <ToggleSwitch enabled={false} label="Share anonymised data" sub="Research · disabled by default" />
       </Section>
 
-      {/* ── System Stats ── */}
-      <Section icon={Database} title="SESSION STATISTICS" color="#00ff88" borderColor="rgba(0,255,136,0.1)" delay={0.22}>
-        <InfoRow label="TOTAL ANALYSES RUN" value={String(stats?.totalAnalyses ?? 0)} accent="#00e5ff" />
-        <InfoRow label="AVG CREDIBILITY SCORE" value={stats ? `${Math.round(stats.avgCredibilityScore)}/100` : "—"} accent="#00e5ff" />
-        <InfoRow label="SAFE TRANSMISSIONS" value={String(stats?.riskDistribution?.Low ?? 0)} accent="#00ff88" />
-        <InfoRow label="MEDIUM RISK" value={String(stats?.riskDistribution?.Medium ?? 0)} accent="#f59e0b" />
-        <InfoRow label="HIGH RISK" value={String(stats?.riskDistribution?.High ?? 0)} accent="#ef4444" />
+      {/* Session Stats */}
+      <Section icon={Database} title="Session Statistics" color="#22c55e" delay={0.21}>
+        <InfoRow label="Total Analyses Run"    value={String(stats?.totalAnalyses ?? 0)}                                        accent="#3b82f6" />
+        <InfoRow label="Avg Credibility Score" value={stats ? `${Math.round(stats.avgCredibilityScore)}/100` : "—"}             accent="#3b82f6" />
+        <InfoRow label="Safe Transmissions"    value={String(stats?.riskDistribution?.Low ?? 0)}                                accent="#22c55e" />
+        <InfoRow label="Medium Risk"           value={String(stats?.riskDistribution?.Medium ?? 0)}                             accent="#f59e0b" />
+        <InfoRow label="High Risk"             value={String(stats?.riskDistribution?.High ?? 0)}                               accent="#ef4444" />
       </Section>
 
-      {/* ── About ── */}
-      <Section icon={Info} title="ABOUT TRUTHLENS" color="#a855f7" borderColor="rgba(168,85,247,0.12)" delay={0.26}>
-        <InfoRow label="VERSION" value="0.9.4.2" accent="#a855f7" />
-        <InfoRow label="BUILD TYPE" value="PRODUCTION" />
-        <InfoRow label="CLEARANCE LEVEL" value="5 — OPERATOR" accent="#00e5ff" />
-        <InfoRow label="DETECTION ENGINE" value="GPT-5 MINI + HEURISTICS" />
-        <InfoRow label="DATABASE" value="POSTGRESQL" />
+      {/* About */}
+      <Section icon={Info} title="About TruthLens" color="#6b7280" delay={0.25}>
+        <InfoRow label="Version"           value="0.9.4"                    accent="#6b7280" />
+        <InfoRow label="Build Type"        value="Production"               />
+        <InfoRow label="Detection Engine"  value="GPT-5 Mini + Heuristics"  />
+        <InfoRow label="Database"          value="PostgreSQL"               />
         <div className="py-3">
           <div
             className="flex items-center gap-2 p-3 rounded-lg"
-            style={{ background: "rgba(0,229,255,0.04)", border: "1px solid rgba(0,229,255,0.1)" }}
+            style={{ background: "rgba(59,130,246,0.05)", border: "1px solid rgba(59,130,246,0.12)" }}
           >
-            <ShieldAlert className="w-4 h-4 flex-shrink-0" style={{ color: "rgba(0,229,255,0.5)" }} />
-            <div className="flex items-center gap-1.5">
-              <Globe className="w-3 h-3" style={{ color: "rgba(0,229,255,0.4)" }} />
-              <span
-                style={{
-                  fontFamily: "'Space Mono', monospace",
-                  fontSize: "8px",
-                  letterSpacing: "0.15em",
-                  color: "rgba(255,255,255,0.28)",
-                }}
-              >
-                TRUTHLENS AI · MISINFORMATION DETECTION SYSTEM
+            <ShieldAlert className="w-4 h-4 flex-shrink-0" style={{ color: "rgba(59,130,246,0.5)" }} />
+            <div className="flex items-center gap-1.5 flex-1">
+              <Globe className="w-3 h-3" style={{ color: "rgba(59,130,246,0.4)" }} />
+              <span style={{ fontFamily: F, fontSize: "11px", fontWeight: 500, color: "#374151" }}>
+                TruthLens AI · Misinformation Detection System
               </span>
-              <CheckCircle className="w-3 h-3 ml-auto" style={{ color: "#00e5ff" }} />
+              <CheckCircle className="w-3 h-3 ml-auto" style={{ color: "#3b82f6" }} />
             </div>
           </div>
         </div>
       </Section>
 
-      {/* Warning badge */}
+      {/* Notice */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.35 }}
+        transition={{ delay: 0.32 }}
         className="flex items-center gap-2.5 px-4 py-3 rounded-xl"
-        style={{
-          background: "rgba(245,158,11,0.04)",
-          border: "1px solid rgba(245,158,11,0.12)",
-        }}
+        style={{ background: "rgba(245,158,11,0.04)", border: "1px solid rgba(245,158,11,0.1)" }}
       >
-        <Zap className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "rgba(245,158,11,0.6)" }} />
-        <p style={{ fontFamily: "'Space Mono', monospace", fontSize: "8px", letterSpacing: "0.14em", color: "rgba(255,255,255,0.25)", lineHeight: "1.6" }}>
-          TOGGLE STATES ABOVE ARE DISPLAY-ONLY IN THIS BUILD. FULL CONFIG PERSISTENCE AVAILABLE IN ENTERPRISE TIER.
+        <Zap className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "rgba(245,158,11,0.5)" }} />
+        <p style={{ fontFamily: F, fontSize: "11px", fontWeight: 400, color: "#374151", lineHeight: "1.55" }}>
+          Toggle states above are display-only in this build. Full config persistence available in Enterprise tier.
         </p>
       </motion.div>
     </motion.div>
