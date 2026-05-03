@@ -407,11 +407,30 @@ If severity is "risky" or "dangerous": show realistic harm chain (data theft, fi
 
     const completion = await openai.chat.completions.create({
       model: "gpt-5-mini",
-      max_completion_tokens: 620,
+      max_completion_tokens: 1200,
       messages: [{ role: "user", content: prompt }],
     });
-    const raw    = completion.choices[0]?.message?.content ?? "{}";
-    const parsed = JSON.parse(extractJson(raw));
+    const raw = completion.choices[0]?.message?.content || "{}";
+    let parsed: {
+      title?: string;
+      immediateEffect?: string;
+      whatHappens?: string[];
+      statistic?: string;
+      recovery?: string[];
+      lesson?: string;
+    };
+    try {
+      parsed = JSON.parse(extractJson(raw));
+    } catch {
+      parsed = {
+        title: "Outcome Generated",
+        immediateEffect: "Your choice has consequences.",
+        whatHappens: ["The situation unfolds.", "Consequences become clear.", "Action is required.", "Lessons are learned."],
+        statistic: "Awareness is the first step to protection.",
+        recovery: ["Stay alert.", "Verify before acting.", "Report suspicious activity."],
+        lesson: "Always think critically before responding to unexpected requests.",
+      };
+    }
     res.json({ ...parsed, severity });
   } catch (err) {
     req.log.error({ err }, "whatif generation failed");

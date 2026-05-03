@@ -76,12 +76,12 @@ interface Outcome {
   lesson: string;
 }
 
-/* ── Bubble arc positions ───────────────────────────────────── */
+/* ── Bubble arc positions (lowered so they sit just above the head) */
 const BUBBLE_POS: [number, number, number][] = [
-  [-1.75, 2.75, 0.5],
-  [-0.58, 3.2, 0.6],
-  [0.58, 3.2, 0.6],
-  [1.75, 2.75, 0.5],
+  [-1.6, 2.0, 0.4],
+  [-0.52, 2.42, 0.5],
+  [0.52, 2.42, 0.5],
+  [1.6, 2.0, 0.4],
 ];
 const BUBBLE_SPEEDS = [1.55, 2.05, 1.85, 2.25];
 
@@ -350,7 +350,7 @@ function ThoughtBubble({
           }}
           onPointerLeave={() => { setHovered(false); document.body.style.cursor = "auto"; }}
         >
-          <sphereGeometry args={[0.42, 20, 20]} />
+          <sphereGeometry args={[0.48, 20, 20]} />
           <meshStandardMaterial
             color={isSelected ? sevColor + "55" : hovered ? "#16205a" : "#090d25"}
             emissive={sevColor}
@@ -703,8 +703,8 @@ export default function WhatIf() {
       {/* Main interaction area */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
 
-        {/* Left: context + status */}
-        <div className="lg:col-span-2 space-y-3">
+        {/* Left: context + status — shown BELOW canvas on mobile */}
+        <div className="lg:col-span-2 space-y-3 order-2 lg:order-1">
           {/* Context card */}
           <div className="rounded-xl overflow-hidden"
             style={{ border: `1px solid ${activeScenario.color}2e`, background: `${activeScenario.color}07` }}>
@@ -771,10 +771,10 @@ export default function WhatIf() {
           </div>
         </div>
 
-        {/* Right: 3D Canvas */}
+        {/* Right: 3D Canvas — shown FIRST on mobile */}
         <div
-          className="lg:col-span-3 rounded-xl overflow-hidden"
-          style={{ height: "400px", border: "1px solid rgba(255,255,255,0.07)", background: "rgba(4,6,14,0.97)" }}
+          className="lg:col-span-3 rounded-xl overflow-hidden order-1 lg:order-2"
+          style={{ height: "500px", border: "1px solid rgba(255,255,255,0.07)", background: "rgba(4,6,14,0.97)" }}
         >
           {webgl === null && (
             <div className="w-full h-full flex items-center justify-center">
@@ -787,7 +787,8 @@ export default function WhatIf() {
           {webgl === true && (
             <CanvasErrorBoundary>
               <Canvas
-                camera={{ position: [0, 1.6, 5.8], fov: 48 }}
+                camera={{ position: [0, 1.1, 5.5], fov: 55 }}
+                onCreated={({ camera }) => camera.lookAt(0, 1.0, 0)}
                 gl={{ antialias: true, failIfMajorPerformanceCaveat: false }}
               >
                 <Scene
