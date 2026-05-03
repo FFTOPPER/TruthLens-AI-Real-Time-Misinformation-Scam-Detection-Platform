@@ -650,20 +650,110 @@ export default function Home() {
                       {/* Voice controls */}
                       <VoiceControls result={result} />
 
-                      {/* Explanation */}
+                      {/* Explanation — bullet findings */}
                       <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 }}
-                        className="rounded-lg p-4"
-                        style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
+                        className="rounded-xl overflow-hidden"
+                        style={{ border: "1px solid rgba(0,229,255,0.1)", background: "rgba(0,229,255,0.02)" }}
                       >
-                        <p className="text-[10px] tracking-[0.2em] mb-2" style={{ fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.3)" }}>
-                          FINDINGS
-                        </p>
-                        <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.75)", lineHeight: "1.7" }} data-testid="text-explanation">
-                          {result.explanation}
-                        </p>
+                        {/* Header */}
+                        <div
+                          className="px-4 py-3 flex items-center justify-between"
+                          style={{ borderBottom: "1px solid rgba(0,229,255,0.08)", background: "rgba(0,229,255,0.03)" }}
+                        >
+                          <div className="flex items-center gap-2">
+                            <Eye className="w-3 h-3" style={{ color: "#00e5ff" }} />
+                            <span className="text-[10px] tracking-[0.2em]" style={{ fontFamily: "'Space Mono', monospace", color: "#00e5ff" }}>
+                              FINDINGS
+                            </span>
+                          </div>
+                          <span
+                            className="text-[8px] tracking-[0.15em] px-2 py-0.5 rounded-full"
+                            style={{
+                              fontFamily: "'Space Mono', monospace",
+                              color: riskLevel === "High" ? "#ef4444" : riskLevel === "Medium" ? "#f59e0b" : "#00ff88",
+                              background: riskLevel === "High" ? "rgba(239,68,68,0.1)" : riskLevel === "Medium" ? "rgba(245,158,11,0.1)" : "rgba(0,255,136,0.1)",
+                              border: `1px solid ${riskLevel === "High" ? "rgba(239,68,68,0.25)" : riskLevel === "Medium" ? "rgba(245,158,11,0.25)" : "rgba(0,255,136,0.25)"}`,
+                            }}
+                          >
+                            {riskLevel === "High" ? "HIGH RISK" : riskLevel === "Medium" ? "MEDIUM RISK" : "LOW RISK"}
+                          </span>
+                        </div>
+
+                        {/* Bullets */}
+                        <div className="px-4 py-3 space-y-2" data-testid="text-explanation">
+                          {result.explanation
+                            .split(/(?<=[.!?])\s+/)
+                            .map(s => s.trim())
+                            .filter(s => s.length > 4)
+                            .map((sentence, i) => (
+                              <motion.div
+                                key={i}
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.35 + i * 0.1, duration: 0.3 }}
+                                className="group flex items-start gap-3 px-3 py-2.5 rounded-lg cursor-default"
+                                style={{
+                                  background: "rgba(255,255,255,0.02)",
+                                  border: "1px solid rgba(255,255,255,0.04)",
+                                  transition: "background 0.2s, border-color 0.2s",
+                                }}
+                                onMouseEnter={e => {
+                                  (e.currentTarget as HTMLDivElement).style.background = "rgba(0,229,255,0.04)";
+                                  (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(0,229,255,0.15)";
+                                }}
+                                onMouseLeave={e => {
+                                  (e.currentTarget as HTMLDivElement).style.background = "rgba(255,255,255,0.02)";
+                                  (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(255,255,255,0.04)";
+                                }}
+                              >
+                                {/* Bullet marker */}
+                                <div className="flex-shrink-0 flex flex-col items-center gap-1 pt-1">
+                                  <motion.div
+                                    className="w-1.5 h-1.5 rounded-full"
+                                    style={{
+                                      background: i === 0 ? "#00e5ff" : "rgba(255,255,255,0.2)",
+                                      boxShadow: i === 0 ? "0 0 6px #00e5ff" : "none",
+                                    }}
+                                    animate={i === 0 ? { opacity: [0.6, 1, 0.6] } : {}}
+                                    transition={{ duration: 2, repeat: Infinity }}
+                                  />
+                                  {i < result.explanation.split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 4).length - 1 && (
+                                    <motion.div
+                                      className="w-px flex-1"
+                                      initial={{ height: 0 }}
+                                      animate={{ height: "100%" }}
+                                      transition={{ delay: 0.5 + i * 0.1, duration: 0.4 }}
+                                      style={{
+                                        background: "linear-gradient(180deg, rgba(0,229,255,0.2), rgba(0,229,255,0.04))",
+                                        minHeight: "12px",
+                                      }}
+                                    />
+                                  )}
+                                </div>
+
+                                {/* Index + text */}
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-1.5 mb-0.5">
+                                    <span
+                                      className="text-[8px] font-bold tracking-[0.2em]"
+                                      style={{ fontFamily: "'Orbitron', monospace", color: "rgba(0,229,255,0.35)" }}
+                                    >
+                                      {String(i + 1).padStart(2, "0")}
+                                    </span>
+                                  </div>
+                                  <p
+                                    className="text-xs leading-relaxed"
+                                    style={{ color: "rgba(255,255,255,0.7)", lineHeight: "1.65", fontFamily: "'Rajdhani', sans-serif", fontSize: "13px", fontWeight: 500 }}
+                                  >
+                                    {sentence}
+                                  </p>
+                                </div>
+                              </motion.div>
+                            ))}
+                        </div>
                       </motion.div>
 
                       {/* Manipulation breakdown */}
