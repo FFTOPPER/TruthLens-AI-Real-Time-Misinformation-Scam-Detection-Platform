@@ -32,10 +32,10 @@ const SAMPLES = [
 
 /* ── Feature pills for hero ───────────────────────────────── */
 const FEATURES = [
-  { icon: "◈", text: "Manipulation Detection" },
-  { icon: "⚡", text: "Real-time AI Analysis" },
-  { icon: "◉", text: "Credibility Scoring" },
-  { icon: "🎙", text: "Voice Assistant" },
+  { icon: "◈", text: "Manipulation signals" },
+  { icon: "◉", text: "Credibility score" },
+  { icon: "⚑", text: "Risk breakdown" },
+  { icon: "🎙", text: "Voice readout" },
 ];
 
 /* ── Scanning line overlay ────────────────────────────────── */
@@ -104,7 +104,7 @@ function ScanOverlay({ active }: { active: boolean }) {
                   className="text-base tracking-[0.35em] font-bold"
                   style={{ fontFamily: "'Orbitron', monospace", color: "#00e5ff", textShadow: "0 0 16px rgba(0,229,255,0.9)" }}
                 >
-                  DEEP SCAN IN PROGRESS
+                  SCANNING
                 </span>
               </div>
               <div className="flex items-center gap-1.5">
@@ -118,12 +118,6 @@ function ScanOverlay({ active }: { active: boolean }) {
                   />
                 ))}
               </div>
-              <span
-                className="text-[10px] tracking-[0.25em]"
-                style={{ fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.3)" }}
-              >
-                ANALYZING NEURAL PATTERNS
-              </span>
             </div>
 
             {/* Corner brackets on the HUD */}
@@ -318,7 +312,7 @@ export default function Home() {
               transition={{ duration: 1.5, repeat: Infinity }}
             />
             <span className="text-[10px] tracking-[0.2em] font-semibold" style={{ fontFamily: "'Space Mono', monospace", color: "#00e5ff" }}>
-              AI-POWERED · REAL-TIME ANALYSIS
+              LIVE · SCAN READY
             </span>
           </motion.div>
 
@@ -346,19 +340,10 @@ export default function Home() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.5 }}
-            className="text-lg mb-2 max-w-md"
-            style={{ color: "rgba(255,255,255,0.6)", lineHeight: "1.6" }}
+            className="text-lg mb-8 max-w-md"
+            style={{ color: "rgba(255,255,255,0.5)", lineHeight: "1.6" }}
           >
-            Detect misinformation instantly using AI
-          </motion.p>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="text-xs mb-8 max-w-sm"
-            style={{ fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.25)", lineHeight: "1.8" }}
-          >
-            Paste any text — news, messages, claims — and get an AI credibility score, manipulation breakdown, and voice-narrated report in seconds.
+            Know what's real.
           </motion.p>
 
           {/* Feature pills */}
@@ -409,7 +394,7 @@ export default function Home() {
               transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
             />
             <Zap className="w-3.5 h-3.5 relative" />
-            <span className="relative">TRY DEMO</span>
+            <span className="relative">START SCANNING</span>
             <ChevronDown className="w-3.5 h-3.5 relative" />
           </motion.button>
         </motion.section>
@@ -434,7 +419,7 @@ export default function Home() {
                 </h2>
               </div>
               <p className="text-xs tracking-widest ml-11" style={{ fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.35)" }}>
-                DEEP-STATE CREDIBILITY EVALUATION TERMINAL
+                PASTE TEXT · GET THE TRUTH
               </p>
             </motion.div>
             <div className="mt-4" style={{ height: "1px", background: "linear-gradient(90deg, rgba(0,229,255,0.4), rgba(168,85,247,0.4), transparent)" }} />
@@ -450,7 +435,7 @@ export default function Home() {
             <div className="flex items-center gap-2 mr-1">
               <FlaskConical className="w-3.5 h-3.5" style={{ color: "rgba(255,255,255,0.3)" }} />
               <span className="text-[10px] tracking-[0.2em]" style={{ fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.25)" }}>
-                LOAD SAMPLE:
+                TRY A SAMPLE:
               </span>
             </div>
             {SAMPLES.map((s, i) => (
@@ -505,7 +490,7 @@ export default function Home() {
                 >
                   <ScanLine className="w-3.5 h-3.5" style={{ color: "#00e5ff" }} />
                   <span className="text-[11px] tracking-[0.25em] font-semibold" style={{ fontFamily: "'Space Mono', monospace", color: "#00e5ff" }}>
-                    INPUT STREAM
+                    YOUR TEXT
                   </span>
                 </div>
 
@@ -513,7 +498,7 @@ export default function Home() {
                   <div className="relative">
                     <textarea
                       ref={inputRef}
-                      placeholder="Paste transmission data here — news article, message, URL content..."
+                      placeholder="Paste any text to check — news, messages, claims..."
                       className="w-full min-h-[200px] resize-none rounded-lg px-4 py-3 text-sm font-mono outline-none transition-all duration-300"
                       style={{
                         background: "rgba(0,0,0,0.4)",
@@ -574,7 +559,7 @@ export default function Home() {
                       )}
                       <div className="relative flex items-center gap-2">
                         <Zap className="w-3.5 h-3.5" />
-                        {isPending ? "PROCESSING..." : "INITIATE SCAN"}
+                        {isPending ? "SCANNING..." : "SCAN"}
                       </div>
                     </motion.button>
                   </div>
@@ -598,7 +583,7 @@ export default function Home() {
                   style={{ borderBottom: "1px solid rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.02)" }}
                 >
                   <span className="text-[10px] tracking-[0.25em] font-semibold" style={{ fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.3)" }}>
-                    ◈ TRUST ORB — THREAT VISUALIZER
+                    ◈ TRUST SIGNAL
                   </span>
                 </div>
                 <div className="py-6 flex items-center justify-center">
@@ -627,7 +612,7 @@ export default function Home() {
               >
                 <ShieldCheck className="w-3.5 h-3.5" style={{ color: "#a855f7" }} />
                 <span className="text-[11px] tracking-[0.25em] font-semibold" style={{ fontFamily: "'Space Mono', monospace", color: "#a855f7" }}>
-                  INTELLIGENCE REPORT
+                  RESULTS
                 </span>
               </div>
 
@@ -642,7 +627,7 @@ export default function Home() {
                       className="flex flex-col items-center justify-center h-full min-h-[320px] gap-4"
                     >
                       <span className="text-[11px] tracking-[0.25em]" style={{ fontFamily: "'Space Mono', monospace", color: "rgba(0,229,255,0.5)" }}>
-                        AI DEEP SCAN IN PROGRESS...
+                        CHECKING...
                       </span>
                     </motion.div>
                   ) : result ? (
@@ -674,7 +659,7 @@ export default function Home() {
                         style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
                       >
                         <p className="text-[10px] tracking-[0.2em] mb-2" style={{ fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.3)" }}>
-                          ANALYSIS SUMMARY
+                          FINDINGS
                         </p>
                         <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.75)", lineHeight: "1.7" }} data-testid="text-explanation">
                           {result.explanation}
@@ -695,7 +680,7 @@ export default function Home() {
                         >
                           <BrainCircuit className="w-3.5 h-3.5" style={{ color: "#a855f7" }} />
                           <span className="text-[10px] tracking-[0.2em] font-semibold" style={{ fontFamily: "'Space Mono', monospace", color: "#a855f7" }}>
-                            MANIPULATION TECHNIQUE BREAKDOWN
+                            MANIPULATION SIGNALS
                           </span>
                         </div>
                         <div className="px-4 py-4 space-y-4">
@@ -715,7 +700,7 @@ export default function Home() {
                           <div className="flex items-center gap-2 mb-3">
                             <AlertTriangle className="w-3 h-3" style={{ color: "#ef4444" }} />
                             <span className="text-[10px] tracking-[0.2em]" style={{ fontFamily: "'Space Mono', monospace", color: "#ef4444" }}>
-                              DETECTED ANOMALIES
+                              FLAGGED PHRASES
                             </span>
                           </div>
                           <div className="space-y-2">
@@ -761,10 +746,10 @@ export default function Home() {
                       </motion.div>
                       <div className="text-center">
                         <p className="text-xs tracking-[0.2em]" style={{ fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.2)" }}>
-                          AWAITING TRANSMISSION
+                          READY TO SCAN
                         </p>
                         <p className="text-[10px] tracking-widest mt-1" style={{ fontFamily: "'Space Mono', monospace", color: "rgba(255,255,255,0.1)" }}>
-                          SUBMIT TEXT TO BEGIN ANALYSIS
+                          PASTE TEXT · HIT SCAN
                         </p>
                       </div>
                     </motion.div>
