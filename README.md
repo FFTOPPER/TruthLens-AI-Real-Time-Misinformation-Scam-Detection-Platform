@@ -1,15 +1,23 @@
-<div align="center">
-
-<img src="screenshots/dashboard.jpg" alt="TruthLens AI" width="100%"/>
-
 # TruthLens AI
 ### Real-Time Misinformation & Scam Detection Platform
 
+
+
+<div align="center">
+<img src="screenshots/dashboard.jpg" alt="TruthLens AI" width="100%"/>
+
+
+
 [![Live](https://img.shields.io/badge/status-live-brightgreen?style=flat-square)](https://truthlensai-real-time-misinformati.FFTOPPER.repl.co)
+-----
 [![OpenAI](https://img.shields.io/badge/AI-OpenAI%20GPT--4o--mini-412991?style=flat-square&logo=openai)](https://openai.com)
+------
 [![React](https://img.shields.io/badge/Frontend-React%2018%20%2B%20Vite-61DAFB?style=flat-square&logo=react)](https://react.dev)
+------
 [![Express](https://img.shields.io/badge/Backend-Express%20%2B%20TypeScript-000000?style=flat-square&logo=express)](https://expressjs.com)
+------
 [![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-336791?style=flat-square&logo=postgresql)](https://postgresql.org)
+-------
 [![Three.js](https://img.shields.io/badge/3D-Three.js%20%2F%20R3F-black?style=flat-square&logo=threedotjs)](https://threejs.org)
 
 > **Know what's real.** TruthLens AI analyses text, images, and videos for scams, misinformation, deepfakes, and psychological manipulation — in real time, with plain-English explanations anyone can understand.
