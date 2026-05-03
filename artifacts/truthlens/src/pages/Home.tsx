@@ -243,7 +243,7 @@ function NeuralDiagram({ techniques }: { techniques: CognitiveTechnique[] }) {
   ];
   const CX = 110, CY = 110;
   return (
-    <svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg" className="w-full max-w-[180px] mx-auto">
+    <svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg" className="w-full max-w-[260px] mx-auto">
       {/* Orbit rings */}
       <circle cx={CX} cy={CY} r={82} fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="0.5" />
       <circle cx={CX} cy={CY} r={60} fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" strokeDasharray="4,6" />
@@ -302,30 +302,33 @@ function CognitiveTechCard({ tech, idx }: { tech: CognitiveTechnique; idx: numbe
   const cfg = TECH_CFG[tech.name] ?? TECH_CFG["Fear Induction"];
   return (
     <motion.div
-      initial={{ opacity: 0, y: 6 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.65 + idx * 0.07 }}
-      className="p-2.5 rounded-lg"
-      style={{ background: tech.active ? cfg.bg : "rgba(255,255,255,0.02)", border: `1px solid ${tech.active ? cfg.border : "rgba(255,255,255,0.06)"}` }}
+      transition={{ delay: 0.65 + idx * 0.08 }}
+      className="p-4 rounded-xl"
+      style={{
+        background: tech.active ? cfg.bg : "rgba(255,255,255,0.02)",
+        border: `1px solid ${tech.active ? cfg.border : "rgba(255,255,255,0.06)"}`,
+        boxShadow: tech.active ? `0 4px 20px ${cfg.color}18` : "none",
+      }}
     >
-      <div className="flex items-center justify-between mb-1">
-        <div className="flex items-center gap-1.5">
-          <span style={{ color: tech.active ? cfg.color : "rgba(255,255,255,0.2)", fontSize: "10px" }}>{cfg.icon}</span>
-          <span className="text-[8px] tracking-[0.16em] font-bold" style={{ fontFamily: "'Space Mono', monospace", color: tech.active ? cfg.color : "rgba(255,255,255,0.2)" }}>
+      <div className="flex items-center justify-between mb-2.5">
+        <div className="flex items-center gap-2">
+          <span style={{ color: tech.active ? cfg.color : "rgba(255,255,255,0.2)", fontSize: "14px" }}>{cfg.icon}</span>
+          <span className="text-[9px] tracking-[0.18em] font-bold" style={{ fontFamily: "'Space Mono', monospace", color: tech.active ? cfg.color : "rgba(255,255,255,0.2)" }}>
             {tech.name.toUpperCase()}
           </span>
         </div>
-        <span className="text-[7px] tracking-[0.1em] px-1.5 py-0.5 rounded-full"
+        <span className="text-[8px] tracking-[0.1em] px-2 py-1 rounded-full"
           style={{ fontFamily: "'Space Mono', monospace",
             background: tech.active ? `${cfg.color}22` : "rgba(255,255,255,0.04)",
             color: tech.active ? cfg.color : "rgba(255,255,255,0.18)",
             border: `1px solid ${tech.active ? `${cfg.color}44` : "rgba(255,255,255,0.06)"}` }}
         >
-          {tech.active ? "ACTIVE" : "NONE"}
+          {tech.active ? "ACTIVE" : "INACTIVE"}
         </span>
       </div>
-      <p className="text-[10px] leading-snug"
-        style={{ color: tech.active ? "rgba(255,255,255,0.58)" : "rgba(255,255,255,0.2)", fontFamily: "'Rajdhani', sans-serif", fontSize: "11px" }}>
+      <p style={{ color: tech.active ? "rgba(255,255,255,0.72)" : "rgba(255,255,255,0.25)", fontFamily: "'Rajdhani', sans-serif", fontSize: "13px", lineHeight: "1.62" }}>
         {tech.mechanism}
       </p>
     </motion.div>
@@ -1191,18 +1194,16 @@ export default function Home() {
                                 </p>
                               </motion.div>
 
-                              {/* Diagram + technique cards */}
-                              <div className="flex gap-3 items-start">
-                                {/* Neural diagram */}
-                                <div className="flex-shrink-0 w-[110px]">
-                                  <NeuralDiagram techniques={ci.techniques} />
-                                </div>
-                                {/* Technique cards 2×2 */}
-                                <div className="flex-1 grid grid-cols-1 gap-1.5">
-                                  {ci.techniques.map((tech, i) => (
-                                    <CognitiveTechCard key={tech.name} tech={tech} idx={i} />
-                                  ))}
-                                </div>
+                              {/* Neural diagram — centered, full-width */}
+                              <div className="flex justify-center py-2">
+                                <NeuralDiagram techniques={ci.techniques} />
+                              </div>
+
+                              {/* Technique cards — 2-column grid */}
+                              <div className="grid grid-cols-2 gap-3 mt-2">
+                                {ci.techniques.map((tech, i) => (
+                                  <CognitiveTechCard key={tech.name} tech={tech} idx={i} />
+                                ))}
                               </div>
                             </div>
                           </motion.div>
