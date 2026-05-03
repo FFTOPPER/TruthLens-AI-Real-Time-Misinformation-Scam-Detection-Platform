@@ -117,26 +117,27 @@ export default function ImageScan() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  /* ── Load image ── */
+  /* ── Load image — read as data URL so Tesseract worker can access it ── */
   const loadImage = useCallback((file: File) => {
     if (!file.type.startsWith("image/")) {
       toast({ title: "Invalid file", description: "Please upload a JPG or PNG image.", variant: "destructive" });
       return;
     }
-    const url = URL.createObjectURL(file);
-    setImageSrc(url);
-    setImageFile(file);
-    setExtractedText("");
-    setResult(null);
-    setOcrStatus("idle");
-    setAnalysisStatus("idle");
-    setOcrProgress(0);
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImageSrc(reader.result as string);
+      setImageFile(file);
+      setExtractedText("");
+      setResult(null);
+      setOcrStatus("idle");
+      setAnalysisStatus("idle");
+      setOcrProgress(0);
+    };
+    reader.onerror = () => {
+      toast({ title: "Could not read file", description: "Try a different image.", variant: "destructive" });
+    };
+    reader.readAsDataURL(file);
   }, [toast]);
-
-  /* Clean up object URL */
-  useEffect(() => {
-    return () => { if (imageSrc) URL.revokeObjectURL(imageSrc); };
-  }, [imageSrc]);
 
   /* ── Drag & drop ── */
   const onDragOver = (e: React.DragEvent) => { e.preventDefault(); setIsDragging(true); };
@@ -148,29 +149,32 @@ export default function ImageScan() {
     if (file) loadImage(file);
   };
 
-  /* ── Run OCR ── */
+  /* ── Run OCR — pass data URL so the worker can read it ── */
   const runOcr = useCallback(async () => {
-    if (!imageFile) return;
+    if (!imageSrc) return;
     setOcrStatus("running");
     setOcrProgress(0);
     setExtractedText("");
+    let worker: Awaited<ReturnType<typeof createWorker>> | null = null;
     try {
-      const worker = await createWorker("eng", 1, {
-        logger: (m) => {
+      worker = await createWorker("eng", 1, {
+        logger: (m: { status?: string; progress?: number }) => {
           if (m.status) setOcrStage(m.status);
           if (typeof m.progress === "number") setOcrProgress(Math.round(m.progress * 100));
         },
       });
-      const { data } = await worker.recognize(imageFile);
-      await worker.terminate();
+      const { data } = await worker.recognize(imageSrc);
       const clean = data.text.replace(/\f/g, "\n").trim();
       setExtractedText(clean);
       setOcrStatus("done");
-    } catch {
+    } catch (err) {
+      console.error("OCR error:", err);
       setOcrStatus("error");
       toast({ title: "OCR Failed", description: "Could not extract text from image.", variant: "destructive" });
+    } finally {
+      worker?.terminate().catch(() => {});
     }
-  }, [imageFile, toast]);
+  }, [imageSrc, toast]);
 
   /* ── Run analysis ── */
   const runAnalysis = useCallback(async () => {
@@ -195,7 +199,6 @@ export default function ImageScan() {
 
   /* ── Reset ── */
   const reset = () => {
-    if (imageSrc) URL.revokeObjectURL(imageSrc);
     setImageSrc(null);
     setImageFile(null);
     setExtractedText("");
