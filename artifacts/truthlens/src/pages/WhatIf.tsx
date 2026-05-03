@@ -352,11 +352,11 @@ function ThoughtBubble({
         >
           <sphereGeometry args={[0.48, 20, 20]} />
           <meshStandardMaterial
-            color={isSelected ? sevColor + "55" : hovered ? "#16205a" : "#090d25"}
+            color={isSelected ? sevColor : hovered ? "#16205a" : "#090d25"}
             emissive={sevColor}
             emissiveIntensity={isSelected ? 0.6 : hovered ? 0.32 : 0.15}
             transparent
-            opacity={isDisabled && !isSelected ? 0.18 : 0.9}
+            opacity={isSelected ? 0.55 : isDisabled && !isSelected ? 0.18 : 0.9}
             roughness={0.22}
             metalness={0.12}
           />
@@ -454,7 +454,7 @@ function OutcomePanel({ outcome, onReset }: { outcome: Outcome; onReset: () => v
           <span style={{ fontSize: "22px" }}>{sev.icon}</span>
           <div>
             <div style={{ fontFamily: "'Orbitron', monospace", fontSize: "12px", fontWeight: 700, color: sev.color, letterSpacing: "0.1em" }}>
-              {outcome.title.toUpperCase()}
+              {(outcome.title ?? "OUTCOME GENERATED").toUpperCase()}
             </div>
             <div style={{ fontFamily: "'Space Mono', monospace", fontSize: "7.5px", color: "rgba(255,255,255,0.3)", letterSpacing: "0.14em", marginTop: "2px" }}>
               {sev.label} OUTCOME
@@ -788,7 +788,12 @@ export default function WhatIf() {
             <CanvasErrorBoundary>
               <Canvas
                 camera={{ position: [0, 1.1, 5.5], fov: 55 }}
-                onCreated={({ camera }) => camera.lookAt(0, 1.0, 0)}
+                onCreated={({ camera, gl }) => {
+                  camera.lookAt(0, 1.0, 0);
+                  gl.domElement.addEventListener("webglcontextlost", (e) => {
+                    e.preventDefault();
+                  }, false);
+                }}
                 gl={{ antialias: true, failIfMajorPerformanceCaveat: false }}
               >
                 <Scene

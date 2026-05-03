@@ -419,18 +419,20 @@ If severity is "risky" or "dangerous": show realistic harm chain (data theft, fi
       recovery?: string[];
       lesson?: string;
     };
+    let base: Record<string, unknown> = {};
     try {
-      parsed = JSON.parse(extractJson(raw));
-    } catch {
-      parsed = {
-        title: "Outcome Generated",
-        immediateEffect: "Your choice has consequences.",
-        whatHappens: ["The situation unfolds.", "Consequences become clear.", "Action is required.", "Lessons are learned."],
-        statistic: "Awareness is the first step to protection.",
-        recovery: ["Stay alert.", "Verify before acting.", "Report suspicious activity."],
-        lesson: "Always think critically before responding to unexpected requests.",
-      };
-    }
+      base = JSON.parse(extractJson(raw)) as Record<string, unknown>;
+    } catch { /* use empty base — defaults below will fill everything in */ }
+
+    /* Normalise: ensure every required field exists regardless of AI quirks */
+    parsed = {
+      title:          typeof base.title          === "string" ? base.title          : "Outcome Generated",
+      immediateEffect:typeof base.immediateEffect === "string" ? base.immediateEffect : "Your choice set off a chain of consequences.",
+      whatHappens:    Array.isArray(base.whatHappens)  ? base.whatHappens as string[]  : ["The situation unfolds.", "Consequences become clear.", "Action becomes necessary.", "Lessons are learned."],
+      statistic:      typeof base.statistic      === "string" ? base.statistic      : "Awareness is the first step to protection.",
+      recovery:       Array.isArray(base.recovery)     ? base.recovery as string[]     : ["Stay alert.", "Verify before acting.", "Report suspicious activity."],
+      lesson:         typeof base.lesson         === "string" ? base.lesson         : "Always think critically before responding to unexpected requests.",
+    };
     res.json({ ...parsed, severity });
   } catch (err) {
     req.log.error({ err }, "whatif generation failed");
