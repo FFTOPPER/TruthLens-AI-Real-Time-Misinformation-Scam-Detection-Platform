@@ -151,7 +151,7 @@ router.get("/analysis/stats", async (req, res) => {
       .from(analysesTable);
 
     const avgScore = await db
-      .select({ avg: sql<number>`avg(credibility_score::numeric)` })
+      .select({ avg: sql<string>`avg(credibility_score::numeric)::text` })
       .from(analysesTable);
 
     const low = await db
@@ -169,13 +169,30 @@ router.get("/analysis/stats", async (req, res) => {
       .from(analysesTable)
       .where(sql`risk_level = 'High'`);
 
+    const manipulation = await db
+      .select({
+        fear: sql<string>`coalesce(avg((manipulation_breakdown::json->>'fear')::numeric), 0)::text`,
+        urgency: sql<string>`coalesce(avg((manipulation_breakdown::json->>'urgency')::numeric), 0)::text`,
+        emotionalTriggers: sql<string>`coalesce(avg((manipulation_breakdown::json->>'emotionalTriggers')::numeric), 0)::text`,
+        fakeAuthority: sql<string>`coalesce(avg((manipulation_breakdown::json->>'fakeAuthority')::numeric), 0)::text`,
+      })
+      .from(analysesTable);
+
+    const toNum = (v: string | null | undefined) => Math.round(Number(v ?? 0));
+
     res.json({
       totalAnalyses: total[0]?.count ?? 0,
-      avgCredibilityScore: Number((avgScore[0]?.avg ?? 0).toFixed(1)),
+      avgCredibilityScore: Math.round(Number(avgScore[0]?.avg ?? 0) * 10) / 10,
       riskDistribution: {
         Low: low[0]?.count ?? 0,
         Medium: medium[0]?.count ?? 0,
         High: high[0]?.count ?? 0,
+      },
+      avgManipulation: {
+        fear: toNum(manipulation[0]?.fear),
+        urgency: toNum(manipulation[0]?.urgency),
+        emotionalTriggers: toNum(manipulation[0]?.emotionalTriggers),
+        fakeAuthority: toNum(manipulation[0]?.fakeAuthority),
       },
     });
   } catch (err) {
