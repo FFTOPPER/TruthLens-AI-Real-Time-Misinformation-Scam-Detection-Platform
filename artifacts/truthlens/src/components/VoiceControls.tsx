@@ -42,50 +42,41 @@ function pickVoice(): SpeechSynthesisVoice | null {
   );
 }
 
-/* ─── Natural Indian-English speech script ────────────────────── */
+/* ─── Short verdict summary — 2 to 3 sentences max ──────────── */
 function buildSpeechText(result: AnalysisResult): string {
-  const { riskLevel: risk, credibilityScore: score, explanation, suspiciousPhrases, manipulationBreakdown: mb } = result;
+  const { riskLevel: risk, credibilityScore: score, manipulationBreakdown: mb, suspiciousPhrases } = result;
 
-  const signals: string[] = [];
-  if (mb.fear >= 55)            signals.push("fear tactics");
-  if (mb.urgency >= 55)         signals.push("urgency pressure");
-  if (mb.emotionalTriggers >= 55) signals.push("emotional manipulation");
-  if (mb.fakeAuthority >= 55)   signals.push("fake authority claims");
-
-  let speech = "";
+  const topSignal =
+    mb.fear >= 60 ? "fear tactics" :
+    mb.urgency >= 60 ? "urgency pressure" :
+    mb.emotionalTriggers >= 60 ? "emotional manipulation" :
+    mb.fakeAuthority >= 60 ? "fake authority" :
+    null;
 
   if (risk === "Low") {
-    speech =
-      `Okay, so I have checked this content — and it looks quite credible, actually. ` +
-      `The trust score is ${score} out of 100, which is pretty good. ` +
-      `${explanation} ` +
-      (signals.length === 0
-        ? `No manipulation signals detected. This one seems genuine.`
-        : `Though there are some mild signals — ${signals.join(" and ")} — overall it is fine.`);
-  } else if (risk === "Medium") {
-    speech =
-      `Alright, so this content is a bit mixed, I would say. ` +
-      `Trust score is ${score} out of 100 — that is medium range, so some caution is needed here. ` +
-      `${explanation} ` +
-      (signals.length > 0
-        ? `Specifically, watch out for ${signals.join(" and ")} in this one.`
-        : `Overall, read it carefully before sharing or acting on it.`);
-  } else {
-    speech =
-      `Okay, so this one is a red flag — seriously. ` +
-      `Trust score is only ${score} out of 100, which is very low, to be honest. ` +
-      `This content is high risk. ` +
-      `${explanation} ` +
-      (signals.length > 0
-        ? `The main issues are ${signals.join(", ")}. Please be very careful with this.`
-        : `Do not trust this content or share it further.`);
+    return (
+      `Looks credible — score is ${score} out of 100. ` +
+      (topSignal ? `Some mild ${topSignal} detected, but nothing major. ` : `No manipulation signals found. `) +
+      `You can generally trust this one.`
+    );
   }
 
-  if (suspiciousPhrases.length > 0) {
-    speech += ` Also, ${suspiciousPhrases.length} suspicious phrase${suspiciousPhrases.length > 1 ? "s were" : " was"} flagged. Definitely avoid those parts.`;
+  if (risk === "Medium") {
+    return (
+      `Mixed result — score is ${score} out of 100. ` +
+      (topSignal ? `Watch out for ${topSignal} here. ` : `Some questionable patterns detected. `) +
+      `Read carefully before sharing.`
+    );
   }
 
-  return speech;
+  // High risk
+  return (
+    `Red flag — score is only ${score} out of 100. ` +
+    (topSignal ? `Heavy use of ${topSignal} detected. ` : `Multiple manipulation signals found. `) +
+    (suspiciousPhrases.length > 0
+      ? `${suspiciousPhrases.length} suspicious phrase${suspiciousPhrases.length > 1 ? "s" : ""} flagged. Do not trust this.`
+      : `Do not share or act on this content.`)
+  );
 }
 
 /* ─── Natural Q&A answers ─────────────────────────────────────── */
