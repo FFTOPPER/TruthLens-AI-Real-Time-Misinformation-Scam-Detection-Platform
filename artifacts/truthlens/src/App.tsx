@@ -7,6 +7,7 @@ import { Layout } from "@/components/Layout";
 import Home from "@/pages/Home";
 import History from "@/pages/History";
 import Stats from "@/pages/Stats";
+import Settings from "@/pages/Settings";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,6 +25,7 @@ function Router() {
         <Route path="/" component={Home} />
         <Route path="/history" component={History} />
         <Route path="/stats" component={Stats} />
+        <Route path="/settings" component={Settings} />
         <Route component={NotFound} />
       </Switch>
     </Layout>
