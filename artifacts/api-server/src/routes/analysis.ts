@@ -440,4 +440,114 @@ If severity is "risky" or "dangerous": show realistic harm chain (data theft, fi
   }
 });
 
+/* ── Video / Deepfake Analysis ─────────────────────────────── */
+router.post("/analysis/video", async (req, res) => {
+  const { url, fileName, fileType } = req.body as {
+    url?: string;
+    fileName?: string;
+    fileType?: string;
+  };
+
+  if (!url && !fileName) {
+    res.status(400).json({ error: "url or fileName is required" });
+    return;
+  }
+
+  let platform   = "Unknown Platform";
+  let videoTitle = fileName || "Uploaded video file";
+  let videoAuthor = "";
+  let thumbnailUrl = "";
+  let videoContext = "";
+
+  if (url) {
+    if (/youtube\.com|youtu\.be/i.test(url))           platform = "YouTube";
+    else if (/rumble\.com/i.test(url))                 platform = "Rumble";
+    else if (/tiktok\.com/i.test(url))                 platform = "TikTok";
+    else if (/twitter\.com|x\.com/i.test(url))         platform = "X (Twitter)";
+    else if (/facebook\.com|fb\.watch/i.test(url))     platform = "Facebook";
+    else if (/instagram\.com/i.test(url))              platform = "Instagram";
+    else if (/bitchute\.com/i.test(url))               platform = "BitChute";
+    else if (/vimeo\.com/i.test(url))                  platform = "Vimeo";
+    else if (url.startsWith("http"))                   platform = "External Link";
+
+    if (platform === "YouTube") {
+      try {
+        const oembedRes = await fetch(
+          `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`
+        );
+        if (oembedRes.ok) {
+          const oembed = await oembedRes.json() as {
+            title?: string; author_name?: string; thumbnail_url?: string;
+          };
+          videoTitle   = oembed.title        || videoTitle;
+          videoAuthor  = oembed.author_name  || "";
+          thumbnailUrl = oembed.thumbnail_url || "";
+        }
+      } catch { /* oEmbed not critical */ }
+    }
+
+    videoContext = `Video URL: ${url}\nPlatform: ${platform}`;
+    if (videoTitle)  videoContext += `\nTitle: ${videoTitle}`;
+    if (videoAuthor) videoContext += `\nChannel/Author: ${videoAuthor}`;
+  } else {
+    platform     = "Uploaded File";
+    videoContext = `Uploaded video file\nFilename: ${fileName}\nType: ${fileType || "video/*"}`;
+  }
+
+  const prompt = `You are TruthLens, a cutting-edge AI video integrity analyst specializing in deepfake detection, misinformation pattern recognition, and media manipulation analysis.
+
+Analyze the following video for potential manipulation, misinformation, sensationalism, and deepfake risk:
+
+${videoContext}
+
+Evaluate for:
+1. Sensational or manipulative language in the title/description
+2. Platform credibility (YouTube/Vimeo generally more trustworthy; Rumble/BitChute higher risk)
+3. Known misinformation patterns (miracle cures, conspiracy theories, impossible claims, extreme political content)
+4. Deepfake/synthetic media risk indicators
+5. URL or domain red flags
+6. Channel/source credibility signals
+
+Scoring guidance:
+- riskScore 0-30 → riskLevel "Low": mainstream platform, neutral title, no obvious red flags
+- riskScore 31-65 → riskLevel "Medium": some suspicious elements but not conclusive
+- riskScore 66-100 → riskLevel "High": fringe platform, sensational/misleading title, clear misinformation patterns
+- deepfakeRisk: base 8 for mainstream verified channels, 25 for unknown, 55+ for suspicious/fringe contexts
+- Always include at least 1 credibilitySignal even for high-risk content
+- For uploaded files with no verifiable context, assign moderate risk (35-55) and note lack of context
+
+Return ONLY raw JSON with no markdown fences:
+{"riskScore":<0-100>,"riskLevel":"<Low|Medium|High>","verdict":"<one punchy sentence summarizing the risk>","explanation":"<2-3 sentences of detailed analysis>","deepfakeRisk":<0-100>,"misinformationRisk":<0-100>,"sensationalismScore":<0-100>,"redFlags":["<flag1>","<flag2>"],"credibilitySignals":["<signal1>"],"platform":"<platform name>","videoTitle":"<title or Unknown>"}`;
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-5-mini",
+      max_completion_tokens: 900,
+      messages: [{ role: "user", content: prompt }],
+    });
+
+    const raw = completion.choices[0]?.message?.content || "{}";
+    let base: Record<string, unknown> = {};
+    try { base = JSON.parse(extractJson(raw)) as Record<string, unknown>; } catch { /* use defaults */ }
+
+    res.json({
+      riskScore:           typeof base.riskScore           === "number" ? base.riskScore           : 45,
+      riskLevel:           typeof base.riskLevel           === "string" ? base.riskLevel           : "Medium",
+      verdict:             typeof base.verdict             === "string" ? base.verdict             : "Analysis complete — exercise caution.",
+      explanation:         typeof base.explanation         === "string" ? base.explanation         : "Unable to generate detailed analysis.",
+      deepfakeRisk:        typeof base.deepfakeRisk        === "number" ? base.deepfakeRisk        : 25,
+      misinformationRisk:  typeof base.misinformationRisk  === "number" ? base.misinformationRisk  : 30,
+      sensationalismScore: typeof base.sensationalismScore === "number" ? base.sensationalismScore : 25,
+      redFlags:            Array.isArray(base.redFlags)            ? base.redFlags            : [],
+      credibilitySignals:  Array.isArray(base.credibilitySignals)  ? base.credibilitySignals  : [],
+      platform:            typeof base.platform            === "string" ? base.platform            : platform,
+      videoTitle:          typeof base.videoTitle          === "string" ? base.videoTitle          : videoTitle,
+      thumbnailUrl,
+    });
+  } catch (err) {
+    req.log.error({ err }, "video analysis failed");
+    res.status(500).json({ error: "Failed to analyze video" });
+  }
+});
+
 export default router;
