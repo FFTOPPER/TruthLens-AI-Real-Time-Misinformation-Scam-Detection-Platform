@@ -53,63 +53,29 @@ function pickVoice(): SpeechSynthesisVoice | null {
   );
 }
 
-/* ─── Plain-English + technical explanation, naturally blended ── */
+/* ─── Ultra-short 2-sentence verdict ─────────────────────────── */
 function buildSpeechText(result: AnalysisResult): string {
-  const { riskLevel: risk, credibilityScore: score, explanation, suspiciousPhrases, manipulationBreakdown: mb } = result;
+  const { riskLevel: risk, credibilityScore: score, manipulationBreakdown: mb } = result;
 
   const topSignal =
-    mb.fear >= 60       ? "fear tactics" :
-    mb.urgency >= 60    ? "urgency pressure" :
+    mb.fear >= 60            ? "fear tactics" :
+    mb.urgency >= 60         ? "urgency pressure" :
     mb.emotionalTriggers >= 60 ? "emotional manipulation" :
-    mb.fakeAuthority >= 60     ? "fake authority" :
+    mb.fakeAuthority >= 60   ? "fake authority" :
     null;
 
-  // Trim explanation to first 2 sentences so it stays concise
-  const shortExplain = explanation
-    .split(/(?<=[.!?])\s+/)
-    .slice(0, 2)
-    .join(" ");
-
   if (risk === "Low") {
-    return (
-      `Good news — this content looks credible. ` +
-      `The trust score is ${score} out of 100, which is quite solid. ` +
-      `In simple terms, our AI did not find anything suspicious here. ` +
-      `${shortExplain} ` +
-      (topSignal
-        ? `There are some mild ${topSignal} patterns, but nothing alarming. `
-        : `No manipulation signals were found. `) +
-      `So you can generally trust this one.`
-    );
+    return `This content scores ${score} out of 100 — it looks credible. ` +
+           (topSignal ? `Mild ${topSignal} detected, but nothing serious.` : `No manipulation signals found. Safe to read.`);
   }
 
   if (risk === "Medium") {
-    return (
-      `This one is a bit mixed — be careful. ` +
-      `The trust score is ${score} out of 100, which is in the caution zone. ` +
-      `Basically, the content has some warning signs but is not clearly fake. ` +
-      `${shortExplain} ` +
-      (topSignal
-        ? `The main concern is ${topSignal} — the content is trying to influence you. `
-        : `Some questionable patterns were detected. `) +
-      `Read it carefully and verify before sharing or acting on it.`
-    );
+    return `This content scores ${score} out of 100 — proceed with caution. ` +
+           (topSignal ? `Watch out for ${topSignal}.` : `Some suspicious patterns were detected. Verify before sharing.`);
   }
 
-  // High risk
-  return (
-    `Warning — this content is high risk. ` +
-    `The trust score is only ${score} out of 100, which is very low. ` +
-    `In plain terms, this looks like it is trying to manipulate or deceive you. ` +
-    `${shortExplain} ` +
-    (topSignal
-      ? `Technically, it heavily uses ${topSignal} to push you into acting without thinking. `
-      : `Multiple manipulation signals were detected throughout. `) +
-    (suspiciousPhrases.length > 0
-      ? `${suspiciousPhrases.length} suspicious phrase${suspiciousPhrases.length > 1 ? "s were" : " was"} also flagged. `
-      : ``) +
-    `Do not trust, share, or act on this content.`
-  );
+  return `Warning. This content scores only ${score} out of 100 — it is high risk. ` +
+         (topSignal ? `Heavy ${topSignal} detected. Do not trust or share this.` : `Multiple manipulation signals found. Do not trust this content.`);
 }
 
 /* ─── Natural Q&A answers ─────────────────────────────────────── */

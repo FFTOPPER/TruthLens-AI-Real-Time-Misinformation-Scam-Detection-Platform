@@ -213,7 +213,7 @@ router.post("/analysis/tts", async (req, res) => {
     // tts-1 is OpenAI's low-latency model — starts streaming in ~200ms
     const speech = await openai.audio.speech.create({
       model: "tts-1",
-      voice: "fable",          // warm, expressive, cheerful male
+      voice: "echo",           // deep, clear, professional male
       input: text.trim(),
       response_format: "mp3",
       speed: 1.05,             // slight energy boost
