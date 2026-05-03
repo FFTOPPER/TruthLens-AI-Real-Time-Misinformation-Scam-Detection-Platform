@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard, History, Globe, Settings,
-  ShieldAlert, ChevronLeft, Menu, X, Activity, FileImage,
+  ShieldAlert, ChevronLeft, Menu, X, Activity, FileImage, BrainCircuit,
 } from "lucide-react";
 import { useHealthCheck, getHealthCheckQueryKey } from "@workspace/api-client-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -16,6 +16,7 @@ const NAV_ITEMS = [
   { href: "/history",     label: "Scan History",        icon: History,         sub: "INTELLIGENCE FEED" },
   { href: "/stats",       label: "Global Intelligence", icon: Globe,           sub: "THREAT METRICS" },
   { href: "/image-scan",  label: "Image Scan",          icon: FileImage,       sub: "OCR · AI ANALYSIS" },
+  { href: "/what-if",     label: "What If?",            icon: BrainCircuit,    sub: "INTERACTIVE SIMULATOR" },
   { href: "/settings",    label: "Settings",            icon: Settings,        sub: "SYSTEM CONFIG" },
 ];
 

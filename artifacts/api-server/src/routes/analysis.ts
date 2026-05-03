@@ -370,4 +370,53 @@ router.post("/analysis/tts", async (req, res) => {
   }
 });
 
+/* ── What If? simulator ─────────────────────────────────────── */
+router.post("/analysis/whatif", async (req, res) => {
+  const { scenarioTitle, scenarioContext, choiceLabel, choiceSublabel, severity } = req.body as {
+    scenarioTitle:   string;
+    scenarioContext: string;
+    choiceLabel:     string;
+    choiceSublabel:  string;
+    severity:        "safe" | "risky" | "dangerous";
+  };
+  if (!scenarioTitle || !choiceLabel) {
+    res.status(400).json({ error: "scenarioTitle and choiceLabel are required" });
+    return;
+  }
+  try {
+    const prompt = `You are an educational cybersecurity and digital-safety AI inside TruthLens.
+
+A user is in this simulation:
+Scenario: "${scenarioTitle}"
+Content shown: "${scenarioContext.slice(0, 220)}"
+Their choice: "${choiceLabel}" (${choiceSublabel ?? ""})
+Severity: ${severity}
+
+Generate a realistic, educational outcome. Return ONLY raw JSON (no markdown fences):
+{
+  "title": "dramatic 5-7 word title of what happened",
+  "immediateEffect": "one vivid sentence of the immediate consequence",
+  "whatHappens": ["step 1 of chain reaction", "step 2", "step 3", "step 4"],
+  "statistic": "realistic stat e.g. '1 in 3 people who click phishing links have their credentials stolen within minutes'",
+  "recovery": ["action 1", "action 2", "action 3"],
+  "lesson": "one clear educational takeaway sentence"
+}
+
+If severity is "safe": show a positive realistic chain and reinforce good behaviour.
+If severity is "risky" or "dangerous": show realistic harm chain (data theft, financial loss, health risk, etc) then practical recovery steps.`;
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-5-mini",
+      max_completion_tokens: 620,
+      messages: [{ role: "user", content: prompt }],
+    });
+    const raw    = completion.choices[0]?.message?.content ?? "{}";
+    const parsed = JSON.parse(extractJson(raw));
+    res.json({ ...parsed, severity });
+  } catch (err) {
+    req.log.error({ err }, "whatif generation failed");
+    res.status(500).json({ error: "Failed to generate outcome" });
+  }
+});
+
 export default router;
