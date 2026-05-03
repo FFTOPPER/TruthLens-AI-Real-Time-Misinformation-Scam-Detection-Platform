@@ -28,7 +28,7 @@ router.post("/analysis/analyze", async (req, res) => {
     return;
   }
 
-  const prompt = `You are an expert misinformation and manipulation detection AI. Deeply analyze the following text.
+  const prompt = `You are an expert misinformation, manipulation, and cognitive psychology AI. Deeply analyze the following text.
 
 Text to analyze:
 """
@@ -46,7 +46,17 @@ Respond ONLY with valid JSON in this exact format — no extra text, no markdown
     "urgency": <integer 0-100, urgency/scarcity language — "act now", deadlines, FOMO>,
     "emotionalTriggers": <integer 0-100, emotional manipulation — outrage, sympathy bait, tribalism>,
     "fakeAuthority": <integer 0-100, fake credentials, unverified experts, anonymous sources, misleading statistics>
-  }
+  },
+  "cognitiveImpact": {
+    "brainReaction": "<1-2 sentences describing exactly how a human brain psychologically reacts to this content — which cognitive biases fire, what emotional state it induces, how it hijacks decision-making>",
+    "techniques": [
+      {"name": "Fear Induction", "active": <true if fear tactics significantly present>, "mechanism": "<if active: exactly how this text triggers fear and what brain region/response it targets. If inactive: 'Not detected in this content'>"},
+      {"name": "Urgency Pressure", "active": <true if urgency/FOMO significantly present>, "mechanism": "<if active: how this creates artificial time pressure and bypasses rational thinking. If inactive: 'Not detected in this content'>"},
+      {"name": "Authority Bias", "active": <true if fake authority significantly present>, "mechanism": "<if active: how this exploits trust in authority figures and credentials. If inactive: 'Not detected in this content'>"},
+      {"name": "Social Proof", "active": <true if crowd/peer pressure tactics used>, "mechanism": "<if active: how this uses herd mentality and social conformity to manipulate. If inactive: 'Not detected in this content'>"}
+    ]
+  },
+  "counterTruth": "<rewrite the original message in 2-3 sentences as a factual, calm, neutral version — strip all manipulation, false urgency, unverified claims, emotional triggers, exaggerations. Keep only verifiable facts. If no facts exist, write what an honest version would say.>"
 }
 
 Scoring guidelines:
@@ -59,7 +69,7 @@ Scoring guidelines:
   try {
     const completion = await openai.chat.completions.create({
       model: "gpt-5-mini",
-      max_completion_tokens: 1024,
+      max_completion_tokens: 2048,
       messages: [{ role: "user", content: prompt }],
     });
 
@@ -70,12 +80,15 @@ Scoring guidelines:
       explanation: string;
       suspiciousPhrases: string[];
       manipulationBreakdown: ManipulationBreakdown;
+      cognitiveImpact?: {
+        brainReaction: string;
+        techniques: { name: string; active: boolean; mechanism: string }[];
+      };
+      counterTruth?: string;
     };
     try {
       parsed = JSON.parse(responseText);
-      if (!parsed.manipulationBreakdown) {
-        parsed.manipulationBreakdown = defaultBreakdown;
-      }
+      if (!parsed.manipulationBreakdown) parsed.manipulationBreakdown = defaultBreakdown;
     } catch {
       parsed = {
         credibilityScore: 50,
@@ -106,6 +119,8 @@ Scoring guidelines:
       explanation: parsed.explanation,
       suspiciousPhrases: parsed.suspiciousPhrases,
       manipulationBreakdown: parsed.manipulationBreakdown,
+      cognitiveImpact: parsed.cognitiveImpact ?? null,
+      counterTruth: parsed.counterTruth ?? null,
     });
   } catch (err) {
     req.log.error({ err }, "Analysis failed");
@@ -202,7 +217,7 @@ router.get("/analysis/stats", async (req, res) => {
   }
 });
 
-/* ── TTS: tts-1 (fast) + fable voice (warm, cheerful male) ────── */
+/* ── TTS: echo voice (deep male) via gpt-audio ─────────────── */
 router.post("/analysis/tts", async (req, res) => {
   const { text } = req.body as { text: string };
   if (!text || typeof text !== "string" || text.trim().length === 0) {
@@ -210,20 +225,10 @@ router.post("/analysis/tts", async (req, res) => {
     return;
   }
   try {
-    // tts-1 is OpenAI's low-latency model — starts streaming in ~200ms
-    const speech = await openai.audio.speech.create({
-      model: "tts-1",
-      voice: "echo",           // deep, clear, professional male
-      input: text.trim(),
-      response_format: "mp3",
-      speed: 1.05,             // slight energy boost
-    } as Parameters<typeof openai.audio.speech.create>[0]);
-
+    const audioBuffer = await textToSpeech(text.trim(), "echo", "mp3");
     res.set("Content-Type", "audio/mpeg");
     res.set("Cache-Control", "no-store");
-    // Stream directly so client starts playing before full generation done
-    const nodeStream = speech.body as unknown as NodeJS.ReadableStream;
-    nodeStream.pipe(res);
+    res.send(audioBuffer);
   } catch (err) {
     req.log.error({ err }, "TTS failed");
     res.status(500).json({ error: "TTS failed" });

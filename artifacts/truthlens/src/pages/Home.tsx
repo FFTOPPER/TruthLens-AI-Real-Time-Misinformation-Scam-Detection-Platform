@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAnalyzeText, getGetAnalysisHistoryQueryKey, getGetAnalysisStatsQueryKey } from "@workspace/api-client-react";
-import { AlertTriangle, ShieldCheck, ScanLine, Zap, Eye, BrainCircuit, ChevronDown, FlaskConical } from "lucide-react";
+import { AlertTriangle, ShieldCheck, ScanLine, Zap, Eye, BrainCircuit, ChevronDown, FlaskConical, Lightbulb, Cpu } from "lucide-react";
 import { Gauge } from "@/components/Gauge";
 import { TrustOrb } from "@/components/TrustOrb";
 import { VoiceControls } from "@/components/VoiceControls";
@@ -37,6 +37,123 @@ const FEATURES = [
   { icon: "⚑", text: "Risk breakdown" },
   { icon: "🎙", text: "Voice readout" },
 ];
+
+/* ── Cognitive impact types ────────────────────────────────── */
+interface CognitiveTechnique { name: string; active: boolean; mechanism: string; }
+interface CognitiveImpactData { brainReaction: string; techniques: CognitiveTechnique[]; }
+interface ExtendedResult {
+  credibilityScore: number; riskLevel: string; explanation: string;
+  suspiciousPhrases: string[];
+  manipulationBreakdown: { fear: number; urgency: number; emotionalTriggers: number; fakeAuthority: number; };
+  cognitiveImpact?: CognitiveImpactData;
+  counterTruth?: string;
+}
+
+const TECH_CFG: Record<string, { color: string; bg: string; border: string; icon: string }> = {
+  "Fear Induction":   { color: "#ef4444", bg: "rgba(239,68,68,0.07)",  border: "rgba(239,68,68,0.22)",  icon: "⚡" },
+  "Urgency Pressure": { color: "#f97316", bg: "rgba(249,115,22,0.07)", border: "rgba(249,115,22,0.22)", icon: "⏱" },
+  "Authority Bias":   { color: "#f59e0b", bg: "rgba(245,158,11,0.07)", border: "rgba(245,158,11,0.22)", icon: "⬡" },
+  "Social Proof":     { color: "#a855f7", bg: "rgba(168,85,247,0.07)", border: "rgba(168,85,247,0.22)", icon: "◈" },
+};
+
+/* ── Neural Diagram SVG ─────────────────────────────────────── */
+function NeuralDiagram({ techniques }: { techniques: CognitiveTechnique[] }) {
+  const nodes = [
+    { name: "Fear Induction",   cx: 110, cy: 28,  label: "FEAR" },
+    { name: "Urgency Pressure", cx: 192, cy: 110, label: "URGENCY" },
+    { name: "Authority Bias",   cx: 110, cy: 192, label: "AUTHORITY" },
+    { name: "Social Proof",     cx: 28,  cy: 110, label: "SOCIAL" },
+  ];
+  const CX = 110, CY = 110;
+  return (
+    <svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg" className="w-full max-w-[180px] mx-auto">
+      {/* Orbit rings */}
+      <circle cx={CX} cy={CY} r={82} fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="0.5" />
+      <circle cx={CX} cy={CY} r={60} fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" strokeDasharray="4,6" />
+      {/* Connection lines */}
+      {nodes.map(node => {
+        const tech = techniques.find(t => t.name === node.name);
+        const active = tech?.active ?? false;
+        const cfg = TECH_CFG[node.name];
+        return (
+          <line key={node.name} x1={CX} y1={CY} x2={node.cx} y2={node.cy}
+            stroke={active ? cfg.color : "rgba(255,255,255,0.06)"}
+            strokeWidth={active ? 1.5 : 0.5}
+            strokeDasharray={active ? "" : "3,4"}
+            opacity={active ? 0.7 : 0.3}
+          />
+        );
+      })}
+      {/* Technique nodes */}
+      {nodes.map(node => {
+        const tech = techniques.find(t => t.name === node.name);
+        const active = tech?.active ?? false;
+        const cfg = TECH_CFG[node.name];
+        return (
+          <g key={node.name}>
+            {active && <circle cx={node.cx} cy={node.cy} r={19} fill={`${cfg.color}18`} stroke={`${cfg.color}55`} strokeWidth="1" />}
+            <circle cx={node.cx} cy={node.cy} r={12}
+              fill={active ? `${cfg.color}28` : "rgba(255,255,255,0.03)"}
+              stroke={active ? cfg.color : "rgba(255,255,255,0.1)"}
+              strokeWidth={active ? 1.5 : 0.5}
+            />
+            <circle cx={node.cx} cy={node.cy} r={4}
+              fill={active ? cfg.color : "rgba(255,255,255,0.1)"}
+            />
+            <text x={node.cx} y={node.cy + (node.cy < CY ? -18 : node.cy > CY ? 22 : 0)}
+              dy={node.cy === CY ? (node.cx < CX ? 0 : 0) : 0}
+              dx={node.cy === CY ? (node.cx < CX ? -22 : 22) : 0}
+              textAnchor={node.cy === CY ? (node.cx < CX ? "end" : "start") : "middle"}
+              dominantBaseline="middle"
+              fill={active ? cfg.color : "rgba(255,255,255,0.18)"}
+              fontSize="6" fontFamily="Space Mono, monospace"
+            >{node.label}</text>
+          </g>
+        );
+      })}
+      {/* Center brain */}
+      <circle cx={CX} cy={CY} r={26} fill="rgba(16,185,129,0.06)" stroke="rgba(16,185,129,0.3)" strokeWidth="1.5" />
+      <circle cx={CX} cy={CY} r={17} fill="rgba(16,185,129,0.1)" stroke="rgba(16,185,129,0.4)" strokeWidth="1" />
+      <text x={CX} y={CY - 4} textAnchor="middle" dominantBaseline="middle" fill="#10b981" fontSize="6" fontFamily="Space Mono, monospace" fontWeight="bold">HUMAN</text>
+      <text x={CX} y={CY + 5} textAnchor="middle" dominantBaseline="middle" fill="#10b981" fontSize="6" fontFamily="Space Mono, monospace" fontWeight="bold">BRAIN</text>
+    </svg>
+  );
+}
+
+/* ── Cognitive technique card ──────────────────────────────── */
+function CognitiveTechCard({ tech, idx }: { tech: CognitiveTechnique; idx: number }) {
+  const cfg = TECH_CFG[tech.name] ?? TECH_CFG["Fear Induction"];
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.65 + idx * 0.07 }}
+      className="p-2.5 rounded-lg"
+      style={{ background: tech.active ? cfg.bg : "rgba(255,255,255,0.02)", border: `1px solid ${tech.active ? cfg.border : "rgba(255,255,255,0.06)"}` }}
+    >
+      <div className="flex items-center justify-between mb-1">
+        <div className="flex items-center gap-1.5">
+          <span style={{ color: tech.active ? cfg.color : "rgba(255,255,255,0.2)", fontSize: "10px" }}>{cfg.icon}</span>
+          <span className="text-[8px] tracking-[0.16em] font-bold" style={{ fontFamily: "'Space Mono', monospace", color: tech.active ? cfg.color : "rgba(255,255,255,0.2)" }}>
+            {tech.name.toUpperCase()}
+          </span>
+        </div>
+        <span className="text-[7px] tracking-[0.1em] px-1.5 py-0.5 rounded-full"
+          style={{ fontFamily: "'Space Mono', monospace",
+            background: tech.active ? `${cfg.color}22` : "rgba(255,255,255,0.04)",
+            color: tech.active ? cfg.color : "rgba(255,255,255,0.18)",
+            border: `1px solid ${tech.active ? `${cfg.color}44` : "rgba(255,255,255,0.06)"}` }}
+        >
+          {tech.active ? "ACTIVE" : "NONE"}
+        </span>
+      </div>
+      <p className="text-[10px] leading-snug"
+        style={{ color: tech.active ? "rgba(255,255,255,0.58)" : "rgba(255,255,255,0.2)", fontFamily: "'Rajdhani', sans-serif", fontSize: "11px" }}>
+        {tech.mechanism}
+      </p>
+    </motion.div>
+  );
+}
 
 /* ── Scanning line overlay ────────────────────────────────── */
 function ScanOverlay({ active }: { active: boolean }) {
@@ -817,6 +934,124 @@ export default function Home() {
                           </div>
                         </motion.div>
                       )}
+
+                      {/* ── COGNITIVE IMPACT ANALYSIS ────────────────────── */}
+                      {(() => {
+                        const ext = result as unknown as ExtendedResult;
+                        const ci = ext.cognitiveImpact;
+                        if (!ci) return null;
+                        const activeTechs = ci.techniques.filter(t => t.active).length;
+                        return (
+                          <motion.div
+                            initial={{ opacity: 0, y: 12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 1.1 }}
+                            className="rounded-xl overflow-hidden"
+                            style={{ border: "1px solid rgba(16,185,129,0.18)", background: "rgba(16,185,129,0.02)" }}
+                          >
+                            {/* Header */}
+                            <div className="px-4 py-3 flex items-center justify-between"
+                              style={{ borderBottom: "1px solid rgba(16,185,129,0.1)", background: "rgba(16,185,129,0.04)" }}>
+                              <div className="flex items-center gap-2">
+                                <BrainCircuit className="w-3.5 h-3.5" style={{ color: "#10b981" }} />
+                                <span className="text-[10px] tracking-[0.2em] font-semibold" style={{ fontFamily: "'Space Mono', monospace", color: "#10b981" }}>
+                                  COGNITIVE IMPACT
+                                </span>
+                              </div>
+                              <span className="text-[8px] tracking-[0.12em] px-2 py-0.5 rounded-full"
+                                style={{ fontFamily: "'Space Mono', monospace",
+                                  color: activeTechs > 2 ? "#ef4444" : activeTechs > 0 ? "#f59e0b" : "#10b981",
+                                  background: activeTechs > 2 ? "rgba(239,68,68,0.1)" : activeTechs > 0 ? "rgba(245,158,11,0.1)" : "rgba(16,185,129,0.1)",
+                                  border: `1px solid ${activeTechs > 2 ? "rgba(239,68,68,0.25)" : activeTechs > 0 ? "rgba(245,158,11,0.25)" : "rgba(16,185,129,0.25)"}` }}>
+                                {activeTechs} TECHNIQUE{activeTechs !== 1 ? "S" : ""} ACTIVE
+                              </span>
+                            </div>
+
+                            {/* Brain reaction statement */}
+                            <div className="px-4 pt-3 pb-2">
+                              <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 1.2 }}
+                                className="px-3 py-2.5 rounded-lg mb-3"
+                                style={{ background: "rgba(16,185,129,0.06)", borderLeft: "3px solid rgba(16,185,129,0.5)" }}
+                              >
+                                <p className="text-[9px] tracking-[0.14em] mb-1" style={{ fontFamily: "'Space Mono', monospace", color: "rgba(16,185,129,0.6)" }}>
+                                  BRAIN REACTION
+                                </p>
+                                <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.75)", fontFamily: "'Rajdhani', sans-serif", fontSize: "13px", fontWeight: 500 }}>
+                                  {ci.brainReaction}
+                                </p>
+                              </motion.div>
+
+                              {/* Diagram + technique cards */}
+                              <div className="flex gap-3 items-start">
+                                {/* Neural diagram */}
+                                <div className="flex-shrink-0 w-[110px]">
+                                  <NeuralDiagram techniques={ci.techniques} />
+                                </div>
+                                {/* Technique cards 2×2 */}
+                                <div className="flex-1 grid grid-cols-1 gap-1.5">
+                                  {ci.techniques.map((tech, i) => (
+                                    <CognitiveTechCard key={tech.name} tech={tech} idx={i} />
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          </motion.div>
+                        );
+                      })()}
+
+                      {/* ── COUNTER TRUTH SUGGESTION ─────────────────────── */}
+                      {(() => {
+                        const ext = result as unknown as ExtendedResult;
+                        if (!ext.counterTruth) return null;
+                        return (
+                          <motion.div
+                            initial={{ opacity: 0, y: 12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 1.25 }}
+                            className="rounded-xl overflow-hidden"
+                            style={{ border: "1px solid rgba(251,191,36,0.18)", background: "rgba(251,191,36,0.02)" }}
+                          >
+                            {/* Header */}
+                            <div className="px-4 py-3 flex items-center justify-between"
+                              style={{ borderBottom: "1px solid rgba(251,191,36,0.1)", background: "rgba(251,191,36,0.04)" }}>
+                              <div className="flex items-center gap-2">
+                                <Lightbulb className="w-3.5 h-3.5" style={{ color: "#fbbf24" }} />
+                                <span className="text-[10px] tracking-[0.2em] font-semibold" style={{ fontFamily: "'Space Mono', monospace", color: "#fbbf24" }}>
+                                  COUNTER TRUTH
+                                </span>
+                              </div>
+                              <span className="text-[7px] tracking-[0.12em] px-2 py-0.5 rounded-full"
+                                style={{ fontFamily: "'Space Mono', monospace", color: "#fbbf24",
+                                  background: "rgba(251,191,36,0.1)", border: "1px solid rgba(251,191,36,0.25)" }}>
+                                AI REWRITE
+                              </span>
+                            </div>
+
+                            {/* Rewritten text */}
+                            <div className="px-4 py-3">
+                              <p className="text-[9px] tracking-[0.12em] mb-2" style={{ fontFamily: "'Space Mono', monospace", color: "rgba(251,191,36,0.45)" }}>
+                                NEUTRAL · FACTUAL · MANIPULATION-FREE VERSION
+                              </p>
+                              <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 1.35 }}
+                                className="px-3 py-3 rounded-lg"
+                                style={{ background: "rgba(251,191,36,0.05)", border: "1px solid rgba(251,191,36,0.15)" }}
+                              >
+                                <Cpu className="w-3 h-3 mb-2" style={{ color: "rgba(251,191,36,0.4)" }} />
+                                <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.75)", fontFamily: "'Rajdhani', sans-serif", fontSize: "13px", fontWeight: 500, lineHeight: "1.7" }}>
+                                  {ext.counterTruth}
+                                </p>
+                              </motion.div>
+                            </div>
+                          </motion.div>
+                        );
+                      })()}
+
                     </motion.div>
                   ) : (
                     <motion.div
