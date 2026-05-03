@@ -27,15 +27,26 @@ const SpeechRecognitionAPI =
   | (new () => SpeechRecognition)
   | null;
 
-/* ─── Pick best voice — prefers en-IN, then Google, then any en ── */
+/* ─── Pick best MALE voice — bold, deep, clear ────────────────── */
 function pickVoice(): SpeechSynthesisVoice | null {
   const voices = window.speechSynthesis.getVoices();
+
+  // Explicit known male voices by name (cross-platform)
+  const maleNames = ["david", "mark", "alex", "daniel", "fred", "rishi", "aaron", "noel", "thomas", "oliver", "james", "guy"];
+
   return (
+    // 1. Known male voices by name
+    voices.find(v => v.lang.startsWith("en") && maleNames.some(m => v.name.toLowerCase().includes(m))) ||
+    // 2. Google UK/US English Male explicit
+    voices.find(v => v.name === "Google UK English Male") ||
+    voices.find(v => v.name === "Google US English") ||
+    // 3. Microsoft David or Mark (Windows)
+    voices.find(v => v.lang.startsWith("en") && v.name.toLowerCase().includes("microsoft") && maleNames.some(m => v.name.toLowerCase().includes(m))) ||
+    // 4. en-IN male (Rishi on Apple)
     voices.find(v => v.lang === "en-IN") ||
-    voices.find(v => v.lang.startsWith("en") && v.name.toLowerCase().includes("india")) ||
-    voices.find(v => v.lang.startsWith("en") && v.name.toLowerCase().includes("rishi")) ||
+    // 5. Any Google English
     voices.find(v => v.lang.startsWith("en") && v.name.toLowerCase().includes("google")) ||
-    voices.find(v => v.lang.startsWith("en") && (v.name.includes("Natural") || v.name.includes("Neural"))) ||
+    // 6. Any English
     voices.find(v => v.lang.startsWith("en-US")) ||
     voices.find(v => v.lang.startsWith("en")) ||
     null
@@ -138,13 +149,12 @@ function buildAnswer(question: string, res: AnalysisResult): string {
   return `So here is the full picture — ${explanation} Overall, this is ${risk.toLowerCase()} risk with a score of ${score} out of 100.`;
 }
 
-/* ─── Apply voice settings ────────────────────────────────────── */
+/* ─── Apply voice settings — deep, bold, clear male ──────────── */
 function applySettings(utterance: SpeechSynthesisUtterance) {
   const voice = pickVoice();
   if (voice) utterance.voice = voice;
-  // Faster, more natural Indian-English pace
-  utterance.rate  = 1.12;
-  utterance.pitch = 1.08;
+  utterance.rate   = 0.97;  // Slightly measured — every word lands clearly
+  utterance.pitch  = 0.78;  // Deep, authoritative male tone
   utterance.volume = 1;
 }
 
