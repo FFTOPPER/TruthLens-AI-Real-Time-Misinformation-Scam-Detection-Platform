@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { Search, History, BarChart3, ShieldAlert, Menu, X } from "lucide-react";
+import { Search, Globe, BarChart3, ShieldAlert, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useHealthCheck, getHealthCheckQueryKey } from "@workspace/api-client-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,7 +11,7 @@ interface LayoutProps {
 
 const NAV_ITEMS = [
   { href: "/", label: "Analysis Terminal", icon: Search },
-  { href: "/history", label: "Intelligence Logs", icon: History },
+  { href: "/history", label: "Global Intelligence Feed", icon: Globe },
   { href: "/stats", label: "Global Threat Stats", icon: BarChart3 },
 ];
 
