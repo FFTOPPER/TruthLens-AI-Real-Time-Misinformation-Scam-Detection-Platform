@@ -205,58 +205,72 @@ router.post("/analysis/explain", async (req, res) => {
     return;
   }
 
-  const prompt = `You are a warm, knowledgeable digital safety advisor speaking directly to an everyday person — not a tech expert. You analyzed this content and found:
+  const safeScore = typeof credibilityScore === "number" ? credibilityScore : 50;
+  const safeLevel = typeof riskLevel === "string" ? riskLevel : "Medium";
+  const bd = manipulationBreakdown ?? { fear: 0, urgency: 0, emotionalTriggers: 0, fakeAuthority: 0 };
 
-Risk Level: ${riskLevel}
-Credibility Score: ${credibilityScore}/100
-Manipulation signals — fear: ${manipulationBreakdown.fear}/100, urgency: ${manipulationBreakdown.urgency}/100, emotional triggers: ${manipulationBreakdown.emotionalTriggers}/100, fake authority: ${manipulationBreakdown.fakeAuthority}/100
+  const prompt = `You are a warm digital-safety advisor explaining a scan result to an everyday person. Keep language simple and conversational — no jargon.
 
-Original content:
+SCAN RESULT:
+Risk Level: ${safeLevel} | Credibility Score: ${safeScore}/100
+Manipulation signals: fear ${bd.fear}/100, urgency ${bd.urgency}/100, emotional triggers ${bd.emotionalTriggers}/100, fake authority ${bd.fakeAuthority}/100
+
+CONTENT ANALYSED:
 """
-${text.slice(0, 800)}
+${text.slice(0, 700)}
 """
 
-Respond ONLY with valid JSON in this exact format — no markdown, no extra text:
-{
-  "summary": "<1-2 conversational sentences as if explaining to a friend. Use 'this message', 'you'. Be warm and direct. Example: 'This message is designed to make you panic so you act without thinking. It's using classic scam tactics.'>",
-  "whyMisleading": "<3-5 sentences explaining WHY this is problematic or safe. Reference specific elements from the text. Conversational, no jargon — explain how it works on a psychological level.>",
-  "patternsDetected": [
-    {"name": "<short pattern name — e.g. 'Manufactured Urgency' or 'False Authority'>", "description": "<1-2 sentences: what this pattern is and exactly how it appears in this content>", "severity": "<low|medium|high>"}
-  ],
-  "nextSteps": [
-    {"step": 1, "action": "<imperative short phrase — e.g. 'Don't click any links'>", "why": "<1 concise sentence explaining why this matters>"}
-  ]
-}
+Return ONLY raw JSON — no markdown fences, no extra text:
+{"summary":"<2 plain sentences explaining what this content is doing and whether it is safe. Use 'this message' and 'you'. E.g. This message is trying to make you panic so you act without thinking. It is using a classic fear tactic to steal your information.>","whyMisleading":"<3-4 sentences explaining WHY this is safe or dangerous. Reference specific words or phrases from the content. Explain the psychology — why it works on people.>","patternsDetected":[{"name":"<short name e.g. Manufactured Urgency>","description":"<1-2 sentences: what this pattern is and how it shows up here>","severity":"<low|medium|high>"}],"nextSteps":[{"step":1,"action":"<short imperative e.g. Do not click any links>","why":"<one sentence why>"}]}
 
-Rules:
-- patternsDetected: 2-4 items, only include patterns genuinely present. Skip patterns with 0 signals.
-- nextSteps: 3-5 practical, specific actions the person should actually take
-- If risk is Low, still give helpful context about what's safe and why
-- Keep tone conversational, warm, and empowering — not scary`;
+Rules — follow exactly:
+- patternsDetected: include 2 to 4 patterns actually present. Skip any with 0 signals.
+- nextSteps: include 3 to 4 concrete actions the person should take right now.
+- If risk is Low: explain what makes it safe and give 2-3 general tips.
+- Never use markdown inside the JSON strings.`;
 
   try {
     const completion = await openai.chat.completions.create({
       model: "gpt-5-mini",
-      max_completion_tokens: 1200,
+      max_completion_tokens: 1600,
       messages: [{ role: "user", content: prompt }],
     });
 
-    const responseText = completion.choices[0]?.message?.content ?? "{}";
-    let parsed: {
-      summary: string;
-      whyMisleading: string;
-      patternsDetected: { name: string; description: string; severity: string }[];
-      nextSteps: { step: number; action: string; why: string }[];
-    };
+    const raw = completion.choices[0]?.message?.content || "{}";
+
+    let base: Record<string, unknown> = {};
     try {
-      parsed = JSON.parse(extractJson(responseText));
+      base = JSON.parse(extractJson(raw)) as Record<string, unknown>;
     } catch {
-      req.log.error({ rawSlice: responseText.slice(0, 300) }, "Explain JSON parse failed");
-      res.status(500).json({ error: "Failed to parse AI response" });
-      return;
+      req.log.error({ rawSlice: raw.slice(0, 400) }, "Explain JSON parse failed");
     }
 
-    res.json(parsed);
+    const normaliseArray = <T>(val: unknown, fallback: T[]): T[] =>
+      Array.isArray(val) && val.length > 0 ? (val as T[]) : fallback;
+
+    const result = {
+      summary: typeof base.summary === "string" && base.summary.trim()
+        ? base.summary
+        : `This content has been assessed as ${safeLevel.toLowerCase()} risk with a credibility score of ${safeScore}/100. Review the signals below for details.`,
+
+      whyMisleading: typeof base.whyMisleading === "string" && base.whyMisleading.trim()
+        ? base.whyMisleading
+        : safeLevel === "Low"
+          ? "This content does not appear to use known manipulation tactics and is likely genuine. Always stay cautious with unexpected messages even when they seem safe."
+          : "This content shows several markers commonly used in scams and misinformation. Be cautious before acting, clicking links, or sharing with others.",
+
+      patternsDetected: normaliseArray(base.patternsDetected, [
+        { name: "Analysis Incomplete", description: "The AI could not fully break down the patterns. Review the credibility score and manipulation signals above for guidance.", severity: safeScore < 40 ? "high" : safeScore < 65 ? "medium" : "low" },
+      ]),
+
+      nextSteps: normaliseArray(base.nextSteps, [
+        { step: 1, action: "Do not click any links in this content", why: "Links can lead to phishing sites designed to steal your credentials." },
+        { step: 2, action: "Verify the source independently", why: "Search the sender or organisation directly using a trusted search engine." },
+        { step: 3, action: "Report if suspicious", why: "Reporting helps protect others from the same content." },
+      ]),
+    };
+
+    res.json(result);
   } catch (err) {
     req.log.error({ err }, "Explain deeply failed");
     res.status(500).json({ error: "Explain failed" });
