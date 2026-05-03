@@ -171,6 +171,7 @@ function speakFallback(text: string, onStart: () => void, onEnd: () => void) {
 export function VoiceControls({ result }: VoiceControlsProps) {
   const { toast } = useToast();
   const [isSpeaking, setIsSpeaking]   = useState(false);
+  const [isLoading,  setIsLoading]    = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript]   = useState<string | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
@@ -186,14 +187,16 @@ export function VoiceControls({ result }: VoiceControlsProps) {
     };
   }, []);
 
-  /* Primary: OpenAI onyx via API → fallback to browser TTS */
+  /* Primary: OpenAI fable via API → fallback to browser TTS */
   const speakResult = useCallback(async () => {
-    if (!result) return;
+    if (!result || isLoading) return;
     const text = buildSpeechText(result);
 
-    // Stop anything currently playing
     audioRef.current?.pause();
     window.speechSynthesis?.cancel();
+
+    // Instant visual feedback — button reacts immediately
+    setIsLoading(true);
 
     try {
       const res = await fetch("/api/analysis/tts", {
@@ -202,19 +205,27 @@ export function VoiceControls({ result }: VoiceControlsProps) {
         body: JSON.stringify({ text }),
       });
       if (!res.ok) throw new Error("TTS API error");
+
+      // Stream audio — start playing as soon as first bytes arrive
       const blob = await res.blob();
       const url  = URL.createObjectURL(blob);
       const audio = new Audio(url);
       audioRef.current = audio;
-      audio.onplay  = () => setIsSpeaking(true);
+      audio.oncanplaythrough = () => {
+        setIsLoading(false);
+        setIsSpeaking(true);
+      };
       audio.onended = () => { setIsSpeaking(false); URL.revokeObjectURL(url); };
-      audio.onerror = () => { setIsSpeaking(false); URL.revokeObjectURL(url); };
+      audio.onerror = () => { setIsLoading(false); setIsSpeaking(false); URL.revokeObjectURL(url); };
+      audio.load();
       await audio.play();
+      setIsLoading(false);
+      setIsSpeaking(true);
     } catch {
-      // Fallback to browser TTS if API unavailable
+      setIsLoading(false);
       speakFallback(text, () => setIsSpeaking(true), () => setIsSpeaking(false));
     }
-  }, [result]);
+  }, [result, isLoading]);
 
   /* Q&A mic answers still use browser TTS (fast, no round-trip needed) */
   const speak = useCallback((text: string) => {
@@ -293,27 +304,51 @@ export function VoiceControls({ result }: VoiceControlsProps) {
 
       {/* Controls */}
       <div className="px-4 py-3 flex items-center gap-3 flex-wrap">
-        {/* Speak / Stop */}
-        {(
-          <motion.button
-            onClick={isSpeaking ? stopSpeaking : speakResult}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] tracking-[0.15em] font-semibold"
-            style={{
-              fontFamily: "'Orbitron', monospace",
-              background: isSpeaking ? "rgba(239,68,68,0.1)" : "rgba(0,229,255,0.08)",
-              border: isSpeaking ? "1px solid rgba(239,68,68,0.35)" : "1px solid rgba(0,229,255,0.25)",
-              color: isSpeaking ? "#ef4444" : "#00e5ff",
-            }}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-          >
-            {isSpeaking ? (
-              <><Square className="w-3 h-3" /> STOP</>
-            ) : (
-              <><Volume2 className="w-3 h-3" /> SPEAK</>
-            )}
-          </motion.button>
-        )}
+        {/* Speak / Loading / Stop */}
+        <motion.button
+          onClick={isSpeaking ? stopSpeaking : speakResult}
+          disabled={isLoading}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] tracking-[0.15em] font-semibold relative overflow-hidden"
+          style={{
+            fontFamily: "'Orbitron', monospace",
+            background: isSpeaking
+              ? "rgba(239,68,68,0.1)"
+              : isLoading
+              ? "rgba(255,165,0,0.08)"
+              : "rgba(0,229,255,0.08)",
+            border: isSpeaking
+              ? "1px solid rgba(239,68,68,0.35)"
+              : isLoading
+              ? "1px solid rgba(255,165,0,0.35)"
+              : "1px solid rgba(0,229,255,0.25)",
+            color: isSpeaking ? "#ef4444" : isLoading ? "#ffa500" : "#00e5ff",
+            cursor: isLoading ? "default" : "pointer",
+          }}
+          whileHover={isLoading ? {} : { scale: 1.03 }}
+          whileTap={isLoading ? {} : { scale: 0.97 }}
+        >
+          {/* Loading shimmer sweep */}
+          {isLoading && (
+            <motion.div
+              className="absolute inset-0"
+              animate={{ x: ["-100%", "100%"] }}
+              transition={{ duration: 0.9, repeat: Infinity, ease: "linear" }}
+              style={{ background: "linear-gradient(90deg, transparent, rgba(255,165,0,0.15), transparent)" }}
+            />
+          )}
+          {isSpeaking ? (
+            <><Square className="w-3 h-3" /> STOP</>
+          ) : isLoading ? (
+            <>
+              <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
+                <Volume2 className="w-3 h-3" />
+              </motion.div>
+              PREPARING…
+            </>
+          ) : (
+            <><Volume2 className="w-3 h-3" /> SPEAK</>
+          )}
+        </motion.button>
 
         {/* Mic */}
         {hasMic && (

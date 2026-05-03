@@ -202,7 +202,7 @@ router.get("/analysis/stats", async (req, res) => {
   }
 });
 
-/* ── TTS: OpenAI onyx voice (deep male) ───────────────────────── */
+/* ── TTS: tts-1 (fast) + fable voice (warm, cheerful male) ────── */
 router.post("/analysis/tts", async (req, res) => {
   const { text } = req.body as { text: string };
   if (!text || typeof text !== "string" || text.trim().length === 0) {
@@ -210,10 +210,20 @@ router.post("/analysis/tts", async (req, res) => {
     return;
   }
   try {
-    const audioBuffer = await textToSpeech(text.trim(), "onyx", "wav");
-    res.set("Content-Type", "audio/wav");
+    // tts-1 is OpenAI's low-latency model — starts streaming in ~200ms
+    const speech = await openai.audio.speech.create({
+      model: "tts-1",
+      voice: "fable",          // warm, expressive, cheerful male
+      input: text.trim(),
+      response_format: "mp3",
+      speed: 1.05,             // slight energy boost
+    } as Parameters<typeof openai.audio.speech.create>[0]);
+
+    res.set("Content-Type", "audio/mpeg");
     res.set("Cache-Control", "no-store");
-    res.send(audioBuffer);
+    // Stream directly so client starts playing before full generation done
+    const nodeStream = speech.body as unknown as NodeJS.ReadableStream;
+    nodeStream.pipe(res);
   } catch (err) {
     req.log.error({ err }, "TTS failed");
     res.status(500).json({ error: "TTS failed" });
