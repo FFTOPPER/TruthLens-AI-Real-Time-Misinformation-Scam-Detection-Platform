@@ -6,6 +6,15 @@ import { desc, sql } from "drizzle-orm";
 
 const router = Router();
 
+/** Strip markdown code fences and extract raw JSON string */
+function extractJson(raw: string): string {
+  const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fenced) return fenced[1].trim();
+  const firstBrace = raw.indexOf("{");
+  if (firstBrace !== -1) return raw.slice(firstBrace);
+  return raw.trim();
+}
+
 type ManipulationBreakdown = {
   fear: number;
   urgency: number;
@@ -87,7 +96,7 @@ Scoring guidelines:
       counterTruth?: string;
     };
     try {
-      parsed = JSON.parse(responseText);
+      parsed = JSON.parse(extractJson(responseText));
       if (!parsed.manipulationBreakdown) parsed.manipulationBreakdown = defaultBreakdown;
     } catch {
       parsed = {
@@ -125,6 +134,78 @@ Scoring guidelines:
   } catch (err) {
     req.log.error({ err }, "Analysis failed");
     res.status(500).json({ error: "Analysis failed" });
+  }
+});
+
+/* ── Deep Explain ───────────────────────────────────────────── */
+router.post("/analysis/explain", async (req, res) => {
+  const { text, credibilityScore, riskLevel, manipulationBreakdown } = req.body as {
+    text: string;
+    credibilityScore: number;
+    riskLevel: string;
+    manipulationBreakdown: ManipulationBreakdown;
+  };
+
+  if (!text || typeof text !== "string" || text.trim().length === 0) {
+    res.status(400).json({ error: "text is required" });
+    return;
+  }
+
+  const prompt = `You are a warm, knowledgeable digital safety advisor speaking directly to an everyday person — not a tech expert. You analyzed this content and found:
+
+Risk Level: ${riskLevel}
+Credibility Score: ${credibilityScore}/100
+Manipulation signals — fear: ${manipulationBreakdown.fear}/100, urgency: ${manipulationBreakdown.urgency}/100, emotional triggers: ${manipulationBreakdown.emotionalTriggers}/100, fake authority: ${manipulationBreakdown.fakeAuthority}/100
+
+Original content:
+"""
+${text.slice(0, 800)}
+"""
+
+Respond ONLY with valid JSON in this exact format — no markdown, no extra text:
+{
+  "summary": "<1-2 conversational sentences as if explaining to a friend. Use 'this message', 'you'. Be warm and direct. Example: 'This message is designed to make you panic so you act without thinking. It's using classic scam tactics.'>",
+  "whyMisleading": "<3-5 sentences explaining WHY this is problematic or safe. Reference specific elements from the text. Conversational, no jargon — explain how it works on a psychological level.>",
+  "patternsDetected": [
+    {"name": "<short pattern name — e.g. 'Manufactured Urgency' or 'False Authority'>", "description": "<1-2 sentences: what this pattern is and exactly how it appears in this content>", "severity": "<low|medium|high>"}
+  ],
+  "nextSteps": [
+    {"step": 1, "action": "<imperative short phrase — e.g. 'Don't click any links'>", "why": "<1 concise sentence explaining why this matters>"}
+  ]
+}
+
+Rules:
+- patternsDetected: 2-4 items, only include patterns genuinely present. Skip patterns with 0 signals.
+- nextSteps: 3-5 practical, specific actions the person should actually take
+- If risk is Low, still give helpful context about what's safe and why
+- Keep tone conversational, warm, and empowering — not scary`;
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-5-mini",
+      max_completion_tokens: 1200,
+      messages: [{ role: "user", content: prompt }],
+    });
+
+    const responseText = completion.choices[0]?.message?.content ?? "{}";
+    let parsed: {
+      summary: string;
+      whyMisleading: string;
+      patternsDetected: { name: string; description: string; severity: string }[];
+      nextSteps: { step: number; action: string; why: string }[];
+    };
+    try {
+      parsed = JSON.parse(extractJson(responseText));
+    } catch {
+      req.log.error({ rawSlice: responseText.slice(0, 300) }, "Explain JSON parse failed");
+      res.status(500).json({ error: "Failed to parse AI response" });
+      return;
+    }
+
+    res.json(parsed);
+  } catch (err) {
+    req.log.error({ err }, "Explain deeply failed");
+    res.status(500).json({ error: "Explain failed" });
   }
 });
 

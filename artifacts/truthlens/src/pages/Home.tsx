@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAnalyzeText, getGetAnalysisHistoryQueryKey, getGetAnalysisStatsQueryKey } from "@workspace/api-client-react";
-import { AlertTriangle, ShieldCheck, ScanLine, Zap, Eye, BrainCircuit, ChevronDown, FlaskConical, Lightbulb, Cpu } from "lucide-react";
+import { AlertTriangle, ShieldCheck, ScanLine, Zap, Eye, BrainCircuit, ChevronDown, FlaskConical, Lightbulb, Cpu, MessageCircle, CheckCircle2 } from "lucide-react";
 import { Gauge } from "@/components/Gauge";
 import { TrustOrb } from "@/components/TrustOrb";
 import { VoiceControls } from "@/components/VoiceControls";
@@ -37,6 +37,183 @@ const FEATURES = [
   { icon: "⚑", text: "Risk breakdown" },
   { icon: "🎙", text: "Voice readout" },
 ];
+
+/* ── Explain Deeply types ──────────────────────────────────── */
+interface ExplainPattern { name: string; description: string; severity: "low" | "medium" | "high"; }
+interface ExplainStep { step: number; action: string; why: string; }
+interface ExplainData { summary: string; whyMisleading: string; patternsDetected: ExplainPattern[]; nextSteps: ExplainStep[]; }
+
+const SEV_CFG = {
+  high:   { color: "#ef4444", bg: "rgba(239,68,68,0.08)",  border: "rgba(239,68,68,0.22)",  label: "HIGH RISK" },
+  medium: { color: "#f97316", bg: "rgba(249,115,22,0.08)", border: "rgba(249,115,22,0.22)", label: "MEDIUM" },
+  low:    { color: "#22c55e", bg: "rgba(34,197,94,0.08)",  border: "rgba(34,197,94,0.22)",  label: "LOW" },
+};
+
+/* ── 3-D pattern card ───────────────────────────────────────── */
+function PatternCard3D({ pattern, idx }: { pattern: ExplainPattern; idx: number }) {
+  const sev = SEV_CFG[pattern.severity] ?? SEV_CFG.medium;
+  return (
+    <div style={{ perspective: "900px" }}>
+      <motion.div
+        initial={{ opacity: 0, y: 10, rotateX: -12 }}
+        animate={{ opacity: 1, y: 0, rotateX: 0 }}
+        whileHover={{ rotateY: 7, rotateX: -5, scale: 1.03, z: 30 }}
+        transition={{ delay: 0.1 + idx * 0.07, type: "spring", stiffness: 220, damping: 22 }}
+        style={{
+          transformStyle: "preserve-3d", background: sev.bg,
+          border: `1px solid ${sev.border}`, borderRadius: "10px", padding: "12px 14px",
+          boxShadow: `0 8px 32px ${sev.color}1a, 0 2px 8px rgba(0,0,0,0.3)`,
+          cursor: "default",
+        }}
+      >
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-[9px] tracking-[0.16em] font-bold" style={{ fontFamily: "'Space Mono', monospace", color: sev.color }}>
+            {pattern.name.toUpperCase()}
+          </span>
+          <span className="text-[7px] tracking-[0.1em] px-1.5 py-0.5 rounded-full"
+            style={{ fontFamily: "'Space Mono', monospace", color: sev.color,
+              background: `${sev.color}22`, border: `1px solid ${sev.color}44` }}>
+            {sev.label}
+          </span>
+        </div>
+        <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.65)", fontFamily: "'Rajdhani', sans-serif", fontSize: "12px", lineHeight: "1.55" }}>
+          {pattern.description}
+        </p>
+        {/* 3-D depth layer */}
+        <div style={{ position: "absolute", inset: 0, borderRadius: "10px", background: `linear-gradient(135deg, ${sev.color}08 0%, transparent 60%)`, pointerEvents: "none" }} />
+      </motion.div>
+    </div>
+  );
+}
+
+/* ── Explain Deep panel ─────────────────────────────────────── */
+function ExplainPanel({ data }: { data: ExplainData }) {
+  const STEP_ICONS = ["①", "②", "③", "④", "⑤"];
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 18, scale: 0.97 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      className="rounded-xl overflow-hidden"
+      style={{ border: "1px solid rgba(6,182,212,0.2)", background: "rgba(6,182,212,0.015)" }}
+    >
+      {/* Header */}
+      <div className="px-4 py-3 flex items-center justify-between"
+        style={{ borderBottom: "1px solid rgba(6,182,212,0.1)", background: "rgba(6,182,212,0.05)" }}>
+        <div className="flex items-center gap-2">
+          <MessageCircle className="w-3.5 h-3.5" style={{ color: "#06b6d4" }} />
+          <span className="text-[10px] tracking-[0.2em] font-semibold" style={{ fontFamily: "'Space Mono', monospace", color: "#06b6d4" }}>
+            DEEP ANALYSIS
+          </span>
+        </div>
+        <span className="text-[7px] tracking-[0.12em] px-2 py-0.5 rounded-full"
+          style={{ fontFamily: "'Space Mono', monospace", color: "#06b6d4",
+            background: "rgba(6,182,212,0.12)", border: "1px solid rgba(6,182,212,0.3)" }}>
+          AI ADVISOR
+        </span>
+      </div>
+
+      <div className="px-4 pt-4 pb-4 space-y-5">
+        {/* Conversational summary bubble */}
+        <motion.div
+          initial={{ opacity: 0, x: -8 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.12 }}
+          className="flex gap-3 p-3 rounded-xl"
+          style={{ background: "rgba(6,182,212,0.06)", border: "1px solid rgba(6,182,212,0.15)",
+            boxShadow: "0 4px 24px rgba(6,182,212,0.06)" }}
+        >
+          <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
+            style={{ background: "rgba(6,182,212,0.15)", border: "1px solid rgba(6,182,212,0.35)" }}>
+            <BrainCircuit className="w-4 h-4" style={{ color: "#06b6d4" }} />
+          </div>
+          <div>
+            <p className="text-[8px] tracking-[0.16em] mb-1.5" style={{ fontFamily: "'Space Mono', monospace", color: "rgba(6,182,212,0.6)" }}>
+              AI ADVISOR · PLAIN ENGLISH
+            </p>
+            <p style={{ color: "rgba(255,255,255,0.88)", fontFamily: "'Rajdhani', sans-serif", fontSize: "14px", fontWeight: 500, lineHeight: "1.65" }}>
+              "{data.summary}"
+            </p>
+          </div>
+        </motion.div>
+
+        {/* Why it matters */}
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
+          <div className="flex items-center gap-2 mb-2">
+            <Eye className="w-3 h-3" style={{ color: "#06b6d4" }} />
+            <span className="text-[9px] tracking-[0.18em]" style={{ fontFamily: "'Space Mono', monospace", color: "#06b6d4" }}>
+              WHY THIS MATTERS
+            </span>
+          </div>
+          <p style={{ color: "rgba(255,255,255,0.68)", fontFamily: "'Rajdhani', sans-serif", fontSize: "13px", lineHeight: "1.72" }}>
+            {data.whyMisleading}
+          </p>
+        </motion.div>
+
+        {/* Patterns detected — 3-D cards */}
+        {data.patternsDetected.length > 0 && (
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <Zap className="w-3 h-3" style={{ color: "#06b6d4" }} />
+              <span className="text-[9px] tracking-[0.18em]" style={{ fontFamily: "'Space Mono', monospace", color: "#06b6d4" }}>
+                PATTERNS DETECTED
+              </span>
+              <span className="text-[7px] ml-auto px-1.5 py-0.5 rounded-full"
+                style={{ fontFamily: "'Space Mono', monospace", color: "rgba(6,182,212,0.5)",
+                  background: "rgba(6,182,212,0.08)", border: "1px solid rgba(6,182,212,0.15)" }}>
+                HOVER FOR 3-D
+              </span>
+            </div>
+            <div className="grid grid-cols-1 gap-2.5">
+              {data.patternsDetected.map((p, i) => (
+                <PatternCard3D key={p.name} pattern={p} idx={i} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Next steps */}
+        {data.nextSteps.length > 0 && (
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <CheckCircle2 className="w-3 h-3" style={{ color: "#06b6d4" }} />
+              <span className="text-[9px] tracking-[0.18em]" style={{ fontFamily: "'Space Mono', monospace", color: "#06b6d4" }}>
+                WHAT TO DO NEXT
+              </span>
+            </div>
+            <div className="space-y-2">
+              {data.nextSteps.map((s, i) => (
+                <motion.div
+                  key={s.step}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 + i * 0.07 }}
+                  className="flex gap-3 items-start p-3 rounded-lg"
+                  style={{ background: "rgba(6,182,212,0.04)", border: "1px solid rgba(6,182,212,0.1)" }}
+                >
+                  <div className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mt-0.5"
+                    style={{ background: "rgba(6,182,212,0.15)", border: "1px solid rgba(6,182,212,0.35)" }}>
+                    <span style={{ color: "#06b6d4", fontFamily: "'Space Mono', monospace", fontSize: "9px", fontWeight: "bold" }}>
+                      {STEP_ICONS[i] ?? s.step}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="font-bold mb-0.5" style={{ color: "rgba(255,255,255,0.88)", fontFamily: "'Rajdhani', sans-serif", fontSize: "13px" }}>
+                      {s.action}
+                    </p>
+                    <p style={{ color: "rgba(255,255,255,0.42)", fontFamily: "'Rajdhani', sans-serif", fontSize: "11.5px" }}>
+                      {s.why}
+                    </p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+}
 
 /* ── Cognitive impact types ────────────────────────────────── */
 interface CognitiveTechnique { name: string; active: boolean; mechanism: string; }
@@ -351,11 +528,41 @@ export default function Home() {
     },
   });
 
+  const [explainData, setExplainData] = useState<ExplainData | null>(null);
+  const [explainLoading, setExplainLoading] = useState(false);
+
+  const handleExplainDeeply = async () => {
+    if (!result) return;
+    setExplainLoading(true);
+    setExplainData(null);
+    try {
+      const res = await fetch("/api/analysis/explain", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text,
+          credibilityScore: result.credibilityScore,
+          riskLevel: result.riskLevel,
+          manipulationBreakdown: result.manipulationBreakdown,
+        }),
+      });
+      if (!res.ok) throw new Error("explain failed");
+      const data = (await res.json()) as ExplainData;
+      setExplainData(data);
+    } catch {
+      toast({ title: "Explain Failed", description: "Could not generate explanation.", variant: "destructive" });
+    } finally {
+      setExplainLoading(false);
+    }
+  };
+
   const handleSubmit = () => {
     if (!text.trim() || text.length < 10) {
       toast({ title: "Input Error", description: "Provide at least 10 characters.", variant: "destructive" });
       return;
     }
+    setExplainData(null);
+    setExplainLoading(false);
     analyzeMutation.mutate({ data: { text } });
   };
 
@@ -1051,6 +1258,80 @@ export default function Home() {
                           </motion.div>
                         );
                       })()}
+
+                      {/* ── EXPLAIN DEEPLY BUTTON ──────────────────────── */}
+                      {!explainData && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 1.45 }}
+                        >
+                          <motion.button
+                            onClick={handleExplainDeeply}
+                            disabled={explainLoading}
+                            whileHover={!explainLoading ? { scale: 1.015 } : {}}
+                            whileTap={!explainLoading ? { scale: 0.985 } : {}}
+                            className="w-full py-3 px-4 rounded-xl flex items-center justify-center gap-2.5 relative overflow-hidden"
+                            style={{
+                              background: "rgba(6,182,212,0.05)",
+                              border: `1px solid ${explainLoading ? "rgba(6,182,212,0.18)" : "rgba(6,182,212,0.32)"}`,
+                              cursor: explainLoading ? "not-allowed" : "pointer",
+                            }}
+                          >
+                            {/* Shimmer sweep */}
+                            {!explainLoading && (
+                              <motion.div
+                                animate={{ x: ["-100%", "220%"] }}
+                                transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut", repeatDelay: 3 }}
+                                className="absolute inset-y-0 w-1/3 pointer-events-none"
+                                style={{ background: "linear-gradient(90deg, transparent, rgba(6,182,212,0.1), transparent)" }}
+                              />
+                            )}
+                            {explainLoading ? (
+                              <>
+                                <motion.div
+                                  animate={{ rotate: 360 }}
+                                  transition={{ duration: 1.1, repeat: Infinity, ease: "linear" }}
+                                  className="w-3 h-3 rounded-full flex-shrink-0"
+                                  style={{ border: "1.5px solid rgba(6,182,212,0.2)", borderTopColor: "#06b6d4" }}
+                                />
+                                <span className="text-[10px] tracking-[0.2em]" style={{ fontFamily: "'Space Mono', monospace", color: "rgba(6,182,212,0.5)" }}>
+                                  AI ADVISOR THINKING...
+                                </span>
+                              </>
+                            ) : (
+                              <>
+                                <MessageCircle className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#06b6d4" }} />
+                                <span className="text-[10px] tracking-[0.22em] font-bold" style={{ fontFamily: "'Space Mono', monospace", color: "#06b6d4" }}>
+                                  EXPLAIN DEEPLY
+                                </span>
+                                <span className="text-[8px] tracking-[0.1em]" style={{ fontFamily: "'Space Mono', monospace", color: "rgba(6,182,212,0.4)" }}>
+                                  · PLAIN ENGLISH
+                                </span>
+                              </>
+                            )}
+                          </motion.button>
+                        </motion.div>
+                      )}
+
+                      {/* ── EXPLAIN PANEL ──────────────────────────────── */}
+                      {explainData && (
+                        <div className="space-y-2">
+                          <ExplainPanel data={explainData} />
+                          {/* Re-analyze button */}
+                          <motion.button
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.6 }}
+                            onClick={() => { setExplainData(null); }}
+                            className="w-full py-2 rounded-lg text-[8px] tracking-[0.15em]"
+                            style={{ fontFamily: "'Space Mono', monospace", color: "rgba(6,182,212,0.35)",
+                              background: "transparent", border: "1px solid rgba(6,182,212,0.08)", cursor: "pointer" }}
+                          >
+                            ↺ RE-ANALYZE
+                          </motion.button>
+                        </div>
+                      )}
 
                     </motion.div>
                   ) : (
